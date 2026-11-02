@@ -45,8 +45,8 @@ Tutti i comandi sono asincroni (`mpv_command_async`), quindi il thread dell'inte
 - **Memoria**: working set, memoria privata e heap gestito al momento di ogni misura.
 - Nel CSV si registra solo il nome del file, senza percorso.
 
-## D-009 — Cache contenuta **[da verificare]**
-`cache=no`: mpv mantiene solo il read-ahead minimo del demuxer, senza letture massicce dal NAS. Il valore definitivo, e un eventuale limite in `viBro.ini` a partire dalla 0.2.0, dipende dalle prove con `--mpv-opt cache=yes`, `demuxer-max-bytes` e `demuxer-readahead-secs`.
+## D-009 — Cache contenuta (confermata per la 0.1.0)
+`cache=no`: mpv mantiene solo il read-ahead minimo del demuxer, senza letture massicce dal NAS. Il log della 0.1.0 mostra che il tempo di caricamento sul NAS è dovuto all'apertura SMB e alla lettura dell'indice MP4, che una cache più grande non riduce; per ora resta `no`. Il valore definitivo, e un eventuale limite in `viBro.ini` a partire dalla 0.2.0, dipende dalle prove con `--mpv-opt cache=yes`, `demuxer-max-bytes` e `demuxer-readahead-secs`.
 
 ## D-010 — EXE singolo
 `PublishSingleFile` + `SelfContained` + `IncludeNativeLibrariesForSelfExtract`. Le DLL native (libmpv, WPF) vengono estratte al primo avvio in `%TEMP%\.net\viBro\<hash del bundle>`: una cache versionata e riutilizzata, come consentito dalla specifica. Se l'utente svuota `%TEMP%`, le DLL vengono semplicemente estratte di nuovo.

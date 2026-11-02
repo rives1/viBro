@@ -1,6 +1,6 @@
 # CONTEXT — stato del progetto per riprendere il lavoro
 
-_Aggiornato: 2026-11-02 · versione in sviluppo: 0.1.0 (prototipo tecnico) · branch: `main`_
+_Aggiornato: 2026-11-02 · ultima versione: **0.1.0 (prototipo tecnico, chiusa)** · prossima: 0.2.0 · branch: `main`_
 
 ## Obiettivo corrente
 Prototipo 0.1.0. Deve dimostrare che l'EXE è autonomo, che il video si carica in pausa e che la navigazione è abbastanza rapida sui file reali (SSD e NAS). Solo dopo questa verifica si passa alla 0.2.0 (interfaccia completa). Specifica: [SPEC.md](SPEC.md).
@@ -30,13 +30,20 @@ Prototipo 0.1.0. Deve dimostrare che l'EXE è autonomo, che il video si carica i
 
 Il test con libmpv ha trovato e fatto correggere un bug: con i cambi rapidi di file il rilevamento del caricamento si bloccava (vedi D-008).
 
-## Problemi noti / rischi aperti
-1. EXE di 255,9 MB (libmpv 121 MB + runtime .NET/WPF + ReadyToRun): valutare `build.ps1 -Compress` confrontando dimensione e tempo di avvio.
-2. `libmpv-2.dll` importa `vulkan-1.dll` in modo statico: può non avviarsi su VM o Sandbox senza driver GPU (vedi D-002).
-3. ~~Salti `keyframes` brevi~~: confermato sui file reali che non spostano l'immagine; risolto con la modalità mista (D-007). Da verificare dopo la ricompilazione.
-4. shinchiro conserva su GitHub solo ~30 build: la build fissata sparirà da GitHub verso dicembre 2026 e resterà disponibile il link SourceForge. Conviene archiviare l'archivio (D-002).
-5. Gli obblighi di licenza GPL (sorgente corrispondente di libmpv) vanno risolti prima del rilascio pubblico: vedi THIRD-PARTY-NOTICES.md.
-6. Il tag `v0.1.0` non è ancora stato creato.
+| Formati (sessione 3, NAS) | ✔ MP4 H.264, MKV HEVC fino a 1080p (d3d11va); WMV VC-1 (d3d11va); WMV3 (decodifica software: salti esatti 18–375 ms secondo risoluzione) |
+| Memoria, 21 cambi video | ✔ 290–460 MB, oscillante, nessuna crescita progressiva |
+| Diagnosi cambio video NAS con log mpv (15 cambi) | ✔ viBro aggiunge pochi ms (tempi viBro ≈ tempi mpv); MKV 66–120 ms; MP4 135–486 ms, dominati dalla lettura dell'indice MP4 (28–218 ms) e dall'apertura SMB (18–92 ms). Picchi di 2 s della sessione 2 non riprodotti |
+
+## Esito 0.1.0
+Le tre condizioni della specifica sono dimostrate: EXE autonomo funzionante, caricamento in pausa, navigazione rapida su SSD e NAS. La scelta WPF + libmpv è confermata.
+
+## Problemi noti / punti aperti (rimandati)
+1. **Non provati:** MOV e 4K (nessun file disponibile), avvio su PC senza driver GPU (rischio `vulkan-1.dll`, D-002), sessione lunga di 50 o più cambi.
+2. Cambio video sul NAS variabile: picchi fino a 2,1 s nella sessione 2, non riprodotti con il log. Causa probabile esterna (dischi del NAS in risparmio energetico, accesso a freddo); da osservare.
+3. EXE di 256 MB: valutare `build.ps1 -Compress` misurando l'avvio.
+4. La build di libmpv sparirà da GitHub verso dicembre 2026 (resta il link SourceForge): archiviarne una copia (D-002).
+5. Obblighi GPL (sorgente corrispondente di libmpv) da soddisfare prima del rilascio pubblico (THIRD-PARTY-NOTICES.md).
+6. Autore dei commit provvisorio (D-017).
 
 ## Dipendenze
 | Dipendenza | Versione | Dove è fissata |
@@ -54,10 +61,7 @@ build\analyze-metrics.ps1 -Path <csv>
 Uscite: `artifacts\publish\viBro.exe`, `dist\viBro-0.1.0-win-x64.zip`.
 
 ## Riferimento al codice
-Ultimo commit compilato con successo su Windows: `aa0695f4d79a0dc9b3edf826d2a38dc9b2b93b87` (non ancora testato in esecuzione).
+Codice verificato su Windows (compilato e misurato): commit `147b85f` (prodotto `0.1.0+147b85f…`). Tag `v0.1.0` sul commit di chiusura della documentazione, senza modifiche al codice rispetto a `147b85f`.
 
 ## Prossimo passo
-1. ~~Compilare su Windows~~ fatto (aa0695f).
-2. ~~Verificare la modalità mista~~ fatto. Completare le misure su SSD locale, 4K, WMV/MOV e una sessione lunga per la memoria ([docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md)).
-3. Riportare qui i risultati, aggiornare le decisioni [da verificare], creare il tag `v0.1.0` e la fotografia `docs/handover/CONTEXT-v0.1.0.md`.
-4. Poi la 0.2.0: albero delle cartelle, ordinamento per colonna, `viBro.ini`.
+Versione 0.2.0: albero delle cartelle a sinistra (caricamento progressivo, unità e percorsi di rete senza blocchi), ordinamento per colonna con ordinamento naturale, divisori ridimensionabili e `viBro.ini` (schema versionato, salvataggio atomico, valori predefiniti; inclusi soglia dei salti esatti e limite della cache). Prima di iniziare, chiarire con l'utente eventuali preferenze sull'interfaccia.

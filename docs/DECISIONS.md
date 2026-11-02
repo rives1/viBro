@@ -29,10 +29,13 @@ I tasti indirizzati alla finestra nativa non generano eventi WPF. Un hook su `Co
 Un'unica istanza mpv resta attiva per tutta la sessione (`idle=yes`, `force-window=yes`). Ogni caricamento esegue `set pause yes` seguito da `loadfile <file> replace`; un nuovo caricamento interrompe quello in corso. Con `keep-open=yes` la riproduzione si ferma sull'ultimo fotogramma e non passa ad altri file.
 Tutti i comandi sono asincroni (`mpv_command_async`), quindi il thread dell'interfaccia non attende mai mpv.
 
-## D-007 — Salti: assoluti, accorpati, su fotogrammi chiave per impostazione predefinita **[da verificare]**
+## D-007 — Salti: assoluti, accorpati; brevi esatti, lunghi su fotogrammi chiave (misurato 2026-11-02)
 - L'applicazione calcola il bersaglio (posizione + delta, limitato all'intervallo [0, durata]) e invia un `seek` **assoluto**.
-- Resta in corso al massimo un salto alla volta. Le richieste che arrivano nel frattempo sostituiscono quella in attesa, e i delta successivi si sommano al bersaglio in attesa. In questo modo la ripetizione automatica dei tasti non crea arretrati.
-- Modalità predefinita `keyframes`: la più veloce, ma su video con GOP lunghi un salto di 1 s può atterrare più lontano. La casella *Exact seeks* (o `--exact-seeks`) usa `exact`. Le misure stabiliranno la modalità predefinita per ciascun tipo di salto, e potrebbe risultare `exact` per ±1 s.
+- Resta in corso al massimo un salto alla volta. Le richieste che arrivano nel frattempo sostituiscono quella in attesa, e i delta si sommano al bersaglio in attesa: la ripetizione automatica dei tasti non crea arretrati. Misurato: fino a 11 richieste accorpate in un solo salto, nessun timeout.
+- **±1 s e ±5 s: sempre `exact`.** Con `keyframes` l'immagine non si spostava: sui file reali i fotogrammi chiave distano da 5 a 24 s, quindi 14 pressioni di → lasciavano il video fermo e poi lo riportavano indietro. La latenza misurata di 2 ms era fittizia. In modalità `exact`, sul NAS, ±1 s ha mediana 22 ms (90%: 38 ms) e ±5 s ha mediana 35–66 ms (90%: 84–115 ms); su disco locale 18–19 ms.
+- **±1 min, ±5 min e barra temporale: `keyframes`**, come chiede la specifica (mediana 16 ms, 90%: 140 ms per ±1 min sul NAS; possibile scarto fino all'intervallo tra fotogrammi chiave). La casella *Exact long seeks* (o `--exact-seeks`) li rende esatti: ±1 min esatto costa 67–242 ms di mediana sul NAS.
+- La soglia (30 s) è una costante in `MainWindow`; dalla 0.2.0 potrà passare in `viBro.ini`.
+- Il CSV registra `landed_s`, la posizione effettivamente raggiunta, per individuare salti che non spostano l'immagine.
 - Timeout di sicurezza di 3 s: se mpv non segnala la ripresa, la coda si sblocca (`seek_timeout` nel CSV).
 
 ## D-008 — Definizione delle misure

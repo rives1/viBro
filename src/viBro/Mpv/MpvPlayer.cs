@@ -11,7 +11,8 @@ internal sealed record MediaInfo(string? Codec, long Width, long Height, string?
 
 internal sealed record LoadResult(string Path, string Kind, double ElapsedMs, double Duration, MediaInfo Info, object? Tag);
 
-internal sealed record SeekResult(double ElapsedMs, double Target, double Delta, bool Exact, int Coalesced, bool TimedOut, object? Tag);
+internal sealed record SeekResult(double ElapsedMs, double Target, double Delta, bool Exact, int Coalesced, bool TimedOut,
+    double? Landed, object? Tag);
 
 /// <summary>
 /// One long-lived libmpv instance rendering into a native child window.
@@ -242,7 +243,7 @@ internal sealed class MpvPlayer : IDisposable
         _queuedTarget = null;
         _queuedCount = 0;
         return new SeekResult(_seekWatch.Elapsed.TotalMilliseconds, _inFlightTarget, _inFlightDelta,
-            _inFlightExact, _inFlightCoalesced, TimedOut: true, _currentTag);
+            _inFlightExact, _inFlightCoalesced, TimedOut: true, Landed: null, _currentTag);
     }
 
     private void RequestSeekLocked(double target, bool exact)
@@ -465,7 +466,7 @@ internal sealed class MpvPlayer : IDisposable
             else if (_seekInFlight)
             {
                 seek = new SeekResult(_seekWatch.Elapsed.TotalMilliseconds, _inFlightTarget, _inFlightDelta,
-                    _inFlightExact, _inFlightCoalesced, TimedOut: false, _currentTag);
+                    _inFlightExact, _inFlightCoalesced, TimedOut: false, Landed: null, _currentTag);
                 _seekInFlight = false;
                 IssueQueuedSeekLocked();
             }
@@ -485,7 +486,10 @@ internal sealed class MpvPlayer : IDisposable
         }
 
         if (seek != null)
-            SeekCompleted?.Invoke(seek);
+        {
+            // Position actually reached (keyframe seeks may land away from the target).
+            SeekCompleted?.Invoke(seek with { Landed = GetDouble("time-pos") });
+        }
     }
 
     // ---------------------------------------------------------------- helpers

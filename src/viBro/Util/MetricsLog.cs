@@ -18,6 +18,7 @@ internal sealed record MetricRecord(
     string SeekMode,
     double? Delta,
     double? Target,
+    double? Landed,
     int Coalesced,
     string? Codec,
     long Width,
@@ -30,7 +31,7 @@ internal sealed record MetricRecord(
     string Version)
 {
     public const string Header =
-        "timestamp_utc,kind,ms,file,size_bytes,storage,seek_mode,delta_s,target_s,coalesced," +
+        "timestamp_utc,kind,ms,file,size_bytes,storage,seek_mode,delta_s,target_s,landed_s,coalesced," +
         "codec,width,height,hwdec,vo,working_set_mb,private_mb,managed_mb,version";
 
     public string ToCsv()
@@ -46,6 +47,7 @@ internal sealed record MetricRecord(
             SeekMode,
             Delta?.ToString("0.###", c) ?? "",
             Target?.ToString("0.###", c) ?? "",
+            Landed?.ToString("0.###", c) ?? "",
             Coalesced.ToString(c),
             Quote(Codec ?? ""),
             Width.ToString(c),
@@ -82,12 +84,25 @@ internal sealed class MetricsLog
         return (p.WorkingSet64 / mb, p.PrivateMemorySize64 / mb, GC.GetTotalMemory(false) / mb);
     }
 
+    private bool HeaderMatches()
+    {
+        using var r = new StreamReader(_path);
+        return r.ReadLine() == MetricRecord.Header;
+    }
+
     public void Append(MetricRecord record)
     {
         if (_failed) return;
         try
         {
             bool isNew = !File.Exists(_path);
+            if (!isNew && !HeaderMatches())
+            {
+                // Column layout changed: keep the old file aside instead of mixing layouts.
+                File.Move(_path, System.IO.Path.ChangeExtension(_path, null) + "-" +
+                    DateTime.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture) + ".csv");
+                isNew = true;
+            }
             using var w = new StreamWriter(_path, append: true, new UTF8Encoding(false));
             if (isNew) w.WriteLine(MetricRecord.Header);
             w.WriteLine(record.ToCsv());

@@ -12,7 +12,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - Barra del percorso: cartelle locali, unità mappate e percorsi UNC (`\\server\share`). L'apertura avviene in background, quindi una condivisione irraggiungibile non blocca l'interfaccia.
 - Elenco dei soli video della cartella (MP4, MKV, MOV, WMV), senza ricorsione, in ordine naturale dei nomi (lo stesso di Esplora risorse).
 - Il video selezionato viene caricato **in pausa**, mostrando il primo fotogramma; la selezione non avvia mai la riproduzione.
-- Salti rapidi su fotogrammi chiave, con opzione per i salti esatti. Le richieste ripetute vengono accorpate, quindi non si accumula una coda.
+- Salti: ±1 s e ±5 s esatti, ±1 min e ±5 min su fotogrammi chiave (rapidi, approssimati) oppure esatti con *Exact long seeks*. Le richieste ripetute vengono accorpate, quindi non si accumula una coda.
 - Play/Pause, barra temporale, volume, mute, schermo intero.
 - **Misure automatiche** in `viBro-metrics.csv`, accanto all'EXE: tempo al primo fotogramma, cambio video, latenza dei salti, memoria.
 
@@ -42,7 +42,7 @@ viBro.exe [cartella] [--exact-seeks] [--mpv-opt nome=valore]...
 ```
 
 - `cartella`: cartella da aprire all'avvio.
-- `--exact-seeks`: avvia con i salti esatti attivi (equivale alla casella *Exact seeks*).
+- `--exact-seeks`: rende esatti anche i salti lunghi e la barra temporale (equivale alla casella *Exact long seeks*).
 - `--mpv-opt nome=valore`: sovrascrive un'opzione di mpv. Serve per le prove di prestazione, per esempio `--mpv-opt cache=yes --mpv-opt demuxer-max-bytes=64MiB`, oppure `--mpv-opt log-file=C:\temp\mpv.log` per la diagnostica.
 
 Al primo avvio .NET estrae le librerie native, tra cui libmpv, nella cache per utente `%TEMP%\.net\viBro\<hash>`. Gli avvii successivi riutilizzano la cache; una nuova build usa un nuovo hash.

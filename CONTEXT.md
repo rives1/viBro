@@ -22,14 +22,16 @@ Prototipo 0.1.0. Deve dimostrare che l'EXE è autonomo, che il video si carica i
 | Accorpamento dei salti: 30 richieste ravvicinate → 4 salti effettivi, posizione finale corretta | ✔ |
 | Parsing degli script PowerShell; `analyze-metrics.ps1` su dati di prova | ✔ |
 | Compilazione completa e pubblicazione su Windows (SDK 10.0.403), commit `aa0695f` | ✔ 2026-11-02: EXE singolo 255,9 MB, nessun file accessorio, versione 0.1.0+aa0695f |
-| **Esecuzione su Windows, rendering D3D11, decodifica hardware, NAS** | ✘ da eseguire |
+| Esecuzione su Windows: motore avviato, primo fotogramma in pausa, tastiera (anche col focus sul video), NAS | ✔ 2026-11-02, verificato dall'utente |
+| Misure su NAS (unità mappata, d3d11va, gpu-next), ~1100 campioni | ✔ cambio video mediana 140 ms (90%: 269 ms); salto esatto ±1 s 22 ms, ±5 s 35–66 ms; ±1 min su fotogrammi chiave 16 ms (90%: 140 ms); ±5 min 368 ms; memoria privata 300–470 MB, stabile |
+| Misure su disco locale | parziali: salti esatti ±1/±5 s 18–19 ms, cambio video 74–211 ms (4 campioni) |
 
 Il test con libmpv ha trovato e fatto correggere un bug: con i cambi rapidi di file il rilevamento del caricamento si bloccava (vedi D-008).
 
 ## Problemi noti / rischi aperti
 1. EXE di 255,9 MB (libmpv 121 MB + runtime .NET/WPF + ReadyToRun): valutare `build.ps1 -Compress` confrontando dimensione e tempo di avvio.
 2. `libmpv-2.dll` importa `vulkan-1.dll` in modo statico: può non avviarsi su VM o Sandbox senza driver GPU (vedi D-002).
-3. Salti `keyframes` da ±1 s su GOP lunghi: il test conferma che un salto di -1 s può tornare al fotogramma chiave precedente, anche diversi secondi indietro. Va valutato sui file reali (D-007).
+3. ~~Salti `keyframes` brevi~~: confermato sui file reali che non spostano l'immagine; risolto con la modalità mista (D-007). Da verificare dopo la ricompilazione.
 4. shinchiro conserva su GitHub solo ~30 build: la build fissata sparirà da GitHub verso dicembre 2026 e resterà disponibile il link SourceForge. Conviene archiviare l'archivio (D-002).
 5. Gli obblighi di licenza GPL (sorgente corrispondente di libmpv) vanno risolti prima del rilascio pubblico: vedi THIRD-PARTY-NOTICES.md.
 6. Il tag `v0.1.0` non è ancora stato creato.
@@ -54,6 +56,6 @@ Ultimo commit compilato con successo su Windows: `aa0695f4d79a0dc9b3edf826d2a38d
 
 ## Prossimo passo
 1. ~~Compilare su Windows~~ fatto (aa0695f).
-2. Eseguire [docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md) su SSD e NAS.
+2. Ricompilare e verificare la modalità mista dei salti (colonna `landed_s`); completare le misure su SSD locale, 4K, WMV/MOV e una sessione lunga per la memoria ([docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md)).
 3. Riportare qui i risultati, aggiornare le decisioni [da verificare], creare il tag `v0.1.0` e la fotografia `docs/handover/CONTEXT-v0.1.0.md`.
 4. Poi la 0.2.0: albero delle cartelle, ordinamento per colonna, `viBro.ini`.

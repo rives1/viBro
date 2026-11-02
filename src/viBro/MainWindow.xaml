@@ -18,9 +18,9 @@
                 <ComboBoxItem Content="no" />
             </ComboBox>
             <TextBlock DockPanel.Dock="Right" Text="HW decoding:" VerticalAlignment="Center" Margin="12,0,0,0" />
-            <CheckBox x:Name="ExactSeekBox" DockPanel.Dock="Right" Content="Exact seeks" VerticalAlignment="Center"
+            <CheckBox x:Name="ExactSeekBox" DockPanel.Dock="Right" Content="Exact long seeks" VerticalAlignment="Center"
                       Margin="12,0,0,0" Focusable="False"
-                      ToolTip="Off: jump to keyframes (fast, approximate). On: exact position (slower)."
+                      ToolTip="1 s and 5 s steps are always exact. Off: 1 min / 5 min steps and the timeline jump to keyframes (fast, approximate). On: exact (slower)."
                       Checked="ExactSeekBox_Changed" Unchecked="ExactSeekBox_Changed" />
             <TextBox x:Name="PathBox" VerticalContentAlignment="Center" Padding="2"
                      ToolTip="Folder path (local, mapped drive or \\server\share). Enter to open, Esc to cancel."

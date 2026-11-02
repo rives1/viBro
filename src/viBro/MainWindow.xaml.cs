@@ -31,7 +31,9 @@ public partial class MainWindow : Window
     private MediaInfo? _currentInfo;
     private VideoItem? _loadingItem;
 
-    private bool _exactSeeks;
+    /// <summary>Steps shorter than this are always exact: keyframe seeks would not move the picture.</summary>
+    private const double ExactSeekThresholdSeconds = 30;
+    private bool _exactLongSeeks;
     private bool _updatingTimeSlider;
     private string _lastLoadText = "";
     private string _lastSeekText = "";
@@ -50,7 +52,7 @@ public partial class MainWindow : Window
 
         Title = "viBro " + AppInfo.DisplayVersion;
         _metrics = new MetricsLog(Path.Combine(AppInfo.ExeDirectory, "viBro-metrics.csv"));
-        _exactSeeks = options.ExactSeeks;
+        _exactLongSeeks = options.ExactSeeks;
         ExactSeekBox.IsChecked = options.ExactSeeks;
 
         _uiTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
@@ -261,7 +263,7 @@ public partial class MainWindow : Window
         _lastLoadText = $"{r.Kind} {r.ElapsedMs:0} ms";
         UpdateMetricsText();
 
-        RecordMetric(r.Kind, r.ElapsedMs, item, seekMode: "", delta: null, target: null, coalesced: 0);
+        RecordMetric(r.Kind, r.ElapsedMs, item, seekMode: "", delta: null, target: null, landed: null, coalesced: 0);
     }
 
     private void OnLoadFailed(string path, string error)
@@ -271,7 +273,8 @@ public partial class MainWindow : Window
 
     // ================================================================ seeking and transport
 
-    private void Seek(double deltaSeconds) => _player?.SeekRelative(deltaSeconds, _exactSeeks);
+    private void Seek(double deltaSeconds)
+        => _player?.SeekRelative(deltaSeconds, _exactLongSeeks || Math.Abs(deltaSeconds) < ExactSeekThresholdSeconds);
 
     private void OnSeekCompleted(SeekResult r)
     {
@@ -281,13 +284,13 @@ public partial class MainWindow : Window
         _lastSeekText = $"seek {r.ElapsedMs:0} ms (median {_seekStats.Median:0}, n={_seekStats.Count})";
         UpdateMetricsText();
 
-        RecordMetric(kind, r.ElapsedMs, item, r.Exact ? "exact" : "keyframes", r.Delta, r.Target, r.Coalesced);
+        RecordMetric(kind, r.ElapsedMs, item, r.Exact ? "exact" : "keyframes", r.Delta, r.Target, r.Landed, r.Coalesced);
     }
 
     private void TimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (_updatingTimeSlider || _player == null) return;
-        _player.SeekAbsolute(e.NewValue, _exactSeeks); // coalesced while dragging
+        _player.SeekAbsolute(e.NewValue, _exactLongSeeks); // coalesced while dragging
     }
 
     private void RefreshTransport()
@@ -317,7 +320,7 @@ public partial class MainWindow : Window
         => _player?.SetVolume(e.NewValue);
 
     private void ExactSeekBox_Changed(object sender, RoutedEventArgs e)
-        => _exactSeeks = ExactSeekBox.IsChecked == true;
+        => _exactLongSeeks = ExactSeekBox.IsChecked == true;
 
     private void HwdecBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         => _player?.SetHwdec(SelectedHwdec());
@@ -446,12 +449,12 @@ public partial class MainWindow : Window
     // ================================================================ metrics and status
 
     private void RecordMetric(string kind, double ms, VideoItem item, string seekMode,
-        double? delta, double? target, int coalesced)
+        double? delta, double? target, double? landed, int coalesced)
     {
         var mem = MetricsLog.MemorySnapshot();
         var info = _currentInfo;
         _metrics.Append(new MetricRecord(
-            DateTime.UtcNow, kind, ms, item.Name, item.Size, item.Storage, seekMode, delta, target, coalesced,
+            DateTime.UtcNow, kind, ms, item.Name, item.Size, item.Storage, seekMode, delta, target, landed, coalesced,
             info?.Codec, info?.Width ?? 0, info?.Height ?? 0, info?.Hwdec, info?.Vo,
             mem.WorkingSetMb, mem.PrivateMb, mem.ManagedMb, AppInfo.SemanticVersion));
 

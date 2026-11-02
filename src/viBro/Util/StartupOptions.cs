@@ -6,6 +6,7 @@ namespace ViBro.Util;
 /// <summary>
 /// Command line (prototype only):
 ///   viBro.exe [folder] [--exact-seeks] [--mpv-opt name=value]...
+/// --exact-seeks makes long steps (1 min, 5 min, timeline) exact too; short steps are always exact.
 /// --mpv-opt values override viBro's defaults and are meant for performance experiments.
 /// </summary>
 internal sealed class StartupOptions

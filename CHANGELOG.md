@@ -14,5 +14,6 @@ Prototipo tecnico.
 - E/D per il file precedente/successivo, in pausa e senza ripartire dall'estremità opposta; Spazio, M, F11/Esc, Ctrl+L.
 - Barra del percorso (locale, unità mappate, UNC) con lettura della cartella in background; elenco virtualizzato con Name, Size e Date modified in ordine naturale.
 - Accelerazione hardware `auto-safe` con ripiego software; selettore per confrontarla con `no`.
+- Salti ±1 s e ±5 s sempre esatti, ±1 min / ±5 min su fotogrammi chiave (casella *Exact long seeks* per renderli esatti); colonna `landed_s` nel registro.
 - Registro delle misure `viBro-metrics.csv` e script `build/analyze-metrics.ps1`.
 - Script di build e confezionamento, workflow GitHub Actions, documentazione di progetto.

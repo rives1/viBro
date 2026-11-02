@@ -449,6 +449,10 @@ internal sealed class MpvPlayer : IDisposable
         double loadMs = 0;
         SeekResult? seek = null;
 
+        // Read the position reached BEFORE a queued seek is issued below; otherwise the
+        // value could already belong to the next seek (measurement artifact seen in tests).
+        double? landed = GetDouble("time-pos");
+
         lock (_gate)
         {
             if (_pendingLoad != null)
@@ -466,7 +470,7 @@ internal sealed class MpvPlayer : IDisposable
             else if (_seekInFlight)
             {
                 seek = new SeekResult(_seekWatch.Elapsed.TotalMilliseconds, _inFlightTarget, _inFlightDelta,
-                    _inFlightExact, _inFlightCoalesced, TimedOut: false, Landed: null, _currentTag);
+                    _inFlightExact, _inFlightCoalesced, TimedOut: false, landed, _currentTag);
                 _seekInFlight = false;
                 IssueQueuedSeekLocked();
             }
@@ -486,10 +490,7 @@ internal sealed class MpvPlayer : IDisposable
         }
 
         if (seek != null)
-        {
-            // Position actually reached (keyframe seeks may land away from the target).
-            SeekCompleted?.Invoke(seek with { Landed = GetDouble("time-pos") });
-        }
+            SeekCompleted?.Invoke(seek);
     }
 
     // ---------------------------------------------------------------- helpers

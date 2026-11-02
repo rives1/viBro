@@ -25,6 +25,8 @@ Prototipo 0.1.0. Deve dimostrare che l'EXE è autonomo, che il video si carica i
 | Esecuzione su Windows: motore avviato, primo fotogramma in pausa, tastiera (anche col focus sul video), NAS | ✔ 2026-11-02, verificato dall'utente |
 | Misure su NAS (unità mappata, d3d11va, gpu-next), ~1100 campioni | ✔ cambio video mediana 140 ms (90%: 269 ms); salto esatto ±1 s 22 ms, ±5 s 35–66 ms; ±1 min su fotogrammi chiave 16 ms (90%: 140 ms); ±5 min 368 ms; memoria privata 300–470 MB, stabile |
 | Misure su disco locale | parziali: salti esatti ±1/±5 s 18–19 ms, cambio video 74–211 ms (4 campioni) |
+| Modalità mista dei salti (commit d540d1f), ~1140 campioni, NAS + locale | ✔ salti esatti: scarto dal bersaglio ≈ 0 s; locale ±1 s 32 ms, ±5 s 45 ms (mediana); NAS ±1 s 20 ms (90%: 99), ±5 s 56 ms (90%: 134). Fotogrammi chiave ±1/±5 min: 10–35 ms, scarto 2–9 s. Cambio video locale 38 ms, NAS 291 ms (90%: 647, max 1175: più variabile della prima sessione). Memoria 260–460 MB, stabile |
+| Colonna `landed_s` | ✘→✔ la prima versione registrava la posizione del salto successivo quando c'era una richiesta in coda; corretto (lettura prima di avviare il salto in coda) |
 
 Il test con libmpv ha trovato e fatto correggere un bug: con i cambi rapidi di file il rilevamento del caricamento si bloccava (vedi D-008).
 
@@ -56,6 +58,6 @@ Ultimo commit compilato con successo su Windows: `aa0695f4d79a0dc9b3edf826d2a38d
 
 ## Prossimo passo
 1. ~~Compilare su Windows~~ fatto (aa0695f).
-2. Ricompilare e verificare la modalità mista dei salti (colonna `landed_s`); completare le misure su SSD locale, 4K, WMV/MOV e una sessione lunga per la memoria ([docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md)).
+2. ~~Verificare la modalità mista~~ fatto. Completare le misure su SSD locale, 4K, WMV/MOV e una sessione lunga per la memoria ([docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md)).
 3. Riportare qui i risultati, aggiornare le decisioni [da verificare], creare il tag `v0.1.0` e la fotografia `docs/handover/CONTEXT-v0.1.0.md`.
 4. Poi la 0.2.0: albero delle cartelle, ordinamento per colonna, `viBro.ini`.

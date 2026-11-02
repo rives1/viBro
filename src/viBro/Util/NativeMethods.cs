@@ -7,6 +7,7 @@ namespace ViBro.Util;
 internal static class NativeMethods
 {
     public const int WM_KEYDOWN = 0x0100;
+    public const int WM_MOUSEMOVE = 0x0200;
     public const int WM_SYSKEYDOWN = 0x0104;
 
     private const int VK_SHIFT = 0x10;

@@ -9,6 +9,8 @@
     <DockPanel>
         <!-- Path bar -->
         <DockPanel x:Name="TopBar" DockPanel.Dock="Top" Margin="4">
+            <Button x:Name="ThemeButton" DockPanel.Dock="Right" Content="Theme" Margin="4,0,0,0"
+                    Padding="10,2" Focusable="False" Click="ThemeButton_Click" ToolTip="Switch between Light and Dark theme" />
             <Button x:Name="BrowseButton" DockPanel.Dock="Right" Content="Browse..." Margin="4,0,0,0"
                     Padding="10,2" Focusable="False" Click="BrowseButton_Click" />
             <TextBox x:Name="PathBox" VerticalContentAlignment="Center" Padding="2"
@@ -59,20 +61,27 @@
                           ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Focusable="False" />
 
             <DockPanel Grid.Column="2">
-                <!-- Transport -->
-                <DockPanel x:Name="TransportBar" DockPanel.Dock="Bottom" Margin="4">
-                    <Button x:Name="PlayButton" DockPanel.Dock="Left" Width="70" Content="Play" Focusable="False"
-                            Click="PlayButton_Click" />
-                    <Slider x:Name="VolumeSlider" DockPanel.Dock="Right" Width="110" Minimum="0" Maximum="100" Value="100"
-                            Focusable="False" VerticalAlignment="Center" IsMoveToPointEnabled="True"
-                            ValueChanged="VolumeSlider_ValueChanged" />
-                    <Button x:Name="MuteButton" DockPanel.Dock="Right" Width="64" Content="Mute" Focusable="False"
-                            Margin="8,0,6,0" Click="MuteButton_Click" />
-                    <TextBlock x:Name="TimeText" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="10,0,0,0"
-                               FontFamily="Consolas" Text="00:00:00 / 00:00:00" />
-                    <Slider x:Name="TimeSlider" Minimum="0" Maximum="1" Focusable="False" IsMoveToPointEnabled="True"
-                            VerticalAlignment="Center" Margin="10,0,0,0" ValueChanged="TimeSlider_ValueChanged" />
-                </DockPanel>
+                <!-- Transport, above the video. In fullscreen it becomes a black band with only the
+                     timeline, centred and ~40% wide, shown on mouse movement or seeks. -->
+                <Border x:Name="TransportBar" DockPanel.Dock="Top" Padding="4" MouseMove="TransportBar_MouseMove">
+                    <DockPanel>
+                        <Button x:Name="PlayButton" DockPanel.Dock="Left" Width="70" Content="Play" Focusable="False"
+                                Click="PlayButton_Click" />
+                        <StackPanel x:Name="AudioControls" DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button x:Name="MuteButton" Width="64" Content="Mute" Focusable="False"
+                                    Margin="8,0,6,0" Click="MuteButton_Click" />
+                            <Slider x:Name="VolumeSlider" Width="110" Minimum="0" Maximum="100" Value="100"
+                                    Focusable="False" VerticalAlignment="Center" IsMoveToPointEnabled="True"
+                                    ValueChanged="VolumeSlider_ValueChanged" />
+                        </StackPanel>
+                        <DockPanel x:Name="SeekPanel">
+                            <TextBlock x:Name="TimeText" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="10,0,0,0"
+                                       FontFamily="Consolas" Text="00:00:00 / 00:00:00" />
+                            <Slider x:Name="TimeSlider" Minimum="0" Maximum="1" Focusable="False" IsMoveToPointEnabled="True"
+                                    VerticalAlignment="Center" Margin="10,0,0,0" ValueChanged="TimeSlider_ValueChanged" />
+                        </DockPanel>
+                    </DockPanel>
+                </Border>
 
                 <Grid x:Name="RightArea">
                     <Grid.RowDefinitions>

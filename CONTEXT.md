@@ -1,6 +1,6 @@
 # CONTEXT — stato del progetto per riprendere il lavoro
 
-_Aggiornato: 2026-11-02 · ultima versione: **0.3.0** (tag `v0.3.0`) · prossima: 0.4.0 · branch: `main`_
+_Aggiornato: 2026-11-02 · ultima versione: 0.3.0 (tag `v0.3.0`) · **in sviluppo: 0.4.0** · branch: `main`_
 
 ## Obiettivo corrente
 Prototipo 0.1.0. Deve dimostrare che l'EXE è autonomo, che il video si carica in pausa e che la navigazione è abbastanza rapida sui file reali (SSD e NAS). Solo dopo questa verifica si passa alla 0.2.0 (interfaccia completa). Specifica: [SPEC.md](SPEC.md).
@@ -88,5 +88,16 @@ Funzionalità: eliminazione (Canc/R), rinomina (F2), spostamento (W/Shift+W). Co
 
 Codice verificato: commit `77f5882`. Il tag `v0.3.0` è sul commit di chiusura della documentazione, senza modifiche al codice.
 
+## 0.4.0 — stato
+Codice scritto: temi (`Util/ThemeManager.cs`, `[Appearance] Theme`), barra dei controlli in alto e fascia a schermo intero, `Util/ErrorLog.cs` con gestori delle eccezioni ed errori di mpv e di riproduzione, loader Vulkan incorporato (`third_party/vulkan-loader`, `Util/NativePreload.cs`), Cestino per percorsi lunghi (`IFileOperation`), misura `startup` e `build.ps1 -Compress` in una cartella separata. Decisioni D-027…D-032.
+
+Verificato fuori da Windows:
+- progetto completo (WPF, XAML, tema) compilato; la DLL Vulkan risulta incorporata nell'output;
+- motore con libmpv reale, 21 controlli, compreso l'inoltro dei messaggi di errore di mpv;
+- test di `FileOps` ancora superati. Il test di annullamento è stato reso indipendente dalla velocità del disco: prima, con un disco veloce, la copia poteva finire prima dell'annullamento.
+
+Da verificare su Windows: aspetto dei temi, fascia a schermo intero, avvio senza `vulkan-1.dll` di sistema, Cestino con percorso lungo, log degli errori, tempi di avvio delle due varianti (vedi [docs/TEST-PLAN-0.4.0.md](docs/TEST-PLAN-0.4.0.md)).
+
 ## Prossimo passo
-Versione 0.4.0 (dalla specifica): temi Light/Dark selezionabili e persistenti; gestione degli errori; ottimizzazione; verifiche di portabilità. Punti aperti da riprendere: MOV e 4K, avvio senza driver GPU (`vulkan-1.dll`), sessione lunga di memoria, picchi sul NAS, dimensione dell'EXE (`-Compress`), percorsi oltre 260 caratteri per il Cestino (D-023). Prima di iniziare, chiarire con l'utente come selezionare il tema e quali altri punti rientrano nella 0.4.0.
+1. Compilare la 0.4.0 (`build.cmd`, poi `build\build.ps1 -Compress`) ed eseguire [docs/TEST-PLAN-0.4.0.md](docs/TEST-PLAN-0.4.0.md).
+2. Decidere la compressione (D-032), chiudere la 0.4.0, poi preparare la 1.0.0 (verifiche complete, licenze, pubblicazione).

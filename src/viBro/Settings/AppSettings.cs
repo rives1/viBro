@@ -9,6 +9,9 @@ namespace ViBro.Settings;
 
 internal enum SortColumn { Name, Size, Date }
 
+/// <summary>System = follow the Windows light/dark setting (only until the user picks a theme).</summary>
+internal enum ThemeChoice { System, Light, Dark }
+
 /// <summary>
 /// Typed view of viBro.ini (next to the EXE). Missing or invalid values fall back to
 /// defaults (each invalid value is reported once). Unknown keys are preserved on save.
@@ -19,6 +22,9 @@ internal sealed class AppSettings
     public const string FileName = "viBro.ini";
 
     private IniFile _ini = new();
+
+    // [Appearance]
+    public ThemeChoice Theme { get; set; } = ThemeChoice.System;
 
     // [Window]
     public double? WindowLeft { get; set; }
@@ -87,6 +93,8 @@ internal sealed class AppSettings
         LoadedSchemaVersion = ReadInt("viBro", "SchemaVersion", CurrentSchemaVersion, 1, int.MaxValue);
         if (LoadedSchemaVersion > CurrentSchemaVersion)
             Warnings.Add($"{FileName} was written by a newer viBro (schema {LoadedSchemaVersion}); unknown settings are kept.");
+
+        Theme = (ThemeChoice)ReadEnumWord("Appearance", "Theme", new[] { "System", "Light", "Dark" }, (int)Theme);
 
         WindowLeft = ReadNullableDouble("Window", "Left", -100000, 100000);
         WindowTop = ReadNullableDouble("Window", "Top", -100000, 100000);
@@ -169,6 +177,8 @@ internal sealed class AppSettings
         string B(bool v) => v ? "true" : "false";
 
         _ini.Set("viBro", "SchemaVersion", Math.Max(LoadedSchemaVersion, CurrentSchemaVersion).ToString(c));
+
+        _ini.Set("Appearance", "Theme", Theme.ToString());
 
         if (WindowLeft is double l) _ini.Set("Window", "Left", D(l));
         if (WindowTop is double t) _ini.Set("Window", "Top", D(t));

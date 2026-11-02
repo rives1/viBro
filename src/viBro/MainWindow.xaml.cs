@@ -30,6 +30,7 @@ public partial class MainWindow : Window
     private readonly RollingStats _seekStats = new(50);
     private readonly FolderTreeModel _tree;
     private readonly List<string> _warnings = new();
+    private int _loggedWarnings;
 
     private MpvPlayer? _player;
     private List<VideoItem> _items = new();
@@ -58,6 +59,8 @@ public partial class MainWindow : Window
 
     // Fullscreen
     private bool _isFullscreen;
+    private readonly DispatcherTimer _fullscreenBarTimer;
+    private int _lastMouseX = int.MinValue, _lastMouseY = int.MinValue;
     private WindowState _savedState;
     private WindowStyle _savedStyle;
     private ResizeMode _savedResizeMode;
@@ -67,12 +70,15 @@ public partial class MainWindow : Window
     internal MainWindow(StartupOptions options)
     {
         _options = options;
-        InitializeComponent();
-        Title = "viBro " + AppInfo.DisplayVersion;
 
         // Settings next to the EXE. If they cannot be saved there, warn and keep them in memory only.
         _iniPath = Path.Combine(AppInfo.ExeDirectory, AppSettings.FileName);
         _settings = AppSettings.Load(_iniPath);
+        ThemeManager.Apply(_settings.Theme); // before the controls are created
+
+        InitializeComponent();
+        Title = "viBro " + AppInfo.DisplayVersion;
+        UpdateThemeButton();
         _warnings.AddRange(_settings.Warnings);
         _iniWritable = AppSettings.CanWrite(_iniPath, out string? reason);
         if (!_iniWritable)
@@ -94,6 +100,9 @@ public partial class MainWindow : Window
 
         _uiTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _uiTimer.Tick += (_, _) => RefreshTransport();
+        _fullscreenBarTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _fullscreenBarTimer.Tick += (_, _) => HideFullscreenBarIfIdle();
+        SizeChanged += (_, _) => { if (_isFullscreen) SizeFullscreenBar(); };
 
         // Keys pressed while the native video window has focus never reach WPF's
         // routed events: intercept them here and route them to the same handler.
@@ -117,6 +126,8 @@ public partial class MainWindow : Window
             _player.LoadCompleted += r => Dispatcher.InvokeAsync(() => OnLoadCompleted(r));
             _player.LoadFailed += (path, err) => Dispatcher.InvokeAsync(() => OnLoadFailed(path, err));
             _player.SeekCompleted += r => Dispatcher.InvokeAsync(() => OnSeekCompleted(r));
+            _player.EngineMessage += (level, module, text) => ErrorLog.Write("mpv", $"{level} [{module}] {text}");
+            _player.PlaybackFailed += err => Dispatcher.InvokeAsync(() => OnPlaybackFailed(err));
             _player.Start();
 
             _warnings.AddRange(_options.Errors);
@@ -127,6 +138,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             _player = null;
+            ErrorLog.Write("engine", "Video engine could not be started", ex);
             MessageBox.Show(this,
                 "The video engine could not be started.\n\n" + ex.Message +
                 "\n\nCheck that viBro.exe was built with libmpv-2.dll (see README).",
@@ -135,6 +147,7 @@ public partial class MainWindow : Window
         }
 
         _uiTimer.Start();
+        RecordStartup();
 
         // Restore only the last folder: no video is loaded automatically.
         string? folder = !string.IsNullOrWhiteSpace(_options.Folder) ? _options.Folder : _settings.LastFolder;
@@ -508,12 +521,16 @@ public partial class MainWindow : Window
     private void OnLoadFailed(string path, string error)
     {
         SetStatus($"Cannot play {Path.GetFileName(path)}: {error}");
+        ErrorLog.Write("playback", $"Cannot open {Path.GetFileName(path)}: {error}");
     }
 
     // ================================================================ seeking and transport
 
     private void Seek(double deltaSeconds)
-        => _player?.SeekRelative(deltaSeconds, _exactLongSeeks || Math.Abs(deltaSeconds) < _exactThreshold);
+    {
+        ShowFullscreenBar();
+        _player?.SeekRelative(deltaSeconds, _exactLongSeeks || Math.Abs(deltaSeconds) < _exactThreshold);
+    }
 
     private void OnSeekCompleted(SeekResult r)
     {
@@ -529,6 +546,7 @@ public partial class MainWindow : Window
     private void TimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (_updatingTimeSlider || _player == null) return;
+        ShowFullscreenBar();
         _player.SeekAbsolute(e.NewValue, _exactLongSeeks); // coalesced while dragging
     }
 
@@ -576,11 +594,25 @@ public partial class MainWindow : Window
     private void OnThreadPreprocessMessage(ref MSG msg, ref bool handled)
     {
         if (handled) return;
-        if (msg.message != NativeMethods.WM_KEYDOWN && msg.message != NativeMethods.WM_SYSKEYDOWN) return;
+        bool isKey = msg.message == NativeMethods.WM_KEYDOWN || msg.message == NativeMethods.WM_SYSKEYDOWN;
+        bool isMouseMove = msg.message == NativeMethods.WM_MOUSEMOVE;
+        if (!isKey && !(isMouseMove && _isFullscreen)) return;
 
         IntPtr host = VideoHost.Handle;
         if (host == IntPtr.Zero) return;
         if (msg.hwnd != host && !NativeMethods.IsChild(host, msg.hwnd)) return;
+
+        if (isMouseMove)
+        {
+            // Windows also sends WM_MOUSEMOVE without real movement: compare screen positions.
+            if (msg.pt_x != _lastMouseX || msg.pt_y != _lastMouseY)
+            {
+                _lastMouseX = msg.pt_x;
+                _lastMouseY = msg.pt_y;
+                ShowFullscreenBar();
+            }
+            return; // never mark mouse messages as handled
+        }
 
         Key key = KeyInterop.KeyFromVirtualKey((int)msg.wParam.ToInt64());
         bool isRepeat = (msg.lParam.ToInt64() & 0x40000000) != 0;
@@ -674,6 +706,7 @@ public partial class MainWindow : Window
         ResizeMode = ResizeMode.NoResize;
         if (WindowState == WindowState.Maximized) WindowState = WindowState.Normal;
         WindowState = WindowState.Maximized;
+        SetTransportFullscreen(true);
     }
 
     private void ExitFullscreen()
@@ -688,12 +721,102 @@ public partial class MainWindow : Window
         TreeColumn.Width = _savedTreeWidth;
         TreeColumn.MinWidth = _savedTreeMinWidth;
         SetChromeVisibility(Visibility.Visible);
+        SetTransportFullscreen(false);
+    }
+
+    // Fullscreen band: a black strip above the video (the picture is never covered) holding only the
+    // timeline, centred and ~40% of the screen wide. It appears on mouse movement or seeks and hides
+    // after 2 s without activity; the strip itself stays, so the video does not resize.
+    private void SetTransportFullscreen(bool on)
+    {
+        _fullscreenBarTimer.Stop();
+        if (on)
+        {
+            TransportBar.Background = System.Windows.Media.Brushes.Black;
+            TimeText.Foreground = System.Windows.Media.Brushes.White;
+            PlayButton.Visibility = Visibility.Collapsed;
+            AudioControls.Visibility = Visibility.Collapsed;
+            SeekPanel.HorizontalAlignment = HorizontalAlignment.Center;
+            Dispatcher.InvokeAsync(SizeFullscreenBar, DispatcherPriority.Loaded);
+            ShowFullscreenBar();
+        }
+        else
+        {
+            TransportBar.ClearValue(Border.BackgroundProperty);
+            TimeText.ClearValue(TextBlock.ForegroundProperty);
+            PlayButton.Visibility = Visibility.Visible;
+            AudioControls.Visibility = Visibility.Visible;
+            SeekPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            SeekPanel.Width = double.NaN;
+            SeekPanel.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void SizeFullscreenBar()
+    {
+        if (_isFullscreen) SeekPanel.Width = Math.Max(320, ActualWidth * 0.4);
+    }
+
+    private void ShowFullscreenBar()
+    {
+        if (!_isFullscreen) return;
+        SeekPanel.Visibility = Visibility.Visible;
+        _fullscreenBarTimer.Stop();
+        _fullscreenBarTimer.Start();
+    }
+
+    private void HideFullscreenBarIfIdle()
+    {
+        if (!_isFullscreen) { _fullscreenBarTimer.Stop(); return; }
+        if (TransportBar.IsMouseOver || TimeSlider.IsMouseCaptureWithin) return; // keep while in use
+        _fullscreenBarTimer.Stop();
+        SeekPanel.Visibility = Visibility.Hidden; // Hidden keeps the band's height
+    }
+
+    private void TransportBar_MouseMove(object sender, MouseEventArgs e) => ShowFullscreenBar();
+
+    // ================================================================ theme
+
+    private void ThemeButton_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.Theme = ThemeManager.IsDark(_settings.Theme) ? ThemeChoice.Light : ThemeChoice.Dark;
+        ThemeManager.Apply(_settings.Theme);
+        UpdateThemeButton();
+    }
+
+    private void UpdateThemeButton()
+        => ThemeButton.Content = ThemeManager.IsDark(_settings.Theme) ? "Theme: Dark" : "Theme: Light";
+
+    // ================================================================ errors and startup
+
+    private void OnPlaybackFailed(string error)
+    {
+        string name = _loadingItem?.Name ?? (FileList.SelectedItem as VideoItem)?.Name ?? "the video";
+        SetStatus($"Playback of {name} stopped: {error} (network location lost?)");
+        ErrorLog.Write("playback", $"Playback of {name} stopped: {error}");
+    }
+
+    /// <summary>Time from process start to the first rendered window (used to compare EXE variants).</summary>
+    private void RecordStartup()
+    {
+        try
+        {
+            using var proc = System.Diagnostics.Process.GetCurrentProcess();
+            double ms = (DateTime.Now - proc.StartTime).TotalMilliseconds;
+            long exeSize = Environment.ProcessPath != null ? new FileInfo(Environment.ProcessPath).Length : 0;
+            _lastLoadText = $"startup {ms:0} ms";
+            UpdateMetricsText();
+            RecordMetric("startup", ms, null, "", null, null, null, 0, "viBro.exe", exeSize);
+        }
+        catch
+        {
+            // diagnostics only
+        }
     }
 
     private void SetChromeVisibility(Visibility v)
     {
         TopBar.Visibility = v;
-        TransportBar.Visibility = v;
         StatusPanel.Visibility = v;
         ListSplitter.Visibility = v;
         FileList.Visibility = v;
@@ -703,14 +826,15 @@ public partial class MainWindow : Window
 
     // ================================================================ metrics and status
 
-    private void RecordMetric(string kind, double ms, VideoItem item, string seekMode,
-        double? delta, double? target, double? landed, int coalesced)
+    private void RecordMetric(string kind, double ms, VideoItem? item, string seekMode,
+        double? delta, double? target, double? landed, int coalesced, string? fileName = null, long fileSize = 0)
     {
         if (_metrics == null) return;
         var mem = MetricsLog.MemorySnapshot();
-        var info = _currentInfo;
+        var info = item != null ? _currentInfo : null;
         _metrics.Append(new MetricRecord(
-            DateTime.UtcNow, kind, ms, item.Name, item.Size, item.Storage, seekMode, delta, target, landed, coalesced,
+            DateTime.UtcNow, kind, ms, item?.Name ?? fileName ?? "", item?.Size ?? fileSize, item?.Storage ?? "",
+            seekMode, delta, target, landed, coalesced,
             info?.Codec, info?.Width ?? 0, info?.Height ?? 0, info?.Hwdec, info?.Vo,
             mem.WorkingSetMb, mem.PrivateMb, mem.ManagedMb, AppInfo.SemanticVersion));
 
@@ -727,6 +851,8 @@ public partial class MainWindow : Window
 
     private void ShowWarnings()
     {
+        foreach (var w in _warnings.Skip(_loggedWarnings)) ErrorLog.Write("warning", w);
+        _loggedWarnings = _warnings.Count;
         if (_warnings.Count == 0)
         {
             WarningText.Visibility = Visibility.Collapsed;

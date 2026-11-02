@@ -2,6 +2,22 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [0.4.0] - non ancora rilasciata
+
+Temi, gestione degli errori, ottimizzazione e portabilità.
+
+### Aggiunto
+- Temi **Light/Dark** con il tema Fluent integrato in WPF: pulsante *Theme* nella barra del percorso; scelta salvata in `viBro.ini` (`[Appearance] Theme`); al primo avvio si segue l'impostazione di Windows.
+- `viBro-errors.log` accanto all'EXE (massimo 1 MB, con un file precedente `.1.log`): eccezioni impreviste, messaggi di errore di mpv, file non apribili, riproduzione interrotta (ad esempio NAS scollegato durante la visione), avvisi dell'INI.
+- Riproduzione interrotta da un errore: messaggio nella barra di stato.
+- Loader Vulkan ufficiale Khronos incorporato nell'EXE, usato solo se Windows non ne ha uno: viBro parte anche su PC o VM senza driver GPU.
+- Cestino anche per i percorsi di 260 o più caratteri (`IFileOperation` di Windows).
+- Misura del tempo di avvio (`startup` in `viBro-metrics.csv`, con la dimensione dell'EXE) per confrontare EXE normale e compresso; `build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`.
+
+### Modificato
+- La barra dei controlli (Play, barra temporale, tempo, Mute, volume) è **sopra il video**.
+- A schermo intero: fascia nera in alto con la sola barra temporale, centrata e larga circa il 40% dello schermo; compare muovendo il mouse o con un salto e scompare dopo 2 s di inattività; la fascia resta, quindi il video non cambia dimensione.
+
 ## [0.3.0] - 2026-11-02
 
 Operazioni sui file.

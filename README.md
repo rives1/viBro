@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 0.3.0** (operazioni sui file); in sviluppo: 0.4.0 (temi, gestione errori, ottimizzazione, portabilità). La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 0.4.0 in sviluppo** (temi, gestione errori, ottimizzazione, portabilità); ultima versione rilasciata: 0.3.0. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 
 ## Funzionalità
 
@@ -21,7 +21,8 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 
 - Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
 
-Non ancora presenti: temi Light/Dark (0.4.0).
+- Temi Light/Dark (pulsante *Theme*), barra dei controlli sopra il video, fascia con la barra temporale a schermo intero.
+- Registro degli errori `viBro-errors.log` accanto all'EXE.
 
 ## viBro.ini
 
@@ -34,6 +35,7 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | `[Playback] ExactSeekThresholdSeconds` | `30` | I salti più brevi di questa soglia sono sempre esatti |
 | `[Cache] MaxMB` | `0` | 0 = cache di mpv disattivata; >0 = cache attiva con questo limite |
 | `[Diagnostics] MetricsLog` | `true` | Registro delle misure `viBro-metrics.csv` |
+| `[Appearance] Theme` | `System` | `Light`, `Dark`, oppure `System` (segue Windows finché non si sceglie con il pulsante *Theme*) |
 
 ## Scorciatoie da tastiera
 

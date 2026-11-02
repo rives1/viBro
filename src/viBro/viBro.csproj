@@ -36,6 +36,15 @@
     <LibMpvDll>$(MSBuildThisFileDirectory)..\..\deps\libmpv\libmpv-2.dll</LibMpvDll>
   </PropertyGroup>
 
+  <!-- Official Khronos Vulkan loader, used only when Windows has none (see Util/NativePreload.cs). -->
+  <PropertyGroup>
+    <VulkanLoaderDll>$(MSBuildThisFileDirectory)..\..\third_party\vulkan-loader\vulkan-1.dll</VulkanLoaderDll>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(VulkanLoaderDll)" Link="vulkan-1.dll"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup Condition="Exists('$(LibMpvDll)')">
     <None Include="$(LibMpvDll)" Link="libmpv-2.dll"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

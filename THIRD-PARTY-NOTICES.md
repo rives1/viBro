@@ -7,6 +7,7 @@ viBro.exe incorpora i componenti seguenti.
 | libmpv (mpv) | build `20261101-git-48fca90e8c`, commit mpv `48fca90e8ce5011d0a4c689178ad739329ea253d` | GPL-2.0-or-later nella build GPL (mpv è LGPL-2.1+ solo se compilato con `-Dgpl=false`) | https://github.com/mpv-player/mpv |
 | FFmpeg e librerie collegate staticamente in libmpv | fissate dalla build sopra | GPL (build con componenti GPL) | https://github.com/shinchiro/mpv-winbuild-cmake |
 | .NET runtime e WPF | 10.0 | MIT | https://github.com/dotnet |
+| Vulkan loader (vulkan-1.dll) | 1.4.357.0 | Apache-2.0 (`third_party/vulkan-loader/LICENSE.txt`) | https://github.com/KhronosGroup/Vulkan-Loader — binario da conda-forge, provenienza in `third_party/vulkan-loader/SOURCE.md` |
 
 Strumento usato solo durante la compilazione (non incluso nell'EXE): 7-Zip `7zr.exe` 26.05 (LGPL-2.1), https://github.com/ip7z/7zip.
 

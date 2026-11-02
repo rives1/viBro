@@ -84,6 +84,10 @@ internal sealed class MpvPlayer : IDisposable
     public event Action<LoadResult>? LoadCompleted;
     public event Action<string, string>? LoadFailed;
     public event Action<SeekResult>? SeekCompleted;
+    /// <summary>mpv messages at level "error" or worse (level, module, text).</summary>
+    public event Action<string, string, string>? EngineMessage;
+    /// <summary>A file that was already playing stopped with an error (e.g. network share lost).</summary>
+    public event Action<string>? PlaybackFailed;
 
     public List<string> OptionErrors { get; } = new();
 
@@ -118,6 +122,7 @@ internal sealed class MpvPlayer : IDisposable
             }
 
             Check(MpvNative.mpv_initialize(_handle), "initialize");
+            MpvNative.mpv_request_log_messages(_handle, "error");
 
             Observe(ObsTimePos, "time-pos", MpvFormat.Double);
             Observe(ObsDuration, "duration", MpvFormat.Double);
@@ -387,6 +392,14 @@ internal sealed class MpvPlayer : IDisposable
             case MpvEventId.PlaybackRestart:
                 OnPlaybackRestart();
                 break;
+
+            case MpvEventId.LogMessage:
+                var msg = Marshal.PtrToStructure<MpvEventLogMessage>(ev.Data);
+                EngineMessage?.Invoke(
+                    Marshal.PtrToStringUTF8(msg.Level) ?? "",
+                    Marshal.PtrToStringUTF8(msg.Prefix) ?? "",
+                    (Marshal.PtrToStringUTF8(msg.Text) ?? "").TrimEnd());
+                break;
         }
     }
 
@@ -424,8 +437,14 @@ internal sealed class MpvPlayer : IDisposable
     {
         CompleteRelease();
         PendingLoad? failed = null;
+        bool playbackFailed = false;
         lock (_gate)
         {
+            if (_pendingLoad == null && _hasFile && ef.Reason == (int)MpvEndFileReason.Error)
+            {
+                _hasFile = false;
+                playbackFailed = true;
+            }
             bool isExpected = _pendingLoad != null &&
                               (ef.PlaylistEntryId == _expectedEntryId || (_expectedEntryId == AnyEntry && _loadArmed));
             if (isExpected && ef.Reason == (int)MpvEndFileReason.Error)
@@ -438,6 +457,8 @@ internal sealed class MpvPlayer : IDisposable
         }
         if (failed != null)
             LoadFailed?.Invoke(failed.Path, MpvNative.ErrorString(ef.Error));
+        if (playbackFailed)
+            PlaybackFailed?.Invoke(MpvNative.ErrorString(ef.Error));
     }
 
     private void OnCommandReply(ulong ud, int error, IntPtr data)

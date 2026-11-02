@@ -90,6 +90,15 @@ internal struct MpvNodeList
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct MpvEventLogMessage
+{
+    public IntPtr Prefix;
+    public IntPtr Level;
+    public IntPtr Text;
+    public int LogLevel;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct MpvEventEndFile
 {
     public int Reason;
@@ -139,6 +148,9 @@ internal static class MpvNative
     [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
     public static extern int mpv_observe_property(IntPtr ctx, ulong replyUserdata,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string name, MpvFormat format);
+
+    [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int mpv_request_log_messages(IntPtr ctx, [MarshalAs(UnmanagedType.LPUTF8Str)] string minLevel);
 
     [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr mpv_wait_event(IntPtr ctx, double timeout);

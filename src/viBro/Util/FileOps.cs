@@ -132,16 +132,62 @@ internal static class FileOps
     public static DeleteOutcome Recycle(string path, IntPtr ownerHwnd, out string? error)
     {
         error = null;
+        if (Path.GetFullPath(path).Length >= MaxPath)
+            return RecycleLongPath(path, ownerHwnd, out error);
+
         var op = new SHFILEOPSTRUCT
         {
             hwnd = ownerHwnd,
             wFunc = FO_DELETE,
             pFrom = Path.GetFullPath(path) + "\0", // double-null-terminated list
             pTo = null,
-            fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT | FOF_WANTNUKEWARNING,
+            fFlags = (ushort)(FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT | FOF_WANTNUKEWARNING),
         };
         int rc = SHFileOperation(ref op);
         if (rc != 0 && !op.fAnyOperationsAborted) error = $"Windows error 0x{rc:X}";
+        return File.Exists(path) ? DeleteOutcome.NotDeleted : DeleteOutcome.Deleted;
+    }
+
+    /// <summary>
+    /// SHFileOperation cannot handle paths of 260+ characters. For those, the shell's IFileOperation
+    /// is used with the same behaviour (Recycle Bin, Windows asks before any permanent deletion).
+    /// If the shell cannot parse the path either, nothing is deleted and an error is reported.
+    /// </summary>
+    private static DeleteOutcome RecycleLongPath(string path, IntPtr ownerHwnd, out string? error)
+    {
+        error = null;
+        string full = Path.GetFullPath(path);
+        IShellItem? item = null;
+        foreach (string candidate in new[] { full, full.StartsWith(@"\\", StringComparison.Ordinal) ? full : @"\\?\" + full })
+        {
+            if (SHCreateItemFromParsingName(candidate, IntPtr.Zero, typeof(IShellItem).GUID, out item) == 0 && item != null)
+                break;
+            item = null;
+        }
+        if (item == null)
+        {
+            error = "the path is too long for the Recycle Bin; the file was not deleted";
+            return File.Exists(path) ? DeleteOutcome.NotDeleted : DeleteOutcome.Deleted;
+        }
+
+        IFileOperation? op = null;
+        try
+        {
+            op = (IFileOperation)Activator.CreateInstance(Type.GetTypeFromCLSID(ClsidFileOperation, throwOnError: true)!)!;
+            op.SetOperationFlags(FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT | FOF_WANTNUKEWARNING | FOFX_RECYCLEONDELETE);
+            if (ownerHwnd != IntPtr.Zero) op.SetOwnerWindow(ownerHwnd);
+            op.DeleteItem(item, IntPtr.Zero);
+            op.PerformOperations();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            if (op != null) Marshal.FinalReleaseComObject(op);
+            Marshal.FinalReleaseComObject(item);
+        }
         return File.Exists(path) ? DeleteOutcome.NotDeleted : DeleteOutcome.Deleted;
     }
 
@@ -255,12 +301,16 @@ internal static class FileOps
 
     // ------------------------------------------------------------------ Win32
 
+    private const int MaxPath = 260;
+    private static readonly Guid ClsidFileOperation = new("3ad05575-8857-4850-9277-11b85bdb8e09");
+    private const uint FOFX_RECYCLEONDELETE = 0x00080000;
+
     private const uint FO_DELETE = 3;
-    private const ushort FOF_SILENT = 0x0004;
-    private const ushort FOF_NOCONFIRMATION = 0x0010;
-    private const ushort FOF_ALLOWUNDO = 0x0040;
-    private const ushort FOF_NOERRORUI = 0x0400;
-    private const ushort FOF_WANTNUKEWARNING = 0x4000;
+    private const uint FOF_SILENT = 0x0004;
+    private const uint FOF_NOCONFIRMATION = 0x0010;
+    private const uint FOF_ALLOWUNDO = 0x0040;
+    private const uint FOF_NOERRORUI = 0x0400;
+    private const uint FOF_WANTNUKEWARNING = 0x4000;
 
     // x64 layout (natural alignment); viBro is x64 only.
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -278,6 +328,43 @@ internal static class FileOps
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
     private static extern int SHFileOperation(ref SHFILEOPSTRUCT op);
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SHCreateItemFromParsingName(string path, IntPtr bindContext,
+        [MarshalAs(UnmanagedType.LPStruct)] Guid riid, [MarshalAs(UnmanagedType.Interface)] out IShellItem? item);
+
+    [ComImport, Guid("43826d1e-e718-42ee-bc55-a1e261c37bfe"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    private interface IShellItem
+    {
+        // Only passed to IFileOperation; methods not needed.
+    }
+
+    // Vtable order of IFileOperation (shobjidl_core.h). Only some methods are called.
+    [ComImport, Guid("947aab5f-0a5c-4c13-b4d6-4bf7836fc9f8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    private interface IFileOperation
+    {
+        void Advise(IntPtr sink, out uint cookie);
+        void Unadvise(uint cookie);
+        void SetOperationFlags(uint flags);
+        void SetProgressMessage([MarshalAs(UnmanagedType.LPWStr)] string message);
+        void SetProgressDialog(IntPtr dialog);
+        void SetProperties(IntPtr properties);
+        void SetOwnerWindow(IntPtr owner);
+        void ApplyPropertiesToItem(IntPtr item);
+        void ApplyPropertiesToItems(IntPtr items);
+        void RenameItem(IntPtr item, [MarshalAs(UnmanagedType.LPWStr)] string newName, IntPtr sink);
+        void RenameItems(IntPtr items, [MarshalAs(UnmanagedType.LPWStr)] string newName);
+        void MoveItem(IntPtr item, IntPtr destination, [MarshalAs(UnmanagedType.LPWStr)] string newName, IntPtr sink);
+        void MoveItems(IntPtr items, IntPtr destination);
+        void CopyItem(IntPtr item, IntPtr destination, [MarshalAs(UnmanagedType.LPWStr)] string newName, IntPtr sink);
+        void CopyItems(IntPtr items, IntPtr destination);
+        void DeleteItem(IShellItem item, IntPtr sink);
+        void DeleteItems(IntPtr items);
+        void NewItem(IntPtr destination, uint attributes, [MarshalAs(UnmanagedType.LPWStr)] string name,
+            [MarshalAs(UnmanagedType.LPWStr)] string templateName, IntPtr sink);
+        void PerformOperations();
+        void GetAnyOperationsAborted([MarshalAs(UnmanagedType.Bool)] out bool aborted);
+    }
 }
 
 /// <summary>The file was copied to the destination, but the source could not be removed.</summary>

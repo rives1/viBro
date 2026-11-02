@@ -174,7 +174,13 @@ Write-Step "Using $dotnet ($(& $dotnet --version))"
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 $env:DOTNET_NOLOGO = '1'
 
-$publishDir = Join-Path $Root 'artifacts\publish'
+# Vulkan loader embedded in the EXE (third_party\vulkan-loader, see SOURCE.md): check it was not altered.
+$vulkan = Join-Path $Root 'third_party\vulkan-loader\vulkan-1.dll'
+$vulkanSha = '8878cdc6e7656fd8c81135eaf546ce97a4dab8e75b2023bc28fb97a33c2d96f8'
+if ((Get-Sha256 $vulkan) -ne $vulkanSha) { throw "third_party\vulkan-loader\vulkan-1.dll SHA-256 mismatch" }
+
+# The compressed variant goes to its own folder so both EXEs can be compared side by side.
+$publishDir = Join-Path $Root $(if ($Compress) { 'artifacts\publish-compressed' } else { 'artifacts\publish' })
 if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 
 Write-Step 'Publishing single-file EXE'
@@ -192,8 +198,8 @@ if (-not (Test-Path $exe)) { throw 'viBro.exe not produced' }
 $extra = @(Get-ChildItem $publishDir -File | Where-Object { $_.Name -ne 'viBro.exe' })
 if ($extra.Count -gt 0) {
     $names = ($extra | ForEach-Object { $_.Name }) -join ', '
-    if ($extra.Name -contains $Deps.libmpv.dll) {
-        throw "libmpv-2.dll was not embedded in the EXE (found next to it). Files: $names"
+    if ($extra.Name -contains $Deps.libmpv.dll -or $extra.Name -contains 'vulkan-1.dll') {
+        throw "Native libraries were not embedded in the EXE (found next to it). Files: $names"
     }
     Write-Warning "Unexpected files next to viBro.exe: $names"
 }

@@ -117,3 +117,23 @@ I file UNC e delle unità mappate (`DriveType.Network`) si eliminano con `File.D
 
 ## D-026 — Verifica della compilazione WPF fuori da Windows
 Dalla 0.3.0 il progetto completo, XAML compreso, viene compilato anche su Linux (.NET SDK 10.0.114 con `EnableWindowsTargeting`), usando gli assembly di riferimento `Microsoft.WindowsDesktop.App.Ref` 10.0.14 presi dall'SDK installato da `build.cmd`. In questo modo gli errori di compilazione si scoprono prima della prova su Windows; il comportamento va comunque verificato su Windows.
+
+## D-027 — Loader Vulkan incorporato (0.4.0)
+`libmpv-2.dll` importa `vulkan-1.dll` in modo statico: senza quella DLL, libmpv non si carica. Il loader ufficiale Khronos 1.4.357.0 (Apache-2.0, binario conda-forge con provenienza e SHA-256 in `third_party/vulkan-loader/SOURCE.md`, controllato da `build.ps1`) è incorporato nell'EXE. All'avvio `NativePreload` carica prima `System32\vulkan-1.dll`, se esiste; altrimenti carica la copia incorporata. Poiché Windows collega l'import di libmpv al modulo `vulkan-1.dll` già caricato, il loader di sistema (aggiornato dai driver) mantiene la precedenza. Senza driver Vulkan, mpv usa Direct3D 11. La DLL dipende solo da ADVAPI32, CFGMGR32 e KERNEL32.
+
+## D-028 — Temi con Fluent di WPF (0.4.0)
+I temi usano `Application.ThemeMode` (tema Fluent integrato in WPF, segnalato come sperimentale: diagnostica WPF0001 soppressa solo in `ThemeManager`). Ristila in modo coerente tutti i controlli standard, le finestre di dialogo di viBro e la barra del titolo, senza mantenere modelli di controllo propri. Le `MessageBox` e la finestra di scelta cartella sono di Windows e seguono il tema di sistema. `Theme=System` (predefinito) segue Windows; il pulsante salva una scelta esplicita `Light` o `Dark`. Rischio: se una versione futura di .NET cambiasse l'API sperimentale, la compilazione lo segnalerebbe.
+
+## D-029 — Barra dei controlli in alto e fascia a schermo intero (0.4.0, richiesta dell'utente)
+- Finestra normale: tutta la barra dei controlli sta sopra il video.
+- Schermo intero: la barra diventa una fascia nera *sopra* il video (scelta dell'utente: nulla viene coperto). Contiene solo la barra temporale e il tempo, centrati e larghi il 40% della finestra (minimo 320 px), interattivi. Appare al movimento del mouse (anche sopra il video: `WM_MOUSEMOVE` intercettato come i tasti, con filtro sui movimenti fittizi) e a ogni salto; si nasconde dopo 2 s, ma non mentre il mouse è sulla fascia o si trascina. La fascia resta (`Visibility.Hidden`) per non ridimensionare il video a ogni comparsa.
+- Una barra sovrapposta all'immagine richiederebbe una finestra separata sopra quella nativa di mpv (vincolo di "airspace"); la fascia evita il problema.
+
+## D-030 — Registro degli errori (0.4.0)
+`viBro-errors.log` accanto all'EXE, UTF-8, al massimo 1 MB più un file `.1.log`. Registra eccezioni non gestite (thread UI, AppDomain, task non osservati), messaggi mpv di livello `error` (`mpv_request_log_messages`), file non apribili, riproduzione interrotta, avvisi dell'INI, avvio del motore fallito. Se la cartella non è scrivibile il log si disattiva senza errori, e la barra di stato continua a mostrare i problemi. Nota: annullando un caricamento con cambi molto rapidi mpv può registrare errori di apertura del file abbandonato; sono innocui.
+
+## D-031 — Cestino per percorsi lunghi (0.4.0)
+Per i percorsi di 260 o più caratteri si usa `IFileOperation` (COM, thread UI) con `FOFX_RECYCLEONDELETE`, `FOF_ALLOWUNDO` e `FOF_WANTNUKEWARNING`: stesso comportamento di D-023. Se la shell non riesce a interpretare il percorso, nemmeno con il prefisso `\\?\`, il file non viene eliminato e viene mostrato un errore. Sotto i 260 caratteri resta `SHFileOperation`, già verificato nella 0.3.0. L'esito è sempre controllato sul disco.
+
+## D-032 — Dimensione dell'EXE: decisione rimandata alle misure (0.4.0)
+L'EXE normale pesa ~256 MB, quello compresso ~110 MB (stima dalla dimensione dello zip). La compressione decomprime gli assembly a ogni avvio. Ogni avvio registra ora `startup` (ms dall'avvio del processo al primo disegno della finestra) con la dimensione dell'EXE, così le due varianti si distinguono nel CSV. La scelta predefinita si farà dopo la misura (TEST-PLAN-0.4.0).

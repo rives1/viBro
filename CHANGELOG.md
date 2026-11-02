@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [0.3.0] - non ancora rilasciata
+## [0.3.0] - 2026-11-02
 
 Operazioni sui file.
 
@@ -13,6 +13,9 @@ Operazioni sui file.
 - Spostamento tra volumi diversi: copia in un file temporaneo con avanzamento e annullamento (la finestra compare se dura più di 0,4 s), controllo della dimensione, poi rinomina e solo alla fine eliminazione della sorgente. Stesso volume: rinomina istantanea.
 - Prima di ogni operazione il player rilascia il file e si attende che Windows ne chiuda l'handle. Dopo eliminazione o spostamento riusciti viene caricato in pausa il file successivo (o il precedente, se era l'ultimo); se la cartella resta vuota, l'area video si svuota. L'elenco riflette sempre lo stato reale del disco.
 - La ripetizione automatica dei tasti e le operazioni concorrenti vengono ignorate.
+
+### Corretto
+- `build.ps1` / `package.ps1`: SHA-256 e zip calcolati con .NET anziché con `Get-FileHash` / `Compress-Archive`, che su PC con criteri restrittivi possono non essere disponibili.
 
 ## [0.2.0] - 2026-11-02
 

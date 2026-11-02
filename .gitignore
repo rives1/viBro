@@ -1,0 +1,22 @@
+# Build output
+bin/
+obj/
+artifacts/
+dist/
+*.user
+.vs/
+.vscode/
+
+# Local tools and downloaded dependencies (fetched by build\build.ps1)
+.dotnet/
+deps/
+
+# User data: never commit settings, measurements, logs or sample videos
+viBro.ini
+viBro-metrics.csv
+*.log
+samples/
+*.mp4
+*.mkv
+*.mov
+*.wmv

@@ -1,0 +1,27 @@
+{
+  "libmpv": {
+    "version": "20261101-git-48fca90e8c",
+    "mpvCommit": "48fca90e8ce5011d0a4c689178ad739329ea253d",
+    "archive": "mpv-dev-x86_64-20261101-git-48fca90e8c.7z",
+    "sha256": "30d3f9fa121ce24638610a9ae52f8957743f9dea416dd37dc4ff7e43589ef843",
+    "urls": [
+      "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20261101/mpv-dev-x86_64-20261101-git-48fca90e8c.7z",
+      "https://sourceforge.net/projects/mpv-player-windows/files/libmpv/mpv-dev-x86_64-20261101-git-48fca90e8c.7z/download"
+    ],
+    "dll": "libmpv-2.dll",
+    "clientApi": "2.6",
+    "license": "GPL (mpv and FFmpeg built with GPL components)",
+    "builder": "https://github.com/shinchiro/mpv-winbuild-cmake",
+    "note": "shinchiro keeps only the last ~30 daily releases on GitHub; SourceForge keeps older builds. A local copy of the archive in deps\\download\\ is reused if its SHA-256 matches."
+  },
+  "sevenZip": {
+    "comment": "Only used if Windows tar.exe cannot extract the .7z archive (the archive uses LZMA2 + BCJ2).",
+    "version": "26.05",
+    "url": "https://github.com/ip7z/7zip/releases/download/26.05/7zr.exe",
+    "sha256": "9bf582b894dfa665f852d7e9112b02290a1c303c2d95a21fcdc41ffcb03143b7"
+  },
+  "dotnet": {
+    "channel": "10.0",
+    "installScript": "https://dot.net/v1/dotnet-install.ps1"
+  }
+}

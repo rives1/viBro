@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Version: see Directory.Build.props (single source). -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>ViBro</RootNamespace>
+    <AssemblyName>viBro</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+
+    <Product>viBro</Product>
+    <AssemblyTitle>viBro video browser</AssemblyTitle>
+    <Description>Fast folder video browser (WPF + libmpv)</Description>
+    <Company>viBro contributors</Company>
+    <Copyright>Copyright (C) viBro contributors. GPL-3.0-or-later.</Copyright>
+
+    <!-- Single portable EXE: self-contained, native libraries (libmpv, WPF) embedded and
+         extracted on first run to the per-user .NET bundle cache (versioned, reused). -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == ''">false</EnableCompressionInSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <DebugType>embedded</DebugType>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LibMpvDll>$(MSBuildThisFileDirectory)..\..\deps\libmpv\libmpv-2.dll</LibMpvDll>
+  </PropertyGroup>
+
+  <ItemGroup Condition="Exists('$(LibMpvDll)')">
+    <None Include="$(LibMpvDll)" Link="libmpv-2.dll"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="ViBroWarnMissingLibMpv" BeforeTargets="Build" Condition="!Exists('$(LibMpvDll)')">
+    <Warning Text="deps\libmpv\libmpv-2.dll not found: the app will build but cannot play video. Run build\build.ps1 to download the pinned libmpv." />
+  </Target>
+
+  <Target Name="ViBroRequireLibMpvForPublish" BeforeTargets="PrepareForPublish" Condition="!Exists('$(LibMpvDll)')">
+    <Error Text="deps\libmpv\libmpv-2.dll not found. Run build\build.ps1 (it downloads and verifies the pinned libmpv)." />
+  </Target>
+
+</Project>

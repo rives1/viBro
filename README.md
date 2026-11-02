@@ -71,10 +71,11 @@ Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come d
 ## Uso
 
 ```
-viBro.exe [cartella] [--exact-seeks] [--mpv-opt nome=valore]...
+viBro.exe [cartella] [--exact-seeks] [--trace-input] [--mpv-opt nome=valore]...
 ```
 
 - `cartella`: cartella da aprire all'avvio.
+- `--trace-input`: diagnostica; scrive in `viBro-errors.log` ogni tasto e ogni messaggio della rotella ricevuti da viBro, con la finestra di destinazione.
 - `--exact-seeks`: rende esatti anche i salti lunghi e la barra temporale per questa sessione (non viene salvato; l'impostazione permanente è `ExactLongSeeks` in `viBro.ini`).
 - `--mpv-opt nome=valore`: sovrascrive un'opzione di mpv. Serve per le prove di prestazione, per esempio `--mpv-opt cache=yes --mpv-opt demuxer-max-bytes=64MiB`, oppure `--mpv-opt log-file=C:\temp\mpv.log` per la diagnostica.
 

@@ -114,6 +114,7 @@ public partial class MainWindow : Window
         // Keys pressed while the native video window has focus never reach WPF's
         // routed events: intercept them here and route them to the same handler.
         ComponentDispatcher.ThreadPreprocessMessage += OnThreadPreprocessMessage;
+        Activated += (_, _) => RecordActivation(); // the activating click must not Play/Pause
 
         ShowWarnings();
     }

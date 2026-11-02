@@ -59,7 +59,8 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 
 | Azione | Effetto | Da |
 |---|---|---|
-| Doppio clic | Entra in / esce da schermo intero | 0.5.0 |
+| Clic | Play/Pause (il clic che riporta viBro in primo piano non cambia la riproduzione) | 0.5.0 |
+| Doppio clic | Entra in / esce da schermo intero; la riproduzione resta com'era | 0.5.0 |
 | Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W) | 0.5.0 |
 | Rotella, a schermo intero | Giù: video successivo; su: video precedente (come D / E) | 0.5.0 |
 | Clic sulla barra temporale e trascinamento | Spostamento nel video; l'indicatore segue il mouse | 0.4.0 |

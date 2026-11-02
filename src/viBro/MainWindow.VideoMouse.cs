@@ -11,7 +11,9 @@ namespace ViBro;
 
 // Mouse on the video. The video is mpv's native window (mouse input disabled in mpv), so WPF gets
 // no mouse events from it: the messages are read in OnThreadPreprocessMessage and handled here.
-//  - double click: fullscreen on/off
+//  - single click: Play/Pause at once; double click: fullscreen on/off and the pause toggle of
+//    its first click is undone (the video only stops for an instant)
+//  - the click that brings viBro back to the foreground only activates the window
 //  - right click: menu with Delete, Move..., Move to <last folder>
 //  - wheel in fullscreen (anywhere in the window): down = next video, up = previous
 public partial class MainWindow
@@ -19,6 +21,8 @@ public partial class MainWindow
     private uint _lastClickTime;
     private int _lastClickX, _lastClickY;
     private bool _hasLastClick;
+    private bool _lastClickToggledPause;
+    private uint _activatedTick; // GetTickCount time of the last window activation
     private int _wheelAccumulator;
 
     private void OnVideoMouseMessage(MSG msg)
@@ -49,6 +53,9 @@ public partial class MainWindow
         }
     }
 
+    /// <summary>Called on Window.Activated (WM_ACTIVATE is handled before the click that caused it).</summary>
+    private void RecordActivation() => _activatedTick = unchecked((uint)Environment.TickCount);
+
     private void OnVideoClick(uint time, int x, int y)
     {
         var (w, h) = NativeMethods.DoubleClickSize();
@@ -59,6 +66,7 @@ public partial class MainWindow
         if (isDouble)
         {
             _hasLastClick = false; // a third click starts a new pair
+            if (_lastClickToggledPause) _player?.TogglePause(); // undo the first click's Play/Pause
             ToggleFullscreen();
             return;
         }
@@ -66,6 +74,12 @@ public partial class MainWindow
         _lastClickTime = time;
         _lastClickX = x;
         _lastClickY = y;
+
+        // The click's input time precedes the activation it caused: a click at most 50 ms after the
+        // activation is the activating click and only brings the window to the foreground.
+        bool activatingClick = (int)unchecked(time - _activatedTick) <= 50;
+        _lastClickToggledPause = !activatingClick && _player != null;
+        if (_lastClickToggledPause) _player!.TogglePause();
     }
 
     /// <summary>Screen point (device pixels) inside the visible video area.</summary>

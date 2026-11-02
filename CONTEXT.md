@@ -1,9 +1,9 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-02 23:00 · branch `main` · ultimo commit `d6aeed7` · ultima versione rilasciata **0.3.0** (tag `v0.3.0`) · **in sviluppo: 0.5.0 (comprende la 0.4.0), da provare su Windows**_
+_Aggiornato: 2026-11-02 23:15 · branch `main` · ultimo commit `d6aeed7` · ultima versione rilasciata **0.3.0** (tag `v0.3.0`) · **in sviluppo: 0.5.0 (comprende la 0.4.0), da provare su Windows**_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-039 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-040 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 - Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e il tag `v0.3.0` non ancora pubblicati, e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`.
@@ -16,7 +16,7 @@ _Aggiornato: 2026-11-02 23:00 · branch `main` · ultimo commit `d6aeed7` · ult
 | 0.2.0 | Albero delle cartelle progressivo e sincronizzato, ordinamento per colonna (naturale), 3 riquadri, `viBro.ini` (atomico, valori predefiniti, avvisi) | ✔ tag `v0.2.0` |
 | 0.3.0 | Elimina (Canc/R: Cestino locale, definitiva in rete), rinomina (F2), sposta (W/Shift+W, conflitti, avanzamento e annullamento, copia verificata prima di eliminare la sorgente) | ✔ tag `v0.3.0` |
 | 0.4.0 | Temi Light/Dark (Fluent + pulsante *Theme*), barra dei controlli **sopra** il video, fascia a schermo intero con barra temporale centrata al 40% che si nasconde da sola, `viBro-errors.log`, loader Vulkan incorporato, Cestino per percorsi di 260+ caratteri, misura del tempo di avvio, icona, icone dell'albero, righe compatte, clic e trascinamento sui cursori | **non rilasciata separatamente: confluisce nella 0.5.0** (D-039) |
-| 0.5.0 | Mouse sul video: doppio clic per lo schermo intero, menu del tasto destro (Delete, Move..., Move to <ultima cartella>), rotella a schermo intero (giù = successivo) | **scritta e compilata; da provare su Windows insieme alla 0.4.0** |
+| 0.5.0 | Mouse sul video: clic per Play/Pause, doppio clic per lo schermo intero, menu del tasto destro (Delete, Move..., Move to <ultima cartella>), rotella a schermo intero (giù = successivo) | **scritta e compilata; da provare su Windows insieme alla 0.4.0** |
 | 1.0.0 | Prima versione completa e verificata | da fare |
 
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
@@ -26,7 +26,7 @@ _Aggiornato: 2026-11-02 23:00 · branch `main` · ultimo commit `d6aeed7` · ult
 
 ## 4. Stato attuale e prossimo passo
 1. La 0.4.0 (temi, errori, Vulkan, Cestino percorsi lunghi, avvio, icone, righe compatte, cursori, tasti) non è mai stata provata: confluisce nella 0.5.0 senza tag proprio (D-039). Correzioni già fatte dopo le prime prove dell'utente: testo nero nel Dark (`ccd26c9`), righe `ViBro.Util.VideoItem` (`a6ac40c`), R da premere due volte (`a7cd1d0`, D-037: si usa il bit 30 di `WM_KEYDOWN` invece di `IsRepeat` di WPF).
-2. 0.5.0 (richiesta dell'utente): doppio clic sul video per lo schermo intero, menu del tasto destro, rotella a schermo intero (`MainWindow.VideoMouse.cs`, D-038). Compilata nel container, **non provata su Windows**. Punto da osservare: se la finestra di mpv non ricevesse i clic, la verifica di riserva (finestra principale + posizione del puntatore) dovrebbe coprirla.
+2. 0.5.0 (richieste dell'utente): doppio clic sul video per lo schermo intero, menu del tasto destro, rotella a schermo intero (`MainWindow.VideoMouse.cs`, D-038); clic singolo = Play/Pause immediato, annullato se diventa un doppio clic, e ignorato se è il clic che riattiva la finestra (D-040). Compilata nel container, **non provata su Windows**. Punto da osservare: se la finestra di mpv non ricevesse i clic, la verifica di riserva (finestra principale + posizione del puntatore) dovrebbe coprirla.
 3. L'utente esegue `build.cmd` e [docs/TEST-PLAN-0.5.0.md](docs/TEST-PLAN-0.5.0.md) (contiene anche tutte le prove 0.4.0). **Regola dell'utente:** il piano di prova passa alla versione successiva finché l'utente non conferma che tutte le prove sono passate.
 4. Dopo la conferma: decidere la compressione dell'EXE dai dati `startup` (D-032), chiudere la 0.5.0 (CHANGELOG con data, `docs/handover/CONTEXT-v0.5.0.md`, tag `v0.5.0`).
 5. Verso la 1.0.0. Punti aperti: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione.
@@ -41,7 +41,7 @@ _Aggiornato: 2026-11-02 23:00 · branch `main` · ultimo commit `d6aeed7` · ult
 
 ## 6. Mappa del codice (`src/viBro`)
 - `Mpv/MpvNative.cs` (P/Invoke, verificato su `client.h`); `Mpv/MpvPlayer.cs` (comandi asincroni, caricamenti tracciati per `playlist_entry_id`, salti accorpati, `ReleaseFileAsync`, messaggi di errore); `Mpv/MpvHost.cs` (finestra nativa figlia).
-- `MainWindow.xaml(.cs)` (layout, albero, elenco, tastiera con hook `ThreadPreprocessMessage` per tasti e mouse sul video, schermo intero, temi, misure); `MainWindow.VideoMouse.cs` (doppio clic, menu del tasto destro, rotella a schermo intero); `MainWindow.FileOps.cs` (elimina, rinomina, sposta); `Dialogs.cs` (rinomina, conflitto, avanzamento).
+- `MainWindow.xaml(.cs)` (layout, albero, elenco, tastiera con hook `ThreadPreprocessMessage` per tasti e mouse sul video, schermo intero, temi, misure); `MainWindow.VideoMouse.cs` (clic, doppio clic, menu del tasto destro, rotella a schermo intero); `MainWindow.FileOps.cs` (elimina, rinomina, sposta); `Dialogs.cs` (rinomina, conflitto, avanzamento).
 - `Settings/IniFile.cs`, `Settings/AppSettings.cs` (`viBro.ini`, schema 1); `Tree/FolderNode.cs`, `Tree/FolderTreeModel.cs`.
 - `Util/`: `FileOps` (operazioni sicure, Cestino tramite `SHFileOperation` / `IFileOperation`), `FolderScanner`, `NaturalComparer`, `ThemeManager`, `ErrorLog`, `NativePreload` (Vulkan), `MetricsLog`, `AppInfo`, `StartupOptions`, `NativeMethods`, `TreeIcons` (icone dell'albero + convertitore), `SliderDrag` (clic e trascinamento sui cursori).
 

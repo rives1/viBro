@@ -7,7 +7,8 @@ Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il p
 Mouse sul video. Comprende anche le modifiche della 0.4.0, che non è stata rilasciata separatamente.
 
 ### Aggiunto
-- Doppio clic sul video: entra nello schermo intero; a schermo intero, doppio clic per tornare alla finestra normale. Tempo e distanza del doppio clic sono quelli impostati in Windows.
+- Clic sul video: Play/Pause, a finestra normale e a schermo intero. Il clic che riporta viBro in primo piano non cambia la riproduzione.
+- Doppio clic sul video: entra nello schermo intero; a schermo intero, doppio clic per tornare alla finestra normale. Tempo e distanza del doppio clic sono quelli impostati in Windows. Il Play/Pause del primo clic viene annullato, quindi la riproduzione resta com'era (il video si ferma solo per un istante).
 - Tasto destro sul video: menu con *Delete* (come Canc/R), *Move...* (come W) e *Move to <cartella>* (come Shift+W, presente solo se esiste una destinazione precedente). Le voci sono disattivate se nessun video è selezionato o se un'operazione è in corso.
 - A schermo intero, rotella del mouse: verso il basso video successivo, verso l'alto precedente (uno scatto = un video, come D/E). Gli scorrimenti fini dei touchpad si sommano fino a uno scatto.
 

@@ -8,8 +8,10 @@ Compilare con `build.cmd` (EXE normale, `artifacts\\publish`) e poi con
 Nel titolo deve comparire `viBro 0.5.0 (…)`.
 
 ## Mouse sul video (0.5.0)
-- [ ] Doppio clic sul video a finestra normale: schermo intero. Doppio clic a schermo intero: ritorno alla finestra normale, con barra, albero ed elenco come prima.
-- [ ] Un clic singolo sul video non fa nulla; due clic lenti (oltre il tempo del doppio clic di Windows) non cambiano modalità.
+- [ ] Clic singolo sul video, a finestra normale e a schermo intero: Play/Pause immediato (il pulsante Play/Pause cambia).
+- [ ] Doppio clic sul video a finestra normale: schermo intero. Doppio clic a schermo intero: ritorno alla finestra normale, con barra, albero ed elenco come prima. In entrambi i casi la riproduzione resta com'era (in pausa resta in pausa, in riproduzione continua dopo un attimo).
+- [ ] Due clic lenti (oltre il tempo del doppio clic di Windows): due Play/Pause, nessun cambio di modalità.
+- [ ] Con un'altra applicazione in primo piano, clic sul video di viBro: la finestra torna in primo piano e la riproduzione **non** cambia; il clic successivo fa Play/Pause.
 - [ ] Doppio clic sulla fascia della barra temporale a schermo intero: nessun cambio di modalità (solo il video reagisce).
 - [ ] Tasto destro sul video, a finestra normale e a schermo intero: il menu compare nel punto del puntatore con *Delete*, *Move...* e, se è già stato fatto uno spostamento, *Move to <cartella>* (tooltip con il percorso completo).
 - [ ] *Delete* → stessa conferma di Canc/R; *No* lascia il file. *Move...* → stessa scelta della cartella di W. *Move to …* → spostamento diretto come Shift+W.

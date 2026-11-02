@@ -83,7 +83,8 @@ Esc	Esce dallo schermo intero
 Ctrl + L	Attiva la barra del percorso
 
 Mouse sul video (0.5.0, richiesta dell'utente):
-Doppio clic	Schermo intero; a schermo intero, ritorno alla finestra normale
+Clic	Play/Pause (non il clic che riattiva la finestra)
+Doppio clic	Schermo intero; a schermo intero, ritorno alla finestra normale (la riproduzione resta com'era)
 Tasto destro	Menu con Delete (come Canc/R), Move... (come W) e Move to <ultima destinazione> (come Shift+W)
 Rotella a schermo intero	Giù: video successivo; su: video precedente (come D / E)
 
@@ -159,7 +160,7 @@ Versione	Obiettivo
 0.2.0	Interfaccia completa, albero, elenco, ordinamento e INI
 0.3.0	Eliminazione, rinomina e spostamento
 0.4.0	Temi, gestione errori, ottimizzazione e verifiche di portabilità (confluita nella 0.5.0)
-0.5.0	Mouse sul video: doppio clic per lo schermo intero, menu del tasto destro, rotella a schermo intero
+0.5.0	Mouse sul video: clic per Play/Pause, doppio clic per lo schermo intero, menu del tasto destro, rotella a schermo intero
 1.0.0	Prima versione completa e verificata
 
 

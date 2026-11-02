@@ -1,8 +1,25 @@
-# Piano di prova 0.4.0
+# Piano di prova 0.5.0
+
+Comprende tutte le prove della 0.4.0 (mai eseguite: la 0.4.0 confluisce nella 0.5.0, D-039) più quelle della 0.5.0.
+Il piano passa alla versione successiva finché tutte le prove non sono confermate.
 
 Compilare con `build.cmd` (EXE normale, `artifacts\\publish`) e poi con
 `powershell -ExecutionPolicy Bypass -File build\\build.ps1 -Compress` (EXE compresso, `artifacts\\publish-compressed`).
-Nel titolo deve comparire `viBro 0.4.0 (…)`.
+Nel titolo deve comparire `viBro 0.5.0 (…)`.
+
+## Mouse sul video (0.5.0)
+- [ ] Doppio clic sul video a finestra normale: schermo intero. Doppio clic a schermo intero: ritorno alla finestra normale, con barra, albero ed elenco come prima.
+- [ ] Un clic singolo sul video non fa nulla; due clic lenti (oltre il tempo del doppio clic di Windows) non cambiano modalità.
+- [ ] Doppio clic sulla fascia della barra temporale a schermo intero: nessun cambio di modalità (solo il video reagisce).
+- [ ] Tasto destro sul video, a finestra normale e a schermo intero: il menu compare nel punto del puntatore con *Delete*, *Move...* e, se è già stato fatto uno spostamento, *Move to <cartella>* (tooltip con il percorso completo).
+- [ ] *Delete* → stessa conferma di Canc/R; *No* lascia il file. *Move...* → stessa scelta della cartella di W. *Move to …* → spostamento diretto come Shift+W.
+- [ ] Senza video selezionato (cartella vuota) le voci del menu sono disattivate.
+- [ ] Dopo aver usato il menu, frecce, E/D, R funzionano subito alla prima pressione.
+- [ ] A schermo intero, rotella giù: video successivo; rotella su: precedente; uno scatto = un video. All'ultimo e al primo video non ricomincia dall'altra parte.
+- [ ] Rotella veloce su più scatti: viBro resta reattivo e si ferma sul video corrispondente.
+- [ ] Con un touchpad (se disponibile): lo scorrimento a due dita cambia video senza saltarne molti.
+- [ ] A finestra normale la rotella non cambia video (sull'elenco scorre l'elenco come prima).
+- [ ] Il menu e i video caricati con la rotella rispettano il tema (Light/Dark).
 
 ## Temi
 - [ ] Primo avvio con un `viBro.ini` senza la sezione `[Appearance]`: il tema segue Windows (Impostazioni → Personalizzazione → Colori).

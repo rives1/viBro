@@ -9,6 +9,14 @@ internal static class NativeMethods
     public const int WM_KEYDOWN = 0x0100;
     public const int WM_MOUSEMOVE = 0x0200;
     public const int WM_SYSKEYDOWN = 0x0104;
+    public const int WM_LBUTTONDOWN = 0x0201;
+    public const int WM_LBUTTONDBLCLK = 0x0203;
+    public const int WM_RBUTTONUP = 0x0205;
+    public const int WM_MOUSEWHEEL = 0x020A;
+    public const int WHEEL_DELTA = 120;
+
+    private const int SM_CXDOUBLECLK = 36;
+    private const int SM_CYDOUBLECLK = 37;
 
     private const int VK_SHIFT = 0x10;
     private const int VK_CONTROL = 0x11;
@@ -28,6 +36,18 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     private static extern short GetKeyState(int virtualKey);
+
+    [DllImport("user32.dll")]
+    public static extern uint GetDoubleClickTime();
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int index);
+
+    /// <summary>Size of the rectangle within which two clicks count as a double click (system setting).</summary>
+    public static (int Width, int Height) DoubleClickSize() => (GetSystemMetrics(SM_CXDOUBLECLK), GetSystemMetrics(SM_CYDOUBLECLK));
+
+    /// <summary>Signed wheel rotation of a WM_MOUSEWHEEL (high word of wParam; positive = away from the user).</summary>
+    public static int WheelDelta(IntPtr wParam) => (short)((wParam.ToInt64() >> 16) & 0xFFFF);
 
     [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
     public static extern int StrCmpLogicalW(string a, string b);

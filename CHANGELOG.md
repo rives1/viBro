@@ -2,7 +2,16 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [0.4.0] - non ancora rilasciata
+## [0.5.0] - non ancora rilasciata
+
+Mouse sul video. Comprende anche le modifiche della 0.4.0, che non è stata rilasciata separatamente.
+
+### Aggiunto
+- Doppio clic sul video: entra nello schermo intero; a schermo intero, doppio clic per tornare alla finestra normale. Tempo e distanza del doppio clic sono quelli impostati in Windows.
+- Tasto destro sul video: menu con *Delete* (come Canc/R), *Move...* (come W) e *Move to <cartella>* (come Shift+W, presente solo se esiste una destinazione precedente). Le voci sono disattivate se nessun video è selezionato o se un'operazione è in corso.
+- A schermo intero, rotella del mouse: verso il basso video successivo, verso l'alto precedente (uno scatto = un video, come D/E). Gli scorrimenti fini dei touchpad si sommano fino a uno scatto.
+
+## [0.4.0] - non rilasciata separatamente (confluita nella 0.5.0)
 
 Temi, gestione degli errori, ottimizzazione e portabilità.
 

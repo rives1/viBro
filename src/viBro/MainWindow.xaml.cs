@@ -608,24 +608,33 @@ public partial class MainWindow : Window
         // message of this thread before WPF turns it into KeyDown (read by Window_PreviewKeyDown).
         if (isKey) _win32KeyRepeat = (msg.lParam.ToInt64() & 0x40000000) != 0;
         if (handled) return;
-        bool isMouseMove = msg.message == NativeMethods.WM_MOUSEMOVE;
-        if (!isKey && !(isMouseMove && _isFullscreen)) return;
+
+        // The wheel goes to the focused window or to the one under the pointer (Windows setting):
+        // in fullscreen it changes video wherever it lands inside viBro's window.
+        if (msg.message == NativeMethods.WM_MOUSEWHEEL)
+        {
+            if (_isFullscreen && IsOwnWindowMessage(msg.hwnd) && OnFullscreenWheel(NativeMethods.WheelDelta(msg.wParam)))
+                handled = true;
+            return;
+        }
+
+        bool isMouse = msg.message is NativeMethods.WM_MOUSEMOVE or NativeMethods.WM_LBUTTONDOWN
+                                   or NativeMethods.WM_LBUTTONDBLCLK or NativeMethods.WM_RBUTTONUP;
+        if (!isKey && !isMouse) return;
 
         IntPtr host = VideoHost.Handle;
         if (host == IntPtr.Zero) return;
-        if (msg.hwnd != host && !NativeMethods.IsChild(host, msg.hwnd)) return;
+        bool toVideo = msg.hwnd == host || NativeMethods.IsChild(host, msg.hwnd);
 
-        if (isMouseMove)
+        if (isMouse)
         {
-            // Windows also sends WM_MOUSEMOVE without real movement: compare screen positions.
-            if (msg.pt_x != _lastMouseX || msg.pt_y != _lastMouseY)
-            {
-                _lastMouseX = msg.pt_x;
-                _lastMouseY = msg.pt_y;
-                ShowFullscreenBar();
-            }
+            // Normally mpv's window gets the mouse; if it ever let messages through to the main
+            // window, the pointer position still tells whether the click was on the video.
+            if (toVideo || (msg.hwnd == new WindowInteropHelper(this).Handle && IsPointOverVideo(msg.pt_x, msg.pt_y)))
+                OnVideoMouseMessage(msg); // double click, right-click menu, fullscreen band
             return; // never mark mouse messages as handled
         }
+        if (!toVideo) return;
 
         Key key = KeyInterop.KeyFromVirtualKey((int)msg.wParam.ToInt64());
         if (HandleShortcut(key, NativeMethods.CurrentModifiers(), _win32KeyRepeat))

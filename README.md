@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 0.4.0 in sviluppo** (temi, gestione errori, ottimizzazione, portabilità); ultima versione rilasciata: 0.3.0. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 0.5.0 in sviluppo** (mouse sul video; comprende la 0.4.0: temi, gestione errori, ottimizzazione, portabilità); ultima versione rilasciata: 0.3.0. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 
 ## Funzionalità
 
@@ -54,6 +54,15 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | F2 | Rinomina il file (solo il nome; l'estensione resta) | 0.3.0 |
 | W | Sceglie la cartella di destinazione e sposta il file | 0.3.0 |
 | Shift + W | Sposta nell'ultima destinazione usata | 0.3.0 |
+
+## Mouse sul video
+
+| Azione | Effetto | Da |
+|---|---|---|
+| Doppio clic | Entra in / esce da schermo intero | 0.5.0 |
+| Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W) | 0.5.0 |
+| Rotella, a schermo intero | Giù: video successivo; su: video precedente (come D / E) | 0.5.0 |
+| Clic sulla barra temporale e trascinamento | Spostamento nel video; l'indicatore segue il mouse | 0.4.0 |
 
 Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come da specifica, le frecce eseguono sempre i salti, anche con lo stato attivo sull'albero o sull'elenco: la navigazione nell'albero avviene con il mouse.
 

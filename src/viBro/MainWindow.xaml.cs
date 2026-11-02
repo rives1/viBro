@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -12,6 +13,8 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using ViBro.Mpv;
+using ViBro.Settings;
+using ViBro.Tree;
 using ViBro.Util;
 
 namespace ViBro;
@@ -19,9 +22,14 @@ namespace ViBro;
 public partial class MainWindow : Window
 {
     private readonly StartupOptions _options;
-    private readonly MetricsLog _metrics;
+    private readonly AppSettings _settings;
+    private readonly string _iniPath;
+    private readonly bool _iniWritable;
+    private readonly MetricsLog? _metrics;
     private readonly DispatcherTimer _uiTimer;
     private readonly RollingStats _seekStats = new(50);
+    private readonly FolderTreeModel _tree;
+    private readonly List<string> _warnings = new();
 
     private MpvPlayer? _player;
     private List<VideoItem> _items = new();
@@ -31,29 +39,58 @@ public partial class MainWindow : Window
     private MediaInfo? _currentInfo;
     private VideoItem? _loadingItem;
 
-    /// <summary>Steps shorter than this are always exact: keyframe seeks would not move the picture.</summary>
-    private const double ExactSeekThresholdSeconds = 30;
-    private bool _exactLongSeeks;
+    // Folder tree
+    private CancellationTokenSource? _revealCts;
+    private FolderNode? _revealedNode;   // node selected by code, not by the user
+    private FolderNode? _treeSelected;
+
+    // File list
+    private SortColumn _sortColumn;
+    private bool _sortDescending;
+    private bool _suppressSelectionLoad;
+
+    // Seeking: steps shorter than the threshold are always exact (keyframe seeks would not move the picture).
+    private readonly double _exactThreshold;
+    private readonly bool _exactLongSeeks;
     private bool _updatingTimeSlider;
     private string _lastLoadText = "";
     private string _lastSeekText = "";
 
+    // Fullscreen
     private bool _isFullscreen;
     private WindowState _savedState;
     private WindowStyle _savedStyle;
     private ResizeMode _savedResizeMode;
-    private GridLength _savedListHeight;
-    private double _savedListMinHeight;
+    private GridLength _savedListHeight, _savedTreeWidth;
+    private double _savedListMinHeight, _savedTreeMinWidth;
 
     internal MainWindow(StartupOptions options)
     {
         _options = options;
         InitializeComponent();
-
         Title = "viBro " + AppInfo.DisplayVersion;
-        _metrics = new MetricsLog(Path.Combine(AppInfo.ExeDirectory, "viBro-metrics.csv"));
-        _exactLongSeeks = options.ExactSeeks;
-        ExactSeekBox.IsChecked = options.ExactSeeks;
+
+        // Settings next to the EXE. If they cannot be saved there, warn and keep them in memory only.
+        _iniPath = Path.Combine(AppInfo.ExeDirectory, AppSettings.FileName);
+        _settings = AppSettings.Load(_iniPath);
+        _warnings.AddRange(_settings.Warnings);
+        _iniWritable = AppSettings.CanWrite(_iniPath, out string? reason);
+        if (!_iniWritable)
+            _warnings.Add($"Settings will not be saved: {AppSettings.FileName} cannot be written ({reason}).");
+
+        _exactThreshold = _settings.ExactSeekThresholdSeconds;
+        _exactLongSeeks = _settings.ExactLongSeeks || options.ExactSeeks; // the command line is not persisted
+        _sortColumn = _settings.SortColumn;
+        _sortDescending = _settings.SortDescending;
+        _metrics = _settings.MetricsLog
+            ? new MetricsLog(Path.Combine(AppInfo.ExeDirectory, "viBro-metrics.csv"))
+            : null;
+
+        ApplyWindowSettings();
+        UpdateSortHeaders();
+
+        _tree = FolderTreeModel.CreateDefault();
+        FolderTree.ItemsSource = _tree.Roots;
 
         _uiTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _uiTimer.Tick += (_, _) => RefreshTransport();
@@ -61,6 +98,8 @@ public partial class MainWindow : Window
         // Keys pressed while the native video window has focus never reach WPF's
         // routed events: intercept them here and route them to the same handler.
         ComponentDispatcher.ThreadPreprocessMessage += OnThreadPreprocessMessage;
+
+        ShowWarnings();
     }
 
     // ================================================================ lifecycle
@@ -80,10 +119,10 @@ public partial class MainWindow : Window
             _player.SeekCompleted += r => Dispatcher.InvokeAsync(() => OnSeekCompleted(r));
             _player.Start();
 
-            var warnings = _options.Errors.Concat(_player.OptionErrors).ToList();
-            SetStatus(warnings.Count == 0
-                ? $"Video engine ready (libmpv API {_player.ApiVersion})"
-                : "Option problems: " + string.Join("; ", warnings));
+            _warnings.AddRange(_options.Errors);
+            _warnings.AddRange(_player.OptionErrors.Select(o => "mpv option: " + o));
+            ShowWarnings();
+            SetStatus($"Video engine ready (libmpv API {_player.ApiVersion})");
         }
         catch (Exception ex)
         {
@@ -97,23 +136,42 @@ public partial class MainWindow : Window
 
         _uiTimer.Start();
 
-        if (!string.IsNullOrWhiteSpace(_options.Folder))
-            OpenFolder(_options.Folder!);
-        else
-            PathBox.Text = "";
+        // Restore only the last folder: no video is loaded automatically.
+        string? folder = !string.IsNullOrWhiteSpace(_options.Folder) ? _options.Folder : _settings.LastFolder;
+        if (!string.IsNullOrWhiteSpace(folder))
+            OpenFolder(folder!, revealInTree: true);
+        Keyboard.Focus(FileList);
     }
 
     private void Window_Closing(object? sender, CancelEventArgs e)
     {
+        if (_isFullscreen) ExitFullscreen();
         _uiTimer.Stop();
         ComponentDispatcher.ThreadPreprocessMessage -= OnThreadPreprocessMessage;
         _folderCts?.Cancel();
+        _revealCts?.Cancel();
+
+        CollectSettings();
         _player?.Dispose();
         _player = null;
+
+        if (_iniWritable)
+        {
+            try
+            {
+                _settings.Save(_iniPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"Settings could not be saved to {_iniPath}:\n\n{ex.Message}",
+                    "viBro", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
     }
 
     private IEnumerable<KeyValuePair<string, string>> BuildMpvOptions()
     {
+        var c = CultureInfo.InvariantCulture;
         // Isolation from any mpv installed on the machine, no subtitles, no mpv UI or key bindings.
         var o = new List<KeyValuePair<string, string>>
         {
@@ -133,24 +191,102 @@ public partial class MainWindow : Window
             new("force-window", "yes"),
             new("keep-open", "yes"),
             new("pause", "yes"),
-            // Hardware decoding where safe (D3D11VA, etc.), automatic software fallback.
-            new("hwdec", SelectedHwdec()),
-            // No large read-ahead on network shares; tune with --mpv-opt during tests.
-            new("cache", "no"),
+            // Hardware decoding where available, automatic software fallback (viBro.ini).
+            new("hwdec", _settings.HardwareDecoding),
+            new("volume", _settings.Volume.ToString("0.#", c)),
+            new("mute", _settings.Mute ? "yes" : "no"),
         };
+
+        // Cache: off by default (no large read-ahead on network shares); optional limit in viBro.ini.
+        if (_settings.CacheMaxMB > 0)
+        {
+            o.Add(new("cache", "yes"));
+            o.Add(new("demuxer-max-bytes", _settings.CacheMaxMB.ToString(c) + "MiB"));
+        }
+        else
+        {
+            o.Add(new("cache", "no"));
+        }
+
         o.AddRange(_options.MpvOptions); // command-line overrides win (applied last)
         return o;
     }
 
+    // ================================================================ settings <-> window
+
+    private void ApplyWindowSettings()
+    {
+        var s = _settings;
+        Width = s.WindowWidth;
+        Height = s.WindowHeight;
+        if (s.WindowLeft is double left && s.WindowTop is double top && IsOnScreen(left, top, Width, Height))
+        {
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = left;
+            Top = top;
+        }
+        else
+        {
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+        if (s.WindowMaximized) WindowState = WindowState.Maximized;
+
+        TreeColumn.Width = new GridLength(Math.Max(TreeColumn.MinWidth, s.TreeWidth));
+        ListRow.Height = new GridLength(Math.Max(ListRow.MinHeight, s.ListHeight));
+        NameColumn.Width = s.NameColumnWidth;
+        SizeColumn.Width = s.SizeColumnWidth;
+        DateColumn.Width = s.DateColumnWidth;
+        _updatingVolume = true;
+        VolumeSlider.Value = s.Volume;
+        _updatingVolume = false;
+    }
+
+    private bool _updatingVolume;
+
+    /// <summary>True when at least a usable part of the window would be visible on the desktop.</summary>
+    private static bool IsOnScreen(double left, double top, double width, double height)
+    {
+        var desktop = new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
+            SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
+        var r = Rect.Intersect(desktop, new Rect(left, top, width, height));
+        return !r.IsEmpty && r.Width >= 150 && r.Height >= 80;
+    }
+
+    private void CollectSettings()
+    {
+        var s = _settings;
+        Rect b = WindowState == WindowState.Normal ? new Rect(Left, Top, ActualWidth, ActualHeight) : RestoreBounds;
+        if (!b.IsEmpty && b.Width > 0 && b.Height > 0)
+        {
+            s.WindowLeft = b.Left;
+            s.WindowTop = b.Top;
+            s.WindowWidth = b.Width;
+            s.WindowHeight = b.Height;
+        }
+        s.WindowMaximized = WindowState == WindowState.Maximized;
+
+        if (TreeColumn.ActualWidth > 0) s.TreeWidth = TreeColumn.ActualWidth;
+        if (ListRow.ActualHeight > 0) s.ListHeight = ListRow.ActualHeight;
+        if (!double.IsNaN(NameColumn.Width)) s.NameColumnWidth = NameColumn.Width;
+        if (!double.IsNaN(SizeColumn.Width)) s.SizeColumnWidth = SizeColumn.Width;
+        if (!double.IsNaN(DateColumn.Width)) s.DateColumnWidth = DateColumn.Width;
+        s.SortColumn = _sortColumn;
+        s.SortDescending = _sortDescending;
+
+        if (_currentFolder != null) s.LastFolder = _currentFolder;
+        s.Volume = VolumeSlider.Value;
+        if (_player != null) s.Mute = _player.IsMuted;
+    }
+
     // ================================================================ folder
 
-    private async void OpenFolder(string rawPath)
+    private async void OpenFolder(string rawPath, bool revealInTree)
     {
-        string path = rawPath.Trim().Trim('"');
-        if (path.Length == 0) return;
+        if (string.IsNullOrWhiteSpace(rawPath)) return;
+        string path;
         try
         {
-            path = Path.GetFullPath(path); // string-only, no I/O
+            path = PathUtil.NormalizeFolder(rawPath); // string-only, no I/O
         }
         catch (Exception ex)
         {
@@ -181,9 +317,9 @@ public partial class MainWindow : Window
             if (generation != _folderGeneration) return; // superseded by a newer request
 
             _currentFolder = path;
-            _items = items;
-            FileList.ItemsSource = _items;
+            SetItems(items, keepSelection: false);
             SetStatus($"{items.Count} video file(s) in {path}");
+            if (revealInTree) RevealInTree(path);
         }
         catch (OperationCanceledException)
         {
@@ -200,7 +336,7 @@ public partial class MainWindow : Window
     {
         if (e.Key == Key.Enter)
         {
-            OpenFolder(PathBox.Text);
+            OpenFolder(PathBox.Text, revealInTree: true);
             Keyboard.Focus(FileList);
             e.Handled = true;
         }
@@ -217,7 +353,7 @@ public partial class MainWindow : Window
         var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "Select a folder with videos" };
         if (!string.IsNullOrEmpty(_currentFolder)) dialog.InitialDirectory = _currentFolder;
         if (dialog.ShowDialog(this) == true)
-            OpenFolder(dialog.FolderName);
+            OpenFolder(dialog.FolderName, revealInTree: true);
     }
 
     private void FocusPathBox()
@@ -226,10 +362,113 @@ public partial class MainWindow : Window
         PathBox.SelectAll();
     }
 
-    // ================================================================ selection and loading
+    // ================================================================ folder tree
+
+    private void FolderTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+    {
+        if (e.NewValue is not FolderNode node || node.IsPlaceholder) return;
+        _treeSelected = node;
+        if (ReferenceEquals(node, _revealedNode)) return; // selection made by RevealInTree
+        _revealedNode = null;
+        if (_currentFolder != null && string.Equals(node.Path, _currentFolder, StringComparison.OrdinalIgnoreCase))
+            return;
+        OpenFolder(node.Path, revealInTree: false);
+    }
+
+    private void FolderTree_ItemSelected(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is TreeViewItem item) item.BringIntoView();
+    }
+
+    /// <summary>Expands the tree down to the folder in the background, then selects it.</summary>
+    private async void RevealInTree(string folder)
+    {
+        _revealCts?.Cancel();
+        var cts = new CancellationTokenSource();
+        _revealCts = cts;
+
+        FolderNode? node;
+        try
+        {
+            node = await _tree.RevealAsync(folder, cts.Token);
+        }
+        catch
+        {
+            return;
+        }
+        if (node == null || cts.IsCancellationRequested) return;
+
+        if (_treeSelected != null && !ReferenceEquals(_treeSelected, node))
+            _treeSelected.IsSelected = false; // avoid a stale selection on a virtualized item
+        _revealedNode = node;
+        node.IsSelected = true;
+    }
+
+    // ================================================================ file list
+
+    private void SetItems(List<VideoItem> items, bool keepSelection)
+    {
+        var selected = keepSelection ? FileList.SelectedItem : null;
+        items.Sort(CompareItems);
+        _suppressSelectionLoad = true;
+        try
+        {
+            _items = items;
+            FileList.ItemsSource = _items;
+            if (selected != null)
+            {
+                FileList.SelectedItem = selected;
+                FileList.ScrollIntoView(selected);
+            }
+        }
+        finally
+        {
+            _suppressSelectionLoad = false;
+        }
+    }
+
+    private int CompareItems(VideoItem a, VideoItem b)
+    {
+        int c = _sortColumn switch
+        {
+            SortColumn.Size => a.Size.CompareTo(b.Size),
+            SortColumn.Date => a.Modified.CompareTo(b.Modified),
+            _ => 0,
+        };
+        if (c == 0) c = NaturalComparer.Instance.Compare(a.Name, b.Name);
+        return _sortDescending ? -c : c;
+    }
+
+    private void FileList_HeaderClick(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is not GridViewColumnHeader header || header.Column == null ||
+            header.Role == GridViewColumnHeaderRole.Padding)
+            return;
+
+        var column = header.Column == SizeColumn ? SortColumn.Size
+                   : header.Column == DateColumn ? SortColumn.Date
+                   : SortColumn.Name;
+        if (column == _sortColumn) _sortDescending = !_sortDescending;
+        else
+        {
+            _sortColumn = column;
+            _sortDescending = false;
+        }
+        UpdateSortHeaders();
+        SetItems(new List<VideoItem>(_items), keepSelection: true);
+    }
+
+    private void UpdateSortHeaders()
+    {
+        string arrow = _sortDescending ? " ▼" : " ▲";
+        NameColumn.Header = "Name" + (_sortColumn == SortColumn.Name ? arrow : "");
+        SizeColumn.Header = "Size" + (_sortColumn == SortColumn.Size ? arrow : "");
+        DateColumn.Header = "Date modified" + (_sortColumn == SortColumn.Date ? arrow : "");
+    }
 
     private void FileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_suppressSelectionLoad) return;
         if (FileList.SelectedItem is VideoItem item)
             LoadItem(item);
     }
@@ -243,7 +482,7 @@ public partial class MainWindow : Window
         _player.Load(item.FullPath, item);
     }
 
-    /// <summary>E / D: previous / next file, loaded paused. No wrap-around at the ends.</summary>
+    /// <summary>E / D: previous / next file in the current order, loaded paused. No wrap-around.</summary>
     private void SelectRelative(int direction)
     {
         if (_items.Count == 0) return;
@@ -274,7 +513,7 @@ public partial class MainWindow : Window
     // ================================================================ seeking and transport
 
     private void Seek(double deltaSeconds)
-        => _player?.SeekRelative(deltaSeconds, _exactLongSeeks || Math.Abs(deltaSeconds) < ExactSeekThresholdSeconds);
+        => _player?.SeekRelative(deltaSeconds, _exactLongSeeks || Math.Abs(deltaSeconds) < _exactThreshold);
 
     private void OnSeekCompleted(SeekResult r)
     {
@@ -317,16 +556,10 @@ public partial class MainWindow : Window
     private void MuteButton_Click(object sender, RoutedEventArgs e) => _player?.ToggleMute();
 
     private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        => _player?.SetVolume(e.NewValue);
-
-    private void ExactSeekBox_Changed(object sender, RoutedEventArgs e)
-        => _exactLongSeeks = ExactSeekBox.IsChecked == true;
-
-    private void HwdecBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        => _player?.SetHwdec(SelectedHwdec());
-
-    private string SelectedHwdec()
-        => (HwdecBox?.SelectedItem as ComboBoxItem)?.Content as string ?? "auto-safe";
+    {
+        if (_updatingVolume) return;
+        _player?.SetVolume(e.NewValue);
+    }
 
     // ================================================================ keyboard
 
@@ -411,17 +644,16 @@ public partial class MainWindow : Window
         _savedState = WindowState;
         _savedStyle = WindowStyle;
         _savedResizeMode = ResizeMode;
-        var listRow = MainArea.RowDefinitions[2];
-        _savedListHeight = listRow.Height;
-        _savedListMinHeight = listRow.MinHeight;
+        _savedListHeight = ListRow.Height;
+        _savedListMinHeight = ListRow.MinHeight;
+        _savedTreeWidth = TreeColumn.Width;
+        _savedTreeMinWidth = TreeColumn.MinWidth;
 
-        TopBar.Visibility = Visibility.Collapsed;
-        TransportBar.Visibility = Visibility.Collapsed;
-        StatusPanel.Visibility = Visibility.Collapsed;
-        ListSplitter.Visibility = Visibility.Collapsed;
-        FileList.Visibility = Visibility.Collapsed;
-        listRow.MinHeight = 0;
-        listRow.Height = new GridLength(0);
+        SetChromeVisibility(Visibility.Collapsed);
+        ListRow.MinHeight = 0;
+        ListRow.Height = new GridLength(0);
+        TreeColumn.MinWidth = 0;
+        TreeColumn.Width = new GridLength(0);
 
         WindowStyle = WindowStyle.None;
         ResizeMode = ResizeMode.NoResize;
@@ -436,14 +668,22 @@ public partial class MainWindow : Window
         ResizeMode = _savedResizeMode;
         WindowState = _savedState == WindowState.Minimized ? WindowState.Normal : _savedState;
 
-        var listRow = MainArea.RowDefinitions[2];
-        listRow.Height = _savedListHeight;
-        listRow.MinHeight = _savedListMinHeight;
-        TopBar.Visibility = Visibility.Visible;
-        TransportBar.Visibility = Visibility.Visible;
-        StatusPanel.Visibility = Visibility.Visible;
-        ListSplitter.Visibility = Visibility.Visible;
-        FileList.Visibility = Visibility.Visible;
+        ListRow.Height = _savedListHeight;
+        ListRow.MinHeight = _savedListMinHeight;
+        TreeColumn.Width = _savedTreeWidth;
+        TreeColumn.MinWidth = _savedTreeMinWidth;
+        SetChromeVisibility(Visibility.Visible);
+    }
+
+    private void SetChromeVisibility(Visibility v)
+    {
+        TopBar.Visibility = v;
+        TransportBar.Visibility = v;
+        StatusPanel.Visibility = v;
+        ListSplitter.Visibility = v;
+        FileList.Visibility = v;
+        FolderTree.Visibility = v;
+        TreeSplitter.Visibility = v;
     }
 
     // ================================================================ metrics and status
@@ -451,6 +691,7 @@ public partial class MainWindow : Window
     private void RecordMetric(string kind, double ms, VideoItem item, string seekMode,
         double? delta, double? target, double? landed, int coalesced)
     {
+        if (_metrics == null) return;
         var mem = MetricsLog.MemorySnapshot();
         var info = _currentInfo;
         _metrics.Append(new MetricRecord(
@@ -467,6 +708,18 @@ public partial class MainWindow : Window
         var mem = MetricsLog.MemorySnapshot();
         MetricsText.Text = string.Join("  |  ",
             new[] { _lastLoadText, _lastSeekText, $"mem {mem.PrivateMb:0} MB" }.Where(s => s.Length > 0));
+    }
+
+    private void ShowWarnings()
+    {
+        if (_warnings.Count == 0)
+        {
+            WarningText.Visibility = Visibility.Collapsed;
+            return;
+        }
+        WarningText.Text = _warnings.Count == 1 ? "⚠ " + _warnings[0] : $"⚠ {_warnings.Count} warnings (hover for details)";
+        WarningText.ToolTip = string.Join(Environment.NewLine, _warnings);
+        WarningText.Visibility = Visibility.Visible;
     }
 
     private void SetStatus(string text) => StatusText.Text = text;

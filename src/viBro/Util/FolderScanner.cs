@@ -69,7 +69,7 @@ internal static class FolderScanner
             if (VideoExtensions.Contains(fi.Extension))
                 list.Add(new VideoItem(fi.Name, fi.FullName, fi.Length, fi.LastWriteTime, storage));
         }
-        list.Sort((a, b) => NativeMethods.StrCmpLogicalW(a.Name, b.Name));
+        list.Sort((a, b) => NaturalComparer.Instance.Compare(a.Name, b.Name));
         return list;
     }
 }

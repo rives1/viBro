@@ -74,3 +74,25 @@ Se il video è fermo alla fine, Play riparte dall'inizio. La specifica non lo pr
 
 ## D-017 — Git
 I commit sono locali. L'autore è un segnaposto (`viBro developer <vibro@users.noreply.github.com>`), da sostituire prima della pubblicazione. Il tag `v0.1.0` **non** viene creato finché la build e le prove non sono verificate.
+
+## D-018 — Albero delle cartelle (0.2.0)
+- Radici: Desktop, Documents, Videos, Downloads (cartelle note di Windows, quindi anche se reindirizzate), tutte le unità restituite da `GetLogicalDrives` e, per la sessione, la radice `\\server\share` di ogni percorso UNC aperto. Nessun nodo "Rete": l'esplorazione della rete è lenta o vuota su molte reti. Scelta dell'utente.
+- Costruire le radici non accede ai dischi. Le etichette dei volumi si leggono in background (un'unità di rete scollegata può impiegare decine di secondi).
+- Le sottocartelle vengono elencate solo alla prima espansione di un nodo, su un thread di lavoro; un errore mostra "(unavailable: …)" e si ritenta alla successiva espansione. Le cartelle nascoste e di sistema sono escluse, come nell'elenco dei file.
+- La sincronizzazione con la cartella aperta procede livello per livello in background e si ferma all'antenato più profondo visibile (per esempio sotto una cartella nascosta). Una nuova richiesta annulla quella precedente. La selezione fatta dal codice non riapre la cartella.
+- TreeView virtualizzato.
+
+## D-019 — viBro.ini (0.2.0)
+- Formato INI con sezioni, UTF-8 senza BOM, numeri in cultura invariante. `[viBro] SchemaVersion=1`.
+- Salvataggio alla chiusura: si scrive `viBro.ini.tmp`, si esegue il flush su disco, poi `File.Replace` sostituisce il file. Un'interruzione non lascia un INI troncato.
+- Lettura tollerante: ogni valore mancante prende il predefinito; ogni valore non valido o fuori intervallo prende il predefinito e genera un avviso nella barra di stato. Le chiavi sconosciute (file di una versione successiva o modifiche manuali) vengono conservate. I commenti non vengono conservati.
+- La scrivibilità si verifica all'avvio con un file di prova (`viBro.ini.probe`, cancellato alla chiusura dell'handle). Se non è scrivibile: avviso permanente e nessun salvataggio, né lì né altrove (specifica).
+- `HardwareDecoding` accetta solo valori nella forma dei nomi `hwdec` di mpv (`[a-z0-9-]` separati da virgole), per non passare a mpv testo arbitrario.
+- La posizione della finestra si ripristina solo se almeno 150×80 px cadono sul desktop virtuale; altrimenti la finestra viene centrata (per esempio dopo aver scollegato un monitor).
+- `--exact-seeks` da riga di comando vale per la sessione e non viene salvato.
+
+## D-020 — Frecce sempre dedicate ai salti
+La specifica sospende le scorciatoie solo nei campi di testo e nelle finestre modali. Per questo le frecce e PgUp/PgDn eseguono i salti anche con lo stato attivo sull'albero o sull'elenco, e la navigazione nell'albero avviene con il mouse. Se in futuro si vuole la navigazione da tastiera nell'albero, serve una modifica della specifica.
+
+## D-021 — Ordinamento dell'elenco
+Clic sull'intestazione: ordine crescente; nuovo clic sulla stessa colonna: inverte. A parità di dimensione o data si ordina per nome (naturale). La selezione corrente resta selezionata e il video non viene ricaricato. `NaturalComparer` usa `StrCmpLogicalW` su Windows, con un'implementazione interna di ripiego usata nei test.

@@ -1,6 +1,6 @@
 # CONTEXT — stato del progetto per riprendere il lavoro
 
-_Aggiornato: 2026-11-02 · ultima versione: **0.1.0 (prototipo tecnico, chiusa)** · prossima: 0.2.0 · branch: `main`_
+_Aggiornato: 2026-11-02 · ultima versione: 0.1.0 (tag `v0.1.0`) · **in sviluppo: 0.2.0** · branch: `main`_
 
 ## Obiettivo corrente
 Prototipo 0.1.0. Deve dimostrare che l'EXE è autonomo, che il video si carica in pausa e che la navigazione è abbastanza rapida sui file reali (SSD e NAS). Solo dopo questa verifica si passa alla 0.2.0 (interfaccia completa). Specifica: [SPEC.md](SPEC.md).
@@ -63,5 +63,12 @@ Uscite: `artifacts\publish\viBro.exe`, `dist\viBro-0.1.0-win-x64.zip`.
 ## Riferimento al codice
 Codice verificato su Windows (compilato e misurato): commit `147b85f` (prodotto `0.1.0+147b85f…`). Tag `v0.1.0` sul commit di chiusura della documentazione, senza modifiche al codice rispetto a `147b85f`.
 
+## 0.2.0 — stato
+Codice scritto: albero delle cartelle (`Tree/`), `viBro.ini` (`Settings/`), layout a tre riquadri, ordinamento, persistenza. Decisioni D-018…D-021.
+
+Verificato fuori da Windows (.NET 10, Linux): la parte non-WPF compila con 0 avvisi; 19 test su INI e impostazioni (predefiniti, salvataggio e rilettura, valori non validi, chiavi sconosciute, schema più recente, file in sola lettura), ordinamento naturale, helper dei percorsi, caricamento progressivo dei nodi con errore e nuovo tentativo: 19/19.
+Non ancora verificato: compilazione WPF e comportamento su Windows (vedi [docs/TEST-PLAN-0.2.0.md](docs/TEST-PLAN-0.2.0.md)).
+
 ## Prossimo passo
-Versione 0.2.0: albero delle cartelle a sinistra (caricamento progressivo, unità e percorsi di rete senza blocchi), ordinamento per colonna con ordinamento naturale, divisori ridimensionabili e `viBro.ini` (schema versionato, salvataggio atomico, valori predefiniti; inclusi soglia dei salti esatti e limite della cache). Prima di iniziare, chiarire con l'utente eventuali preferenze sull'interfaccia.
+1. Compilare la 0.2.0 su Windows ed eseguire [docs/TEST-PLAN-0.2.0.md](docs/TEST-PLAN-0.2.0.md).
+2. Chiudere la 0.2.0 (tag, fotografia del contesto), poi la 0.3.0: eliminazione, rinomina, spostamento.

@@ -4,9 +4,9 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: prototipo tecnico 0.1.0.** Serve a confermare la scelta tecnologica su file reali (SSD e NAS) prima di sviluppare l'interfaccia completa. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 0.2.0 in sviluppo** (interfaccia completa). La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 
-## Contenuto della 0.1.0
+## Funzionalità
 
 - Un unico EXE autonomo: nessuna installazione, nessun privilegio di amministratore, nessun codec da installare.
 - Barra del percorso: cartelle locali, unità mappate e percorsi UNC (`\\server\share`). L'apertura avviene in background, quindi una condivisione irraggiungibile non blocca l'interfaccia.
@@ -16,7 +16,22 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - Play/Pause, barra temporale, volume, mute, schermo intero.
 - **Misure automatiche** in `viBro-metrics.csv`, accanto all'EXE: tempo al primo fotogramma, cambio video, latenza dei salti, memoria.
 
-Non ancora presenti: albero delle cartelle, ordinamento per colonna, `viBro.ini` (versione 0.2.0); eliminazione, rinomina e spostamento (0.3.0); temi (0.4.0).
+- Albero delle cartelle (cartelle utente, unità locali e di rete, condivisioni UNC aperte), caricato progressivamente e sincronizzato con la cartella aperta.
+- Ordinamento per Name, Size, Date modified; tre riquadri ridimensionabili; impostazioni in `viBro.ini`.
+
+Non ancora presenti: eliminazione, rinomina e spostamento (0.3.0); temi Light/Dark (0.4.0).
+
+## viBro.ini
+
+Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo a programma chiuso. Un valore non valido viene sostituito dal predefinito e segnalato nella barra di stato. Oltre alla finestra, ai riquadri, alle colonne, all'ultima cartella e all'audio, che il programma salva da solo, contiene:
+
+| Sezione / chiave | Predefinito | Significato |
+|---|---|---|
+| `[Playback] HardwareDecoding` | `auto-safe` | Decodifica hardware (`no` = solo software, oppure un valore `hwdec` di mpv) |
+| `[Playback] ExactLongSeeks` | `false` | Rende esatti anche ±1/±5 min e la barra temporale |
+| `[Playback] ExactSeekThresholdSeconds` | `30` | I salti più brevi di questa soglia sono sempre esatti |
+| `[Cache] MaxMB` | `0` | 0 = cache di mpv disattivata; >0 = cache attiva con questo limite |
+| `[Diagnostics] MetricsLog` | `true` | Registro delle misure `viBro-metrics.csv` |
 
 ## Scorciatoie da tastiera
 
@@ -33,7 +48,7 @@ Non ancora presenti: albero delle cartelle, ordinamento per colonna, `viBro.ini`
 | Ctrl + L | Attiva la barra del percorso (Invio apre, Esc annulla) | ✔ |
 | Canc o R, F2, W, Shift + W | Elimina, rinomina, sposta | 0.3.0 |
 
-Le scorciatoie restano sospese mentre si scrive nella barra del percorso.
+Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come da specifica, le frecce eseguono sempre i salti, anche con lo stato attivo sull'albero o sull'elenco: la navigazione nell'albero avviene con il mouse.
 
 ## Uso
 
@@ -42,7 +57,7 @@ viBro.exe [cartella] [--exact-seeks] [--mpv-opt nome=valore]...
 ```
 
 - `cartella`: cartella da aprire all'avvio.
-- `--exact-seeks`: rende esatti anche i salti lunghi e la barra temporale (equivale alla casella *Exact long seeks*).
+- `--exact-seeks`: rende esatti anche i salti lunghi e la barra temporale per questa sessione (non viene salvato; l'impostazione permanente è `ExactLongSeeks` in `viBro.ini`).
 - `--mpv-opt nome=valore`: sovrascrive un'opzione di mpv. Serve per le prove di prestazione, per esempio `--mpv-opt cache=yes --mpv-opt demuxer-max-bytes=64MiB`, oppure `--mpv-opt log-file=C:\temp\mpv.log` per la diagnostica.
 
 Al primo avvio .NET estrae le librerie native, tra cui libmpv, nella cache per utente `%TEMP%\.net\viBro\<hash>`. Gli avvii successivi riutilizzano la cache; una nuova build usa un nuovo hash.

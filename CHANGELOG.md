@@ -2,6 +2,21 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [0.2.0] - non ancora rilasciata
+
+Interfaccia completa.
+
+### Aggiunto
+- Albero delle cartelle a sinistra: cartelle utente (Desktop, Documents, Videos, Downloads), tutte le unità comprese quelle di rete mappate, condivisioni UNC aperte dalla barra del percorso. Sottocartelle elencate in background al primo espandersi del nodo; cartelle nascoste e di sistema escluse; nomi dei volumi letti in background.
+- Sincronizzazione: aprendo una cartella dalla barra del percorso, con Browse o all'avvio, l'albero si espande in background fino a quella cartella e la seleziona.
+- Ordinamento per Name, Size e Date modified (clic sull'intestazione, nuovo clic inverte), con ordine naturale dei nomi; E/D seguono l'ordine visualizzato.
+- Tre riquadri con divisori ridimensionabili.
+- `viBro.ini` accanto all'EXE: versione dello schema, finestra (posizione, dimensioni, stato), dimensioni dei riquadri, ultima cartella, ordinamento e larghezze delle colonne, volume e mute, ultima destinazione di spostamento, decodifica hardware, salti esatti, limite della cache, registro delle misure. Salvataggio atomico; valori mancanti o non validi sostituiti dai predefiniti, con avviso; chiavi sconosciute conservate; se il file non è scrivibile, avviso e impostazioni solo in memoria.
+- All'avvio si riapre l'ultima cartella, senza caricare alcun video.
+
+### Modificato
+- I controlli di prova (Exact long seeks, HW decoding) passano da interfaccia a `viBro.ini`.
+
 ## [0.1.0] - 2026-11-02
 
 Prototipo tecnico.

@@ -123,6 +123,7 @@ Dalla 0.3.0 il progetto completo, XAML compreso, viene compilato anche su Linux 
 
 ## D-028 — Temi con Fluent di WPF (0.4.0)
 I temi usano `Application.ThemeMode` (tema Fluent integrato in WPF, segnalato come sperimentale: diagnostica WPF0001 soppressa solo in `ThemeManager`). Ristila in modo coerente tutti i controlli standard, le finestre di dialogo di viBro e la barra del titolo, senza mantenere modelli di controllo propri. Le `MessageBox` e la finestra di scelta cartella sono di Windows e seguono il tema di sistema. `Theme=System` (predefinito) segue Windows; il pulsante salva una scelta esplicita `Light` o `Dark`. Rischio: se una versione futura di .NET cambiasse l'API sperimentale, la compilazione lo segnalerebbe.
+- **Correzione dopo la prima prova (testo nero nel tema Dark).** Due cause: (1) gli stili impliciti con chiave `Window` non si applicano alle classi derivate (`MainWindow`, dialoghi), quindi il testo semplice restava nero; (2) gli `ItemContainerStyle` di `ListViewItem` e `TreeViewItem` erano definiti senza `BasedOn` e *sostituivano* lo stile Fluent. Soluzione: `ThemeManager` pubblica tre pennelli di risorsa (`ViBro.Foreground`, `ViBro.Background`, `ViBro.Panel`) aggiornati a ogni cambio di tema e collegati con `SetResourceReference` a finestre e barra di stato; gli stili dei contenitori sono costruiti nel codice con `BasedOn` lo stile del tema corrente e ricostruiti a ogni cambio.
 
 ## D-029 — Barra dei controlli in alto e fascia a schermo intero (0.4.0, richiesta dell'utente)
 - Finestra normale: tutta la barra dei controlli sta sopra il video.
@@ -137,3 +138,6 @@ Per i percorsi di 260 o più caratteri si usa `IFileOperation` (COM, thread UI) 
 
 ## D-032 — Dimensione dell'EXE: decisione rimandata alle misure (0.4.0)
 L'EXE normale pesa ~256 MB, quello compresso ~110 MB (stima dalla dimensione dello zip). La compressione decomprime gli assembly a ogni avvio. Ogni avvio registra ora `startup` (ms dall'avvio del processo al primo disegno della finestra) con la dimensione dell'EXE, così le due varianti si distinguono nel CSV. La scelta predefinita si farà dopo la misura (TEST-PLAN-0.4.0).
+
+## D-033 — Icona (0.4.0, richiesta dell'utente)
+`src/viBro/viBro.ico`: disegno originale (quadrato arrotondato blu sfumato, triangolo play bianco, barra temporale con avanzamento), generato in modo programmatico in 9 dimensioni (16–256 px), con una versione semplificata per 16–24 px. È usata come `ApplicationIcon` (EXE, barra delle applicazioni, Esplora risorse) e come icona della finestra.

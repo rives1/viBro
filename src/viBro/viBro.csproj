@@ -11,6 +11,7 @@
     <RootNamespace>ViBro</RootNamespace>
     <AssemblyName>viBro</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>viBro.ico</ApplicationIcon>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
 
     <Product>viBro</Product>
@@ -31,6 +32,10 @@
     <DebugType>embedded</DebugType>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="viBro.ico" />
+  </ItemGroup>
 
   <PropertyGroup>
     <LibMpvDll>$(MSBuildThisFileDirectory)..\..\deps\libmpv\libmpv-2.dll</LibMpvDll>

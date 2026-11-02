@@ -77,6 +77,10 @@ public partial class MainWindow : Window
         ThemeManager.Apply(_settings.Theme); // before the controls are created
 
         InitializeComponent();
+        ThemeManager.AttachWindow(this);
+        ApplyItemStyles();
+        StatusPanel.SetResourceReference(BackgroundProperty, ThemeManager.PanelKey);
+        StatusPanel.SetResourceReference(ForegroundProperty, ThemeManager.ForegroundKey);
         Title = "viBro " + AppInfo.DisplayVersion;
         UpdateThemeButton();
         _warnings.AddRange(_settings.Warnings);
@@ -781,7 +785,26 @@ public partial class MainWindow : Window
     {
         _settings.Theme = ThemeManager.IsDark(_settings.Theme) ? ThemeChoice.Light : ThemeChoice.Dark;
         ThemeManager.Apply(_settings.Theme);
+        ApplyItemStyles();
         UpdateThemeButton();
+    }
+
+    /// <summary>
+    /// Item container styles built on top of the current theme's styles (a style without BasedOn
+    /// would replace the Fluent look, e.g. black text in dark mode). Rebuilt on every theme change.
+    /// </summary>
+    private void ApplyItemStyles()
+    {
+        var listItem = new Style(typeof(ListViewItem), TryFindResource(typeof(ListViewItem)) as Style);
+        listItem.Setters.Add(new Setter(HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+        FileList.ItemContainerStyle = listItem;
+
+        var treeItem = new Style(typeof(TreeViewItem), TryFindResource(typeof(TreeViewItem)) as Style);
+        treeItem.Setters.Add(new Setter(TreeViewItem.IsExpandedProperty,
+            new System.Windows.Data.Binding(nameof(FolderNode.IsExpanded)) { Mode = System.Windows.Data.BindingMode.TwoWay }));
+        treeItem.Setters.Add(new Setter(TreeViewItem.IsSelectedProperty,
+            new System.Windows.Data.Binding(nameof(FolderNode.IsSelected)) { Mode = System.Windows.Data.BindingMode.TwoWay }));
+        FolderTree.ItemContainerStyle = treeItem;
     }
 
     private void UpdateThemeButton()

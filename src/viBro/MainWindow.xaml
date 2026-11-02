@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mpv="clr-namespace:ViBro.Mpv"
-        Title="viBro" Width="1280" Height="820" MinWidth="640" MinHeight="420"
+        Title="viBro" Icon="viBro.ico" Width="1280" Height="820" MinWidth="640" MinHeight="420"
         PreviewKeyDown="Window_PreviewKeyDown"
         ContentRendered="Window_ContentRendered"
         Closing="Window_Closing">
@@ -44,12 +44,6 @@
                       VirtualizingPanel.VirtualizationMode="Recycling"
                       SelectedItemChanged="FolderTree_SelectedItemChanged"
                       TreeViewItem.Selected="FolderTree_ItemSelected">
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                    </Style>
-                </TreeView.ItemContainerStyle>
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                         <TextBlock Text="{Binding Name}" />
@@ -102,11 +96,6 @@
                               VirtualizingPanel.VirtualizationMode="Recycling"
                               SelectionChanged="FileList_SelectionChanged"
                               GridViewColumnHeader.Click="FileList_HeaderClick">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                            </Style>
-                        </ListView.ItemContainerStyle>
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn x:Name="NameColumn" Header="Name" Width="480"

@@ -20,6 +20,7 @@ internal static class DialogStyle
         w.ResizeMode = ResizeMode.NoResize;
         w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         w.ShowInTaskbar = false;
+        ThemeManager.AttachWindow(w);
     }
 
     public static StackPanel Buttons(params Button[] buttons)

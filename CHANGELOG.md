@@ -12,7 +12,11 @@ Temi, gestione degli errori, ottimizzazione e portabilità.
 - Riproduzione interrotta da un errore: messaggio nella barra di stato.
 - Loader Vulkan ufficiale Khronos incorporato nell'EXE, usato solo se Windows non ne ha uno: viBro parte anche su PC o VM senza driver GPU.
 - Cestino anche per i percorsi di 260 o più caratteri (`IFileOperation` di Windows).
+- Icona dell'applicazione (EXE e finestra): disegno originale, play e barra temporale su fondo blu.
 - Misura del tempo di avvio (`startup` in `viBro-metrics.csv`, con la dimensione dell'EXE) per confrontare EXE normale e compresso; `build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`.
+
+### Corretto
+- Tema Dark: testo nero, illeggibile. Le finestre di viBro (classi derivate da `Window`) non ricevevano il colore del testo dallo stile Fluent, e gli stili propri di righe e nodi lo sostituivano. Ora finestre e barra di stato prendono colori del tema aggiornati a ogni cambio, e gli stili di righe e nodi sono basati su quelli del tema.
 
 ### Modificato
 - La barra dei controlli (Play, barra temporale, tempo, Mute, volume) è **sopra il video**.

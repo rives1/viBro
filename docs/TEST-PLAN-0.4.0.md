@@ -16,6 +16,8 @@ Nel titolo deve comparire `viBro 0.4.0 (…)`.
 - [ ] Barra temporale: cliccare in un punto della traccia e, senza rilasciare, trascinare: l'indicatore e il video seguono il mouse. Rilasciando, la riproduzione continua dal punto scelto.
 - [ ] Dopo il trascinamento le frecce (salti) funzionano subito, senza cliccare sull'elenco.
 - [ ] Stesso comportamento sul cursore del volume e sulla barra a schermo intero.
+- [ ] R, rispondere No alla conferma, usare solo il mouse (ad esempio cliccare sulla barra temporale), poi R: la conferma compare alla **prima** pressione. Stessa prova con Canc, F2 (annullare la rinomina) e W (annullare la scelta della cartella).
+- [ ] Tenendo premuto R non si apre più di una conferma.
 
 ## Barra dei controlli e schermo intero
 - [ ] Finestra normale: Play, barra temporale, tempo, Mute e volume stanno sopra il video.

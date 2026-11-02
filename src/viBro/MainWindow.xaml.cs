@@ -54,6 +54,7 @@ public partial class MainWindow : Window
     private readonly double _exactThreshold;
     private readonly bool _exactLongSeeks;
     private bool _updatingTimeSlider;
+    private bool _win32KeyRepeat; // auto-repeat flag of the key message being processed
     private string _lastLoadText = "";
     private string _lastSeekText = "";
 
@@ -593,14 +594,20 @@ public partial class MainWindow : Window
         if (Keyboard.FocusedElement is TextBoxBase) return;
 
         Key key = e.Key == Key.System ? e.SystemKey : e.Key;
-        if (HandleShortcut(key, Keyboard.Modifiers, e.IsRepeat))
+        // Not e.IsRepeat: WPF calls a key "repeated" when it sees the same key down twice without a
+        // key-up in between, and the key-up of R/Del/F2/W is lost to the confirmation dialog they
+        // open. The next press of the same key was then ignored (it had to be pressed twice).
+        if (HandleShortcut(key, Keyboard.Modifiers, _win32KeyRepeat))
             e.Handled = true;
     }
 
     private void OnThreadPreprocessMessage(ref MSG msg, ref bool handled)
     {
-        if (handled) return;
         bool isKey = msg.message == NativeMethods.WM_KEYDOWN || msg.message == NativeMethods.WM_SYSKEYDOWN;
+        // Windows' own auto-repeat flag (bit 30: the key was already down), recorded for every key
+        // message of this thread before WPF turns it into KeyDown (read by Window_PreviewKeyDown).
+        if (isKey) _win32KeyRepeat = (msg.lParam.ToInt64() & 0x40000000) != 0;
+        if (handled) return;
         bool isMouseMove = msg.message == NativeMethods.WM_MOUSEMOVE;
         if (!isKey && !(isMouseMove && _isFullscreen)) return;
 
@@ -621,8 +628,7 @@ public partial class MainWindow : Window
         }
 
         Key key = KeyInterop.KeyFromVirtualKey((int)msg.wParam.ToInt64());
-        bool isRepeat = (msg.lParam.ToInt64() & 0x40000000) != 0;
-        if (HandleShortcut(key, NativeMethods.CurrentModifiers(), isRepeat))
+        if (HandleShortcut(key, NativeMethods.CurrentModifiers(), _win32KeyRepeat))
             handled = true;
     }
 

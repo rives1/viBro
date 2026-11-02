@@ -1,103 +1,54 @@
-# CONTEXT — stato del progetto per riprendere il lavoro
+# CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-02 · ultima versione: 0.3.0 (tag `v0.3.0`) · **in sviluppo: 0.4.0** · branch: `main`_
+_Aggiornato: 2026-11-02 20:55 · branch `main` · ultimo commit `ccd26c9` · ultima versione rilasciata **0.3.0** (tag `v0.3.0`) · **in sviluppo: 0.4.0, da provare su Windows**_
 
-## Obiettivo corrente
-Prototipo 0.1.0. Deve dimostrare che l'EXE è autonomo, che il video si carica in pausa e che la navigazione è abbastanza rapida sui file reali (SSD e NAS). Solo dopo questa verifica si passa alla 0.2.0 (interfaccia completa). Specifica: [SPEC.md](SPEC.md).
+## 1. Il progetto in breve
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-033 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
-## Funzionalità completate (codice scritto)
-- Progetto WPF .NET 10 `src/viBro`, pubblicazione come EXE singolo e self-contained, con libmpv incorporata.
-- `Mpv/MpvPlayer.cs`: un solo motore, comandi asincroni, caricamento in pausa, salti assoluti accorpati, misure basate su `playlist_entry_id` e `PLAYBACK_RESTART`.
-- `Mpv/MpvHost.cs`: finestra nativa figlia per l'opzione `wid` di mpv.
-- `MainWindow`: barra del percorso (UNC e unità mappate, lettura in background), elenco virtualizzato in ordine naturale, controlli di trasporto, scorciatoie, schermo intero, registro `viBro-metrics.csv`.
-- Script `build/build.ps1`, `build/package.ps1`, `build/analyze-metrics.ps1`, `build.cmd`; workflow `.github/workflows/build.yml`.
+- Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha 5 commit e il tag `v0.3.0` non ancora pubblicati, e il push lo fa l'utente.
+- Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`.
+- Versione: in un solo punto, `Directory.Build.props` (ora `0.4.0`). Appare nel titolo e nelle proprietà dell'EXE come `0.4.0+<commit>`.
 
-## Verifiche eseguite (2026-11-02, in un ambiente Linux, non su Windows)
-| Verifica | Esito |
-|---|---|
-| Download della build libmpv fissata, SHA-256 calcolato, contenuto ispezionato (DLL x64, header) | ✔ |
-| Enum, strutture e funzioni P/Invoke confrontati con il `client.h` reale (API 2.6) | ✔ |
-| Compilazione con .NET SDK 10.0.114 del codice non-WPF (`Mpv/*`, `Util/*`) | ✔ 0 errori, 0 avvisi |
-| `MpvPlayer` eseguito con libmpv per Linux (vo/ao null) su video generati: 12 scenari (caricamento in pausa, salti in pausa e in riproduzione, cambio da riproduzione, 20 cambi rapidi, file mancante, ripresa, fine video, Play alla fine) | ✔ 12/12 |
-| Accorpamento dei salti: 30 richieste ravvicinate → 4 salti effettivi, posizione finale corretta | ✔ |
-| Parsing degli script PowerShell; `analyze-metrics.ps1` su dati di prova | ✔ |
-| Compilazione completa e pubblicazione su Windows (SDK 10.0.403), commit `aa0695f` | ✔ 2026-11-02: EXE singolo 255,9 MB, nessun file accessorio, versione 0.1.0+aa0695f |
-| Esecuzione su Windows: motore avviato, primo fotogramma in pausa, tastiera (anche col focus sul video), NAS | ✔ 2026-11-02, verificato dall'utente |
-| Misure su NAS (unità mappata, d3d11va, gpu-next), ~1100 campioni | ✔ cambio video mediana 140 ms (90%: 269 ms); salto esatto ±1 s 22 ms, ±5 s 35–66 ms; ±1 min su fotogrammi chiave 16 ms (90%: 140 ms); ±5 min 368 ms; memoria privata 300–470 MB, stabile |
-| Misure su disco locale | parziali: salti esatti ±1/±5 s 18–19 ms, cambio video 74–211 ms (4 campioni) |
-| Modalità mista dei salti (commit d540d1f), ~1140 campioni, NAS + locale | ✔ salti esatti: scarto dal bersaglio ≈ 0 s; locale ±1 s 32 ms, ±5 s 45 ms (mediana); NAS ±1 s 20 ms (90%: 99), ±5 s 56 ms (90%: 134). Fotogrammi chiave ±1/±5 min: 10–35 ms, scarto 2–9 s. Cambio video locale 38 ms, NAS 291 ms (90%: 647, max 1175: più variabile della prima sessione). Memoria 260–460 MB, stabile |
-| Colonna `landed_s` | ✘→✔ la prima versione registrava la posizione del salto successivo quando c'era una richiesta in coda; corretto (lettura prima di avviare il salto in coda) |
-
-Il test con libmpv ha trovato e fatto correggere un bug: con i cambi rapidi di file il rilevamento del caricamento si bloccava (vedi D-008).
-
-| Formati (sessione 3, NAS) | ✔ MP4 H.264, MKV HEVC fino a 1080p (d3d11va); WMV VC-1 (d3d11va); WMV3 (decodifica software: salti esatti 18–375 ms secondo risoluzione) |
-| Memoria, 21 cambi video | ✔ 290–460 MB, oscillante, nessuna crescita progressiva |
-| Diagnosi cambio video NAS con log mpv (15 cambi) | ✔ viBro aggiunge pochi ms (tempi viBro ≈ tempi mpv); MKV 66–120 ms; MP4 135–486 ms, dominati dalla lettura dell'indice MP4 (28–218 ms) e dall'apertura SMB (18–92 ms). Picchi di 2 s della sessione 2 non riprodotti |
-
-## Esito 0.1.0
-Le tre condizioni della specifica sono dimostrate: EXE autonomo funzionante, caricamento in pausa, navigazione rapida su SSD e NAS. La scelta WPF + libmpv è confermata.
-
-## Problemi noti / punti aperti (rimandati)
-1. **Non provati:** MOV e 4K (nessun file disponibile), avvio su PC senza driver GPU (rischio `vulkan-1.dll`, D-002), sessione lunga di 50 o più cambi.
-2. Cambio video sul NAS variabile: picchi fino a 2,1 s nella sessione 2, non riprodotti con il log. Causa probabile esterna (dischi del NAS in risparmio energetico, accesso a freddo); da osservare.
-3. EXE di 256 MB: valutare `build.ps1 -Compress` misurando l'avvio.
-4. La build di libmpv sparirà da GitHub verso dicembre 2026 (resta il link SourceForge): archiviarne una copia (D-002).
-5. Obblighi GPL (sorgente corrispondente di libmpv) da soddisfare prima del rilascio pubblico (THIRD-PARTY-NOTICES.md).
-6. Autore dei commit provvisorio (D-017).
-
-## Dipendenze
-| Dipendenza | Versione | Dove è fissata |
+## 2. Versioni
+| Versione | Contenuto | Stato |
 |---|---|---|
-| .NET SDK | 10.0.x | `build/dependencies.json` (nessun `global.json`) |
-| libmpv (shinchiro) | 20261101-git-48fca90e8c, SHA-256 `30d3f9fa…ef843` | `build/dependencies.json` |
-| 7zr.exe (solo build, solo ripiego) | 26.05, SHA-256 `9bf582b8…143b7` | `build/dependencies.json` |
+| 0.1.0 | Prototipo: EXE singolo, motore mpv persistente nella finestra nativa (`wid`), caricamento in pausa, salti (±1/±5 s esatti; ±1/±5 min su fotogrammi chiave), accorpamento dei salti, misure CSV | ✔ tag `v0.1.0`, misurato su SSD e NAS |
+| 0.2.0 | Albero delle cartelle progressivo e sincronizzato, ordinamento per colonna (naturale), 3 riquadri, `viBro.ini` (atomico, valori predefiniti, avvisi) | ✔ tag `v0.2.0` |
+| 0.3.0 | Elimina (Canc/R: Cestino locale, definitiva in rete), rinomina (F2), sposta (W/Shift+W, conflitti, avanzamento e annullamento, copia verificata prima di eliminare la sorgente) | ✔ tag `v0.3.0` |
+| 0.4.0 | Temi Light/Dark (Fluent + pulsante *Theme*), barra dei controlli **sopra** il video, fascia a schermo intero con barra temporale centrata al 40% che si nasconde da sola, `viBro-errors.log`, loader Vulkan incorporato, Cestino per percorsi di 260+ caratteri, misura del tempo di avvio, icona | **scritta e compilata; correzione del testo nel tema Dark da confermare** |
+| 1.0.0 | Prima versione completa e verificata | da fare |
 
-## Comandi di compilazione
-```
-build.cmd          :: SDK per utente in .dotnet\, libmpv, publish, zip
-build\build.ps1 -Compress         :: variante con EXE compresso (confronto)
-build\analyze-metrics.ps1 -Path <csv>
-```
-Uscite: `artifacts\publish\viBro.exe`, `dist\viBro-0.1.0-win-x64.zip`.
+## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
+- Cambio video: mediana 140–500 ms sul NAS (MP4 più lenti per la lettura dell'indice; MKV 66–120 ms), ~38 ms in locale. viBro aggiunge pochi ms rispetto a mpv (verificato con il log di mpv).
+- Salti esatti: ±1 s mediana ~20 ms, ±5 s 35–66 ms sul NAS. Salti sui fotogrammi chiave: ±1 min 10–35 ms, con scarto di 2–9 s.
+- Memoria: 260–470 MB, stabile. I salti sui fotogrammi chiave per ±1/±5 s **non spostavano l'immagine** (GOP di 5–24 s): da qui la modalità mista (D-007).
 
-## Riferimento al codice
-Codice verificato su Windows (compilato e misurato): commit `147b85f` (prodotto `0.1.0+147b85f…`). Tag `v0.1.0` sul commit di chiusura della documentazione, senza modifiche al codice rispetto a `147b85f`.
+## 4. Stato attuale e prossimo passo
+1. L'utente ha segnalato **testo nero illeggibile nel tema Dark**. La correzione è nel commit `ccd26c9`: finestre e barra di stato legate ai pennelli `ViBro.Foreground/Background/Panel`, `ItemContainerStyle` costruiti con `BasedOn` dello stile del tema (D-028). Nello stesso commit c'è la nuova icona `src/viBro/viBro.ico` (D-033). **Da confermare dopo `build.cmd`.**
+2. Poi eseguire [docs/TEST-PLAN-0.4.0.md](docs/TEST-PLAN-0.4.0.md): temi, fascia a schermo intero, errori (`viBro-errors.log`), portabilità, Vulkan senza driver (facoltativo), Cestino con percorso lungo, 5 avvii dell'EXE normale e 5 di quello compresso (righe `startup` nei due `viBro-metrics.csv`).
+3. Decidere la compressione dell'EXE dai dati (D-032), chiudere la 0.4.0 (CHANGELOG con data, `docs/handover/CONTEXT-v0.4.0.md`, tag `v0.4.0`).
+4. Verso la 1.0.0. Punti aperti: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione.
 
-## 0.2.0 — esito (chiusa il 2026-11-02)
-Funzionalità: albero delle cartelle (`Tree/`), `viBro.ini` (`Settings/`), layout a tre riquadri, ordinamento per colonna, persistenza. Decisioni D-018…D-021.
+## 5. Dipendenze fissate
+| Dipendenza | Versione | Dove |
+|---|---|---|
+| .NET SDK / runtime | 10.0.x (usato 10.0.403 / runtime 10.0.14) | `build/dependencies.json` |
+| libmpv (build shinchiro) | `20261101-git-48fca90e8c`, SHA-256 `30d3f9fa…ef843`, API 2.6 | `build/dependencies.json`. GitHub conserva solo ~30 build: il ripiego è SourceForge |
+| Loader Vulkan Khronos | 1.4.357.0, SHA-256 `8878cdc6…96f8` | `third_party/vulkan-loader/` (incluso nel repository, controllato da `build.ps1`) |
+| 7zr.exe (solo build, ripiego) | 26.05 | `build/dependencies.json` |
 
-| Verifica | Esito |
-|---|---|
-| Parte non-WPF su Linux (.NET 10): compilazione e 19 test su INI, impostazioni, ordinamento naturale, percorsi, caricamento dei nodi | ✔ 0 avvisi, 19/19 |
-| Compilazione su Windows del commit `13095f5` (prodotto `0.2.0+13095f5…`) | ✔ |
-| [docs/TEST-PLAN-0.2.0.md](docs/TEST-PLAN-0.2.0.md) eseguito dall'utente su Windows (albero, sincronizzazione, UNC, ordinamento, riquadri, INI con valore non valido e file in sola lettura, schermo intero, regressioni 0.1.0) | ✔ tutti i punti superati |
-| `viBro.ini` scritto dal programma: sezioni e valori attesi | ✔ |
+## 6. Mappa del codice (`src/viBro`)
+- `Mpv/MpvNative.cs` (P/Invoke, verificato su `client.h`); `Mpv/MpvPlayer.cs` (comandi asincroni, caricamenti tracciati per `playlist_entry_id`, salti accorpati, `ReleaseFileAsync`, messaggi di errore); `Mpv/MpvHost.cs` (finestra nativa figlia).
+- `MainWindow.xaml(.cs)` (layout, albero, elenco, tastiera con hook `ThreadPreprocessMessage` per tasti e mouse sul video, schermo intero, temi, misure); `MainWindow.FileOps.cs` (elimina, rinomina, sposta); `Dialogs.cs` (rinomina, conflitto, avanzamento).
+- `Settings/IniFile.cs`, `Settings/AppSettings.cs` (`viBro.ini`, schema 1); `Tree/FolderNode.cs`, `Tree/FolderTreeModel.cs`.
+- `Util/`: `FileOps` (operazioni sicure, Cestino tramite `SHFileOperation` / `IFileOperation`), `FolderScanner`, `NaturalComparer`, `ThemeManager`, `ErrorLog`, `NativePreload` (Vulkan), `MetricsLog`, `AppInfo`, `StartupOptions`, `NativeMethods`.
 
-Codice verificato: commit `13095f5`. Il tag `v0.2.0` è sul commit di chiusura della documentazione, senza modifiche al codice.
+## 7. Note operative per l'assistente (come si è lavorato)
+- **Preferenze dell'utente:** risposte dirette e critiche, in italiano; spiegare il perché; fare domande prima di decidere i punti aperti (usate scelte multiple); rispondere solo con certezze elevate. Interfaccia in inglese.
+- **Accesso al PC:** shell sul PC tramite device_bash (`$HOME/mnt/Claude_vibro/...`), senza .NET né accesso a NuGet; i file si copiano con device_commit_files. Il PC dell'utente è aziendale: alcuni moduli PowerShell di script sono bloccati (per esempio `Get-FileHash` e `Compress-Archive`), quindi negli script si usa .NET direttamente.
+- **Git:** per i commit serve il permesso di cancellazione nella cartella, perché Git rimuove i propri `.lock` (chiedere con device_request_delete_permission). Senza permesso restano `.lock` da spostare con `mv`. Messaggi di commit con la riga `Co-Authored-By`; tag annotati solo dopo i test dell'utente.
+- **Verifica senza Windows:** nel container cloud si può installare `dotnet-sdk-10.0` (apt) e compilare **l'intero progetto WPF** con `EnableWindowsTargeting`. Servono gli assembly di riferimento `Microsoft.WindowsDesktop.App.Ref/10.0.14` copiati dal `.dotnet\packs` dell'utente in `/usr/lib/dotnet/packs` (cartelle `ref` e `data`). Su una copia del csproj vanno tolti RID, SelfContained, SingleFile e R2R. Il motore si prova con `libmpv2` di Ubuntu, reindirizzando `libmpv-2.dll` verso `libmpv.so.2`.
+- **Flusso per ogni versione:** domande, codice, compilazione e test su Linux, copia sul PC, documentazione (CHANGELOG, DECISIONS, CONTEXT, TEST-PLAN), commit; poi l'utente esegue `build.cmd` e il piano di prova; infine chiusura con data, fotografia `docs/handover/CONTEXT-vX.Y.Z.md` e tag.
 
-## 0.3.0 — esito (chiusa il 2026-11-02)
-Funzionalità: eliminazione (Canc/R), rinomina (F2), spostamento (W/Shift+W). Codice in `Util/FileOps.cs`, `MpvPlayer.ReleaseFileAsync`, `Dialogs.cs`, `MainWindow.FileOps.cs`. Decisioni D-022…D-026.
-
-| Verifica | Esito |
-|---|---|
-| Progetto completo (WPF e XAML compresi) compilato su Linux con gli assembly di riferimento WindowsDesktop 10.0.14 | ✔ |
-| 35 test su `FileOps` (nomi, conflitti, spostamento con copia, annullamento, sovrascrittura esplicita, rilascio degli handle) | ✔ |
-| Rilascio del file con libmpv reale | ✔ |
-| Compilazione e confezionamento su Windows, commit `77f5882` (prodotto `0.3.0+77f5882…`, `dist\viBro-0.3.0-win-x64.zip`) | ✔ dopo la correzione di `Get-FileHash`/`Compress-Archive` |
-| [docs/TEST-PLAN-0.3.0.md](docs/TEST-PLAN-0.3.0.md) eseguito dall'utente su Windows, con file di prova su disco locale e NAS (Cestino, eliminazione definitiva in rete, ultimo file, cartella svuotata, ripetizione dei tasti, rinomina con errori e conflitti, spostamento istantaneo e con avanzamento, annullamento, conflitti, destinazione irraggiungibile, regressioni) | ✔ tutti i punti superati |
-
-Codice verificato: commit `77f5882`. Il tag `v0.3.0` è sul commit di chiusura della documentazione, senza modifiche al codice.
-
-## 0.4.0 — stato
-Codice scritto: temi (`Util/ThemeManager.cs`, `[Appearance] Theme`), barra dei controlli in alto e fascia a schermo intero, `Util/ErrorLog.cs` con gestori delle eccezioni ed errori di mpv e di riproduzione, loader Vulkan incorporato (`third_party/vulkan-loader`, `Util/NativePreload.cs`), Cestino per percorsi lunghi (`IFileOperation`), misura `startup` e `build.ps1 -Compress` in una cartella separata. Decisioni D-027…D-032.
-
-Verificato fuori da Windows:
-- progetto completo (WPF, XAML, tema) compilato; la DLL Vulkan risulta incorporata nell'output;
-- motore con libmpv reale, 21 controlli, compreso l'inoltro dei messaggi di errore di mpv;
-- test di `FileOps` ancora superati. Il test di annullamento è stato reso indipendente dalla velocità del disco: prima, con un disco veloce, la copia poteva finire prima dell'annullamento.
-
-Da verificare su Windows: aspetto dei temi, fascia a schermo intero, avvio senza `vulkan-1.dll` di sistema, Cestino con percorso lungo, log degli errori, tempi di avvio delle due varianti (vedi [docs/TEST-PLAN-0.4.0.md](docs/TEST-PLAN-0.4.0.md)).
-
-## Prossimo passo
-1. Compilare la 0.4.0 (`build.cmd`, poi `build\build.ps1 -Compress`) ed eseguire [docs/TEST-PLAN-0.4.0.md](docs/TEST-PLAN-0.4.0.md).
-2. Decidere la compressione (D-032), chiudere la 0.4.0, poi preparare la 1.0.0 (verifiche complete, licenze, pubblicazione).
+## 8. Messaggio per riprendere in una nuova chat
+> Progetto viBro nella cartella `C:\Users\ammin\Documents\Claude_vibro\viBro`. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. Siamo alla 0.4.0, in prova: ho ricompilato con `build.cmd` dopo la correzione del tema Dark (commit `ccd26c9`) e ti riporto l'esito di `docs/TEST-PLAN-0.4.0.md`.

@@ -33,12 +33,22 @@ foreach ($f in 'LICENSE', 'THIRD-PARTY-NOTICES.md', 'README.md', 'CHANGELOG.md')
     Copy-Item (Join-Path $Root $f) $stage
 }
 
+# SHA-256 via .NET: Get-FileHash lives in a script module that some locked-down machines block.
+function Get-Sha256([string]$Path) {
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $fs = [System.IO.File]::OpenRead($Path)
+    try { return ([System.BitConverter]::ToString($sha.ComputeHash($fs)) -replace '-', '').ToLowerInvariant() }
+    finally { $fs.Dispose(); $sha.Dispose() }
+}
+
 $zip = "$stage.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
-Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip
+# ZipFile via .NET: Compress-Archive is a script module too.
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::CreateFromDirectory($stage, $zip)
 Remove-Item $stage -Recurse -Force
 
-$hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant()
+$hash = Get-Sha256 $zip
 Set-Content -Path "$zip.sha256" -Value "$hash  $(Split-Path -Leaf $zip)" -Encoding ASCII
 
 Write-Host "==> $zip" -ForegroundColor Cyan

@@ -50,7 +50,13 @@ function Get-FileFromUrls([string[]]$Urls, [string]$OutFile) {
     throw "Download failed from all sources: $($Urls -join ', ')"
 }
 
-function Get-Sha256([string]$Path) { (Get-FileHash -Algorithm SHA256 -Path $Path).Hash.ToLowerInvariant() }
+# SHA-256 via .NET: Get-FileHash lives in a script module that some locked-down machines block.
+function Get-Sha256([string]$Path) {
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $fs = [System.IO.File]::OpenRead($Path)
+    try { return ([System.BitConverter]::ToString($sha.ComputeHash($fs)) -replace '-', '').ToLowerInvariant() }
+    finally { $fs.Dispose(); $sha.Dispose() }
+}
 
 # Runs a native tool without letting its stderr abort the script (Windows PowerShell 5.1 behaviour).
 function Invoke-Quiet([scriptblock]$Block) {

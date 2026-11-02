@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [0.2.0] - non ancora rilasciata
+## [0.2.0] - 2026-11-02
 
 Interfaccia completa.
 

@@ -21,13 +21,13 @@ Prototipo 0.1.0. Deve dimostrare che l'EXE è autonomo, che il video si carica i
 | `MpvPlayer` eseguito con libmpv per Linux (vo/ao null) su video generati: 12 scenari (caricamento in pausa, salti in pausa e in riproduzione, cambio da riproduzione, 20 cambi rapidi, file mancante, ripresa, fine video, Play alla fine) | ✔ 12/12 |
 | Accorpamento dei salti: 30 richieste ravvicinate → 4 salti effettivi, posizione finale corretta | ✔ |
 | Parsing degli script PowerShell; `analyze-metrics.ps1` su dati di prova | ✔ |
-| **Compilazione WPF (`MainWindow`, `MpvHost`, `App`) e pubblicazione dell'EXE** | ✘ non eseguita: gli assembly di riferimento WPF arrivano da NuGet, irraggiungibile da quell'ambiente |
+| Compilazione completa e pubblicazione su Windows (SDK 10.0.403), commit `aa0695f` | ✔ 2026-11-02: EXE singolo 255,9 MB, nessun file accessorio, versione 0.1.0+aa0695f |
 | **Esecuzione su Windows, rendering D3D11, decodifica hardware, NAS** | ✘ da eseguire |
 
 Il test con libmpv ha trovato e fatto correggere un bug: con i cambi rapidi di file il rilevamento del caricamento si bloccava (vedi D-008).
 
 ## Problemi noti / rischi aperti
-1. La parte WPF non è mai stata compilata: possibili piccoli errori al primo `build.cmd`.
+1. EXE di 255,9 MB (libmpv 121 MB + runtime .NET/WPF + ReadyToRun): valutare `build.ps1 -Compress` confrontando dimensione e tempo di avvio.
 2. `libmpv-2.dll` importa `vulkan-1.dll` in modo statico: può non avviarsi su VM o Sandbox senza driver GPU (vedi D-002).
 3. Salti `keyframes` da ±1 s su GOP lunghi: il test conferma che un salto di -1 s può tornare al fotogramma chiave precedente, anche diversi secondi indietro. Va valutato sui file reali (D-007).
 4. shinchiro conserva su GitHub solo ~30 build: la build fissata sparirà da GitHub verso dicembre 2026 e resterà disponibile il link SourceForge. Conviene archiviare l'archivio (D-002).
@@ -50,10 +50,10 @@ build\analyze-metrics.ps1 -Path <csv>
 Uscite: `artifacts\publish\viBro.exe`, `dist\viBro-0.1.0-win-x64.zip`.
 
 ## Riferimento al codice
-Ultimo commit locale su `main`: vedere `git log -1`. Al primo `build.cmd` riuscito su Windows, annotare qui l'hash del commit compilato e testato.
+Ultimo commit compilato con successo su Windows: `aa0695f4d79a0dc9b3edf826d2a38dc9b2b93b87` (non ancora testato in esecuzione).
 
 ## Prossimo passo
-1. Eseguire `build.cmd` sul PC Windows e correggere eventuali errori di compilazione WPF.
+1. ~~Compilare su Windows~~ fatto (aa0695f).
 2. Eseguire [docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md) su SSD e NAS.
 3. Riportare qui i risultati, aggiornare le decisioni [da verificare], creare il tag `v0.1.0` e la fotografia `docs/handover/CONTEXT-v0.1.0.md`.
 4. Poi la 0.2.0: albero delle cartelle, ordinamento per colonna, `viBro.ini`.

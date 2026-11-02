@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -795,7 +795,12 @@ public partial class MainWindow : Window
     /// </summary>
     private void ApplyItemStyles()
     {
-        var listItem = new Style(typeof(ListViewItem), TryFindResource(typeof(ListViewItem)) as Style);
+        // A ListView with a GridView needs the GridView row style (its template has a
+        // GridViewRowPresenter that draws the columns). The plain ListViewItem style only has a
+        // ContentPresenter and would show the item's ToString() ("ViBro.Util.VideoItem").
+        var baseListStyle = TryFindResource(GridView.GridViewItemContainerStyleKey) as Style
+                            ?? TryFindResource(typeof(ListViewItem)) as Style;
+        var listItem = new Style(typeof(ListViewItem), baseListStyle);
         listItem.Setters.Add(new Setter(HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
         FileList.ItemContainerStyle = listItem;
 

@@ -17,6 +17,7 @@ Temi, gestione degli errori, ottimizzazione e portabilità.
 
 ### Corretto
 - Tema Dark: testo nero, illeggibile. Le finestre di viBro (classi derivate da `Window`) non ricevevano il colore del testo dallo stile Fluent, e gli stili propri di righe e nodi lo sostituivano. Ora finestre e barra di stato prendono colori del tema aggiornati a ogni cambio, e gli stili di righe e nodi sono basati su quelli del tema.
+- Elenco dei file vuoto di dati dopo la correzione del tema: ogni riga mostrava `ViBro.Util.VideoItem` invece di nome, dimensione e data. Lo stile delle righe era basato sullo stile generico di `ListViewItem` (senza colonne); ora è basato sullo stile delle righe di `GridView` del tema.
 
 ### Modificato
 - La barra dei controlli (Play, barra temporale, tempo, Mute, volume) è **sopra il video**.

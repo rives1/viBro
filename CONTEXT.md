@@ -1,11 +1,11 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-02 20:55 · branch `main` · ultimo commit `ccd26c9` · ultima versione rilasciata **0.3.0** (tag `v0.3.0`) · **in sviluppo: 0.4.0, da provare su Windows**_
+_Aggiornato: 2026-11-02 22:30 · branch `main` · ultimo commit `54d2a9e` · ultima versione rilasciata **0.3.0** (tag `v0.3.0`) · **in sviluppo: 0.4.0, da provare su Windows**_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-033 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-036 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
-- Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha 5 commit e il tag `v0.3.0` non ancora pubblicati, e il push lo fa l'utente.
+- Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e il tag `v0.3.0` non ancora pubblicati, e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`.
 - Versione: in un solo punto, `Directory.Build.props` (ora `0.4.0`). Appare nel titolo e nelle proprietà dell'EXE come `0.4.0+<commit>`.
 
@@ -15,7 +15,7 @@ _Aggiornato: 2026-11-02 20:55 · branch `main` · ultimo commit `ccd26c9` · ult
 | 0.1.0 | Prototipo: EXE singolo, motore mpv persistente nella finestra nativa (`wid`), caricamento in pausa, salti (±1/±5 s esatti; ±1/±5 min su fotogrammi chiave), accorpamento dei salti, misure CSV | ✔ tag `v0.1.0`, misurato su SSD e NAS |
 | 0.2.0 | Albero delle cartelle progressivo e sincronizzato, ordinamento per colonna (naturale), 3 riquadri, `viBro.ini` (atomico, valori predefiniti, avvisi) | ✔ tag `v0.2.0` |
 | 0.3.0 | Elimina (Canc/R: Cestino locale, definitiva in rete), rinomina (F2), sposta (W/Shift+W, conflitti, avanzamento e annullamento, copia verificata prima di eliminare la sorgente) | ✔ tag `v0.3.0` |
-| 0.4.0 | Temi Light/Dark (Fluent + pulsante *Theme*), barra dei controlli **sopra** il video, fascia a schermo intero con barra temporale centrata al 40% che si nasconde da sola, `viBro-errors.log`, loader Vulkan incorporato, Cestino per percorsi di 260+ caratteri, misura del tempo di avvio, icona | **scritta e compilata; correzione del testo nel tema Dark da confermare** |
+| 0.4.0 | Temi Light/Dark (Fluent + pulsante *Theme*), barra dei controlli **sopra** il video, fascia a schermo intero con barra temporale centrata al 40% che si nasconde da sola, `viBro-errors.log`, loader Vulkan incorporato, Cestino per percorsi di 260+ caratteri, misura del tempo di avvio, icona, icone dell'albero, righe compatte, clic e trascinamento sui cursori | **scritta e compilata; da provare su Windows** |
 | 1.0.0 | Prima versione completa e verificata | da fare |
 
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
@@ -24,10 +24,12 @@ _Aggiornato: 2026-11-02 20:55 · branch `main` · ultimo commit `ccd26c9` · ult
 - Memoria: 260–470 MB, stabile. I salti sui fotogrammi chiave per ±1/±5 s **non spostavano l'immagine** (GOP di 5–24 s): da qui la modalità mista (D-007).
 
 ## 4. Stato attuale e prossimo passo
-1. L'utente ha segnalato **testo nero illeggibile nel tema Dark**. La correzione è nel commit `ccd26c9`: finestre e barra di stato legate ai pennelli `ViBro.Foreground/Background/Panel`, `ItemContainerStyle` costruiti con `BasedOn` dello stile del tema (D-028). Nello stesso commit c'è la nuova icona `src/viBro/viBro.ico` (D-033). **Da confermare dopo `build.cmd`.**
-2. Poi eseguire [docs/TEST-PLAN-0.4.0.md](docs/TEST-PLAN-0.4.0.md): temi, fascia a schermo intero, errori (`viBro-errors.log`), portabilità, Vulkan senza driver (facoltativo), Cestino con percorso lungo, 5 avvii dell'EXE normale e 5 di quello compresso (righe `startup` nei due `viBro-metrics.csv`).
-3. Decidere la compressione dell'EXE dai dati (D-032), chiudere la 0.4.0 (CHANGELOG con data, `docs/handover/CONTEXT-v0.4.0.md`, tag `v0.4.0`).
-4. Verso la 1.0.0. Punti aperti: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione.
+1. `ccd26c9`: testo nero nel tema Dark corretto (pennelli `ViBro.Foreground/Background/Panel`, stili dei contenitori con `BasedOn` dello stile del tema, D-028) e nuova icona (D-033).
+2. `a6ac40c`: dopo `ccd26c9` ogni riga dell'elenco mostrava `ViBro.Util.VideoItem`. Lo stile delle righe ora è basato su `GridView.GridViewItemContainerStyleKey` (`GridViewRowPresenter`) invece che sullo stile generico di `ListViewItem`.
+3. `54d2a9e`, richieste dell'utente prima dei test: icone vettoriali a colori nell'albero (`Util/TreeIcons.cs`, D-034), righe di circa 24 px in elenco e albero (D-035), clic e trascinamento su barra temporale e volume (`Util/SliderDrag.cs`, D-036). Compilato nel container; **non ancora provato su Windows**.
+4. L'utente esegue `build.cmd` e [docs/TEST-PLAN-0.4.0.md](docs/TEST-PLAN-0.4.0.md) (nuova sezione "Icone, righe e cursori" più temi, fascia a schermo intero, errori, portabilità, Vulkan facoltativo, Cestino con percorso lungo, 5+5 avvii per `startup`).
+5. Decidere la compressione dell'EXE dai dati (D-032), chiudere la 0.4.0 (CHANGELOG con data, `docs/handover/CONTEXT-v0.4.0.md`, tag `v0.4.0`).
+6. Verso la 1.0.0. Punti aperti: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione.
 
 ## 5. Dipendenze fissate
 | Dipendenza | Versione | Dove |
@@ -45,10 +47,10 @@ _Aggiornato: 2026-11-02 20:55 · branch `main` · ultimo commit `ccd26c9` · ult
 
 ## 7. Note operative per l'assistente (come si è lavorato)
 - **Preferenze dell'utente:** risposte dirette e critiche, in italiano; spiegare il perché; fare domande prima di decidere i punti aperti (usate scelte multiple); rispondere solo con certezze elevate. Interfaccia in inglese.
-- **Accesso al PC:** shell sul PC tramite device_bash (`$HOME/mnt/Claude_vibro/...`), senza .NET né accesso a NuGet; i file si copiano con device_commit_files. Il PC dell'utente è aziendale: alcuni moduli PowerShell di script sono bloccati (per esempio `Get-FileHash` e `Compress-Archive`), quindi negli script si usa .NET direttamente.
+- **Accesso al PC:** shell sul PC tramite device_bash (`$HOME/mnt/Claude_vibro/...`), senza .NET né accesso a NuGet; i file si copiano con device_commit_files. Il PC dell'utente è aziendale: alcuni moduli PowerShell di script sono bloccati (per esempio `Get-FileHash` e `Compress-Archive`), quindi negli script si usa .NET direttamente. Gli stili Fluent di riferimento si leggono da `raw.githubusercontent.com/dotnet/wpf/release/10.0/src/Microsoft.DotNet.Wpf/src/Themes/PresentationFramework.Fluent/Styles/<Controllo>.xaml`. Per copiare file dal PC al container: archivio `.tgz` in `artifacts\\tmp` (ignorato da Git) e device_stage_files, poi cancellarlo.
 - **Git:** per i commit serve il permesso di cancellazione nella cartella, perché Git rimuove i propri `.lock` (chiedere con device_request_delete_permission). Senza permesso restano `.lock` da spostare con `mv`. Messaggi di commit con la riga `Co-Authored-By`; tag annotati solo dopo i test dell'utente.
 - **Verifica senza Windows:** nel container cloud si può installare `dotnet-sdk-10.0` (apt) e compilare **l'intero progetto WPF** con `EnableWindowsTargeting`. Servono gli assembly di riferimento `Microsoft.WindowsDesktop.App.Ref/10.0.14` copiati dal `.dotnet\packs` dell'utente in `/usr/lib/dotnet/packs` (cartelle `ref` e `data`). Su una copia del csproj vanno tolti RID, SelfContained, SingleFile e R2R. Il motore si prova con `libmpv2` di Ubuntu, reindirizzando `libmpv-2.dll` verso `libmpv.so.2`.
 - **Flusso per ogni versione:** domande, codice, compilazione e test su Linux, copia sul PC, documentazione (CHANGELOG, DECISIONS, CONTEXT, TEST-PLAN), commit; poi l'utente esegue `build.cmd` e il piano di prova; infine chiusura con data, fotografia `docs/handover/CONTEXT-vX.Y.Z.md` e tag.
 
 ## 8. Messaggio per riprendere in una nuova chat
-> Progetto viBro nella cartella `C:\Users\ammin\Documents\Claude_vibro\viBro`. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. Siamo alla 0.4.0, in prova: ho ricompilato con `build.cmd` dopo la correzione del tema Dark (commit `ccd26c9`) e ti riporto l'esito di `docs/TEST-PLAN-0.4.0.md`.
+> Progetto viBro nella cartella `C:\\Users\\ammin\\Documents\\Claude_vibro\\viBro`. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. Siamo alla 0.4.0, in prova: ho ricompilato con `build.cmd` dopo il commit `54d2a9e` (icone dell'albero, righe compatte, cursori) e ti riporto l'esito di `docs/TEST-PLAN-0.4.0.md`.

@@ -86,7 +86,8 @@ Mouse sul video (0.5.0, richiesta dell'utente):
 Clic	Play/Pause (non il clic che riattiva la finestra)
 Doppio clic	Schermo intero; a schermo intero, ritorno alla finestra normale (la riproduzione resta com'era)
 Tasto destro	Menu con Delete (come Canc/R), Move... (come W) e Move to <ultima destinazione> (come Shift+W)
-Rotella a schermo intero	Giù: video successivo; su: video precedente (come D / E)
+Rotella sopra la barra temporale	Su: avanti 5 s; giù: indietro 5 s (come ↑ / ↓)
+Rotella altrove, a schermo intero	Giù: video successivo; su: video precedente (come D / E)
 
 
 Regole:

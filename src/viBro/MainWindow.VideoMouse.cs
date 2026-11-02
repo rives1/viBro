@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using ViBro.Util;
@@ -15,7 +16,8 @@ namespace ViBro;
 //    its first click is undone (the video only stops for an instant)
 //  - the click that brings viBro back to the foreground only activates the window
 //  - right click: menu with Delete, Move..., Move to <last folder>
-//  - wheel in fullscreen (anywhere in the window): down = next video, up = previous
+//  - wheel over the time bar (both modes): up = forward 5 s, down = back 5 s (like Up/Down keys)
+//  - wheel elsewhere in fullscreen: down = next video, up = previous
 public partial class MainWindow
 {
     private uint _lastClickTime;
@@ -24,6 +26,8 @@ public partial class MainWindow
     private bool _lastClickToggledPause;
     private uint _activatedTick; // GetTickCount time of the last window activation
     private int _wheelAccumulator;
+    private bool _wheelOnTimeBar;
+    private const double WheelSeekSeconds = 5;
 
     private void OnVideoMouseMessage(MSG msg)
     {
@@ -83,11 +87,23 @@ public partial class MainWindow
     }
 
     /// <summary>Screen point (device pixels) inside the visible video area.</summary>
-    private bool IsPointOverVideo(int screenX, int screenY)
+    private bool IsPointOverVideo(int screenX, int screenY) => IsPointOver(VideoHost, screenX, screenY);
+
+    private static bool IsPointOver(FrameworkElement element, int screenX, int screenY)
     {
-        if (!VideoHost.IsVisible) return false;
-        Point p = VideoHost.PointFromScreen(new Point(screenX, screenY));
-        return p.X >= 0 && p.Y >= 0 && p.X < VideoHost.ActualWidth && p.Y < VideoHost.ActualHeight;
+        if (!element.IsVisible || PresentationSource.FromVisual(element) == null) return false;
+        Point p = element.PointFromScreen(new Point(screenX, screenY));
+        return p.X >= 0 && p.Y >= 0 && p.X < element.ActualWidth && p.Y < element.ActualHeight;
+    }
+
+    private void TraceInputMessage(MSG msg)
+    {
+        string what = msg.message == NativeMethods.WM_MOUSEWHEEL
+            ? $"WM_MOUSEWHEEL delta={NativeMethods.WheelDelta(msg.wParam)}"
+            : $"WM_KEYDOWN vk=0x{msg.wParam.ToInt64():X2} ({KeyInterop.KeyFromVirtualKey((int)msg.wParam.ToInt64())})";
+        ErrorLog.Write("input", $"{what} hwnd=0x{msg.hwnd.ToInt64():X} class={NativeMethods.ClassName(msg.hwnd)} " +
+                                $"pt=({msg.pt_x},{msg.pt_y}) overTimeBar={IsPointOver(TimeSlider, msg.pt_x, msg.pt_y)} " +
+                                $"fullscreen={_isFullscreen}");
     }
 
     /// <summary>Main window or one of its children (the video, mpv's window).</summary>
@@ -97,17 +113,26 @@ public partial class MainWindow
         return main != IntPtr.Zero && (hwnd == main || NativeMethods.IsChild(main, hwnd));
     }
 
-    /// <summary>One wheel notch (120) = one video; smaller steps (touchpads) are accumulated.</summary>
-    private bool OnFullscreenWheel(int delta)
+    /// <summary>
+    /// One wheel notch (120) = one step; smaller steps (touchpads) are accumulated. Over the time bar:
+    /// seek 5 s (up = forward); elsewhere in fullscreen: change video (down = next).
+    /// </summary>
+    private bool OnWheel(int delta, int screenX, int screenY)
     {
         if (!IsActive || delta == 0) return false;
-        if (Math.Sign(delta) != Math.Sign(_wheelAccumulator)) _wheelAccumulator = 0; // direction changed
+        bool onTimeBar = IsPointOver(TimeSlider, screenX, screenY);
+        if (!onTimeBar && !_isFullscreen) return false; // normal window, not on the bar: unchanged
+
+        // Restart counting when the direction or the target (bar / video) changes.
+        if (Math.Sign(delta) != Math.Sign(_wheelAccumulator) || onTimeBar != _wheelOnTimeBar) _wheelAccumulator = 0;
+        _wheelOnTimeBar = onTimeBar;
         _wheelAccumulator += delta;
         while (Math.Abs(_wheelAccumulator) >= NativeMethods.WHEEL_DELTA)
         {
-            int step = _wheelAccumulator > 0 ? -1 : +1; // away from the user (up) = previous
-            _wheelAccumulator += step * NativeMethods.WHEEL_DELTA;
-            SelectRelative(step);
+            int up = _wheelAccumulator > 0 ? 1 : -1; // positive = away from the user
+            _wheelAccumulator -= up * NativeMethods.WHEEL_DELTA;
+            if (onTimeBar) Seek(up * WheelSeekSeconds);
+            else SelectRelative(-up);
         }
         return true;
     }

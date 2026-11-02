@@ -40,6 +40,16 @@ internal static class NativeMethods
     [DllImport("user32.dll")]
     public static extern uint GetDoubleClickTime();
 
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder name, int maxCount);
+
+    /// <summary>Window class name, for diagnostics.</summary>
+    public static string ClassName(IntPtr hwnd)
+    {
+        var sb = new System.Text.StringBuilder(256);
+        return GetClassName(hwnd, sb, sb.Capacity) > 0 ? sb.ToString() : "?";
+    }
+
     [DllImport("user32.dll")]
     private static extern int GetSystemMetrics(int index);
 

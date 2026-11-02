@@ -21,6 +21,13 @@ Nel titolo deve comparire `viBro 0.5.0 (…)`.
 - [ ] Rotella veloce su più scatti: viBro resta reattivo e si ferma sul video corrispondente.
 - [ ] Con un touchpad (se disponibile): lo scorrimento a due dita cambia video senza saltarne molti.
 - [ ] A finestra normale la rotella non cambia video (sull'elenco scorre l'elenco come prima).
+- [ ] Rotella sopra la barra temporale, a finestra normale e a schermo intero: su = avanti 5 s, giù = indietro 5 s per scatto; il video resta lo stesso.
+- [ ] **Diagnostica rotella (D-041), da fare per prima.** Avviare `viBro.exe --trace-input` (da un collegamento o dal prompt), aprire un video e:
+  1. a finestra normale, rotella sopra la barra temporale (2-3 scatti su e giù);
+  2. a finestra normale, rotella sopra l'elenco dei file;
+  3. a schermo intero, rotella sopra il video;
+  4. a schermo intero, rotella sopra la barra.
+  Poi inviare `viBro-errors.log` (accanto all'EXE): le righe `[input]` dicono se arrivano messaggi `WM_MOUSEWHEEL` o tasti `Up`/`Down`, e a quale finestra. Annotare se si usa un mouse con software proprio (Logitech, ecc.) o il touchpad.
 - [ ] Il menu e i video caricati con la rotella rispettano il tema (Light/Dark).
 
 ## Temi

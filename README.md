@@ -62,7 +62,8 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | Clic | Play/Pause (il clic che riporta viBro in primo piano non cambia la riproduzione) | 0.5.0 |
 | Doppio clic | Entra in / esce da schermo intero; la riproduzione resta com'era | 0.5.0 |
 | Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W) | 0.5.0 |
-| Rotella, a schermo intero | Giù: video successivo; su: video precedente (come D / E) | 0.5.0 |
+| Rotella sopra la barra temporale | Su: avanti 5 s; giù: indietro 5 s (come ↑ / ↓), a finestra normale e a schermo intero | 0.5.0 |
+| Rotella altrove, a schermo intero | Giù: video successivo; su: video precedente (come D / E) | 0.5.0 |
 | Clic sulla barra temporale e trascinamento | Spostamento nel video; l'indicatore segue il mouse | 0.4.0 |
 
 Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come da specifica, le frecce eseguono sempre i salti, anche con lo stato attivo sull'albero o sull'elenco: la navigazione nell'albero avviene con il mouse.

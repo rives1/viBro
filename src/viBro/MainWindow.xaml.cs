@@ -608,13 +608,14 @@ public partial class MainWindow : Window
         // Windows' own auto-repeat flag (bit 30: the key was already down), recorded for every key
         // message of this thread before WPF turns it into KeyDown (read by Window_PreviewKeyDown).
         if (isKey) _win32KeyRepeat = (msg.lParam.ToInt64() & 0x40000000) != 0;
+        if (_options.TraceInput && (isKey || msg.message == NativeMethods.WM_MOUSEWHEEL)) TraceInputMessage(msg);
         if (handled) return;
 
-        // The wheel goes to the focused window or to the one under the pointer (Windows setting):
-        // in fullscreen it changes video wherever it lands inside viBro's window.
+        // The wheel goes to the focused window or to the one under the pointer (Windows setting).
+        // Over the time bar it seeks (both modes); elsewhere in fullscreen it changes video.
         if (msg.message == NativeMethods.WM_MOUSEWHEEL)
         {
-            if (_isFullscreen && IsOwnWindowMessage(msg.hwnd) && OnFullscreenWheel(NativeMethods.WheelDelta(msg.wParam)))
+            if (IsOwnWindowMessage(msg.hwnd) && OnWheel(NativeMethods.WheelDelta(msg.wParam), msg.pt_x, msg.pt_y))
                 handled = true;
             return;
         }

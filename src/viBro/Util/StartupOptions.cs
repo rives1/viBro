@@ -5,7 +5,8 @@ namespace ViBro.Util;
 
 /// <summary>
 /// Command line (prototype only):
-///   viBro.exe [folder] [--exact-seeks] [--mpv-opt name=value]...
+///   viBro.exe [folder] [--exact-seeks] [--trace-input] [--mpv-opt name=value]...
+/// --trace-input writes every key and wheel message seen by viBro to viBro-errors.log (diagnostics).
 /// --exact-seeks makes long steps (1 min, 5 min, timeline) exact too; short steps are always exact.
 /// --mpv-opt values override viBro's defaults and are meant for performance experiments.
 /// </summary>
@@ -13,6 +14,7 @@ internal sealed class StartupOptions
 {
     public string? Folder { get; private set; }
     public bool ExactSeeks { get; private set; }
+    public bool TraceInput { get; private set; }
     public List<KeyValuePair<string, string>> MpvOptions { get; } = new();
     public List<string> Errors { get; } = new();
 
@@ -25,6 +27,10 @@ internal sealed class StartupOptions
             if (a.Equals("--exact-seeks", StringComparison.OrdinalIgnoreCase))
             {
                 o.ExactSeeks = true;
+            }
+            else if (a.Equals("--trace-input", StringComparison.OrdinalIgnoreCase))
+            {
+                o.TraceInput = true;
             }
             else if (a.StartsWith("--mpv-opt=", StringComparison.OrdinalIgnoreCase))
             {

@@ -142,3 +142,12 @@ L'EXE normale pesa ~256 MB, quello compresso ~110 MB (stima dalla dimensione del
 
 ## D-033 — Icona (0.4.0, richiesta dell'utente)
 `src/viBro/viBro.ico`: disegno originale (quadrato arrotondato blu sfumato, triangolo play bianco, barra temporale con avanzamento), generato in modo programmatico in 9 dimensioni (16–256 px), con una versione semplificata per 16–24 px. È usata come `ApplicationIcon` (EXE, barra delle applicazioni, Esplora risorse) e come icona della finestra.
+
+## D-034 — Icone dell'albero (0.4.0, richiesta dell'utente)
+Icone vettoriali a colori disegnate nel codice (`Util/TreeIcons.cs`, griglia 16×16), scelte per tipo di nodo (`FolderNodeKind`) e, per le cartelle utente, per nome; la cartella appare aperta quando il nodo è espanso. Alternative scartate: glifi monocromi di Segoe Fluent Icons (meno colore) e icone reali di Windows con `SHGetFileInfo` (una chiamata alla shell per nodo, lenta o bloccante su NAS scollegati, contraria al caricamento progressivo dell'albero). Le icone sono oggetti congelati e condivisi, uguali in Light e Dark. Se un'icona non si potesse creare, il nodo resta senza icona e l'errore va in `viBro-errors.log`.
+
+## D-035 — Righe compatte (0.4.0, richiesta dell'utente)
+Righe di circa 24 px nell'elenco e nell'albero. Il tema Fluent di .NET 10 (sorgenti `ListViewItem.xaml` e `TreeViewItem.xaml`) usa per le righe di `GridView` un'altezza minima `GridViewItemContainerMinHeight` e un margine inferiore di 2 px; per i nodi dell'albero un margine interno di 4 px e un margine di 2 px applicato due volte (il modello riusa `Margin` sul bordo interno). Negli stili costruiti da `ApplyItemStyles()`: elenco `MinHeight=24`, `Margin=0`; albero `Padding=4,2.5`, `Margin=0`.
+
+## D-036 — Clic e trascinamento sui cursori (0.4.0, richiesta dell'utente)
+Con `IsMoveToPointEnabled` WPF sposta il valore al punto cliccato ma non avvia il trascinamento. `Util/SliderDrag` intercetta la pressione (anche se già gestita dallo `Slider`), aggiorna il layout e passa la stessa pressione al `Thumb`, che cattura il mouse e trascina come se fosse stato premuto direttamente. Il `Thumb` non prende il focus, che resta sull'elenco dei file (tasti di salto). Applicato a barra temporale e volume. Durante il trascinamento i salti restano accorpati come prima.

@@ -79,6 +79,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         ThemeManager.AttachWindow(this);
         ApplyItemStyles();
+        SliderDrag.Enable(TimeSlider);
+        SliderDrag.Enable(VolumeSlider);
         StatusPanel.SetResourceReference(BackgroundProperty, ThemeManager.PanelKey);
         StatusPanel.SetResourceReference(ForegroundProperty, ThemeManager.ForegroundKey);
         Title = "viBro " + AppInfo.DisplayVersion;
@@ -793,6 +795,8 @@ public partial class MainWindow : Window
     /// Item container styles built on top of the current theme's styles (a style without BasedOn
     /// would replace the Fluent look, e.g. black text in dark mode). Rebuilt on every theme change.
     /// </summary>
+    private const double CompactRowHeight = 24;
+
     private void ApplyItemStyles()
     {
         // A ListView with a GridView needs the GridView row style (its template has a
@@ -802,9 +806,16 @@ public partial class MainWindow : Window
                             ?? TryFindResource(typeof(ListViewItem)) as Style;
         var listItem = new Style(typeof(ListViewItem), baseListStyle);
         listItem.Setters.Add(new Setter(HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+        // Compact rows (~24 px). Fluent uses a 40 px minimum and a 2 px gap under each row.
+        listItem.Setters.Add(new Setter(MinHeightProperty, CompactRowHeight));
+        listItem.Setters.Add(new Setter(MarginProperty, new Thickness(0)));
         FileList.ItemContainerStyle = listItem;
 
         var treeItem = new Style(typeof(TreeViewItem), TryFindResource(typeof(TreeViewItem)) as Style);
+        // Same height as the file list: Fluent pads the header by 4 px and leaves a 2 px gap
+        // (applied twice by its template, which reuses Margin on the inner border).
+        treeItem.Setters.Add(new Setter(PaddingProperty, new Thickness(4, 2.5, 4, 2.5)));
+        treeItem.Setters.Add(new Setter(MarginProperty, new Thickness(0)));
         treeItem.Setters.Add(new Setter(TreeViewItem.IsExpandedProperty,
             new System.Windows.Data.Binding(nameof(FolderNode.IsExpanded)) { Mode = System.Windows.Data.BindingMode.TwoWay }));
         treeItem.Setters.Add(new Setter(TreeViewItem.IsSelectedProperty,

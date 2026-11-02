@@ -13,6 +13,7 @@ Temi, gestione degli errori, ottimizzazione e portabilità.
 - Loader Vulkan ufficiale Khronos incorporato nell'EXE, usato solo se Windows non ne ha uno: viBro parte anche su PC o VM senza driver GPU.
 - Cestino anche per i percorsi di 260 o più caratteri (`IFileOperation` di Windows).
 - Icona dell'applicazione (EXE e finestra): disegno originale, play e barra temporale su fondo blu.
+- Icone vettoriali a colori nell'albero delle cartelle: cartella (aperta quando il nodo è espanso), Desktop, Documents, Downloads, Videos, disco locale, unità di rete, unità rimovibile, unità ottica, condivisione di rete.
 - Misura del tempo di avvio (`startup` in `viBro-metrics.csv`, con la dimensione dell'EXE) per confrontare EXE normale e compresso; `build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`.
 
 ### Corretto
@@ -21,6 +22,8 @@ Temi, gestione degli errori, ottimizzazione e portabilità.
 
 ### Modificato
 - La barra dei controlli (Play, barra temporale, tempo, Mute, volume) è **sopra il video**.
+- Righe compatte (circa 24 px invece di circa 40) nell'elenco dei file e nell'albero.
+- Barra temporale e volume: cliccando sulla traccia e tenendo premuto, l'indicatore segue subito il mouse (prima serviva un secondo clic).
 - A schermo intero: fascia nera in alto con la sola barra temporale, centrata e larga circa il 40% dello schermo; compare muovendo il mouse o con un salto e scompare dopo 2 s di inattività; la fascia resta, quindi il video non cambia dimensione.
 
 ## [0.3.0] - 2026-11-02

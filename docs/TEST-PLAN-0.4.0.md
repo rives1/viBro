@@ -10,6 +10,13 @@ Nel titolo deve comparire `viBro 0.4.0 (…)`.
 - [ ] Rinomina (F2), conflitto di spostamento e avanzamento sono nel tema scelto.
 - [ ] Chiudendo e riaprendo, il tema scelto resta (`[Appearance] Theme=Dark` o `Light`).
 
+## Icone, righe e cursori
+- [ ] Albero: ogni nodo ha l'icona del suo tipo (Desktop, Documents, Downloads, Videos, disco locale, unità di rete, chiavetta USB se presente, condivisioni di rete); le cartelle mostrano l'icona aperta quando sono espanse. Icone nitide anche con scala di Windows al 125-150%, leggibili in Light e Dark.
+- [ ] Elenco e albero: righe basse (circa 24 px), testo non tagliato, selezione e indicatore blu visibili; anche dopo il cambio di tema.
+- [ ] Barra temporale: cliccare in un punto della traccia e, senza rilasciare, trascinare: l'indicatore e il video seguono il mouse. Rilasciando, la riproduzione continua dal punto scelto.
+- [ ] Dopo il trascinamento le frecce (salti) funzionano subito, senza cliccare sull'elenco.
+- [ ] Stesso comportamento sul cursore del volume e sulla barra a schermo intero.
+
 ## Barra dei controlli e schermo intero
 - [ ] Finestra normale: Play, barra temporale, tempo, Mute e volume stanno sopra il video.
 - [ ] F11: in alto una fascia nera; la barra temporale, larga circa il 40% e centrata, compare e scompare dopo circa 2 s.

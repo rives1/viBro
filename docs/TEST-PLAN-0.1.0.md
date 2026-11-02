@@ -8,7 +8,7 @@ Il prototipo deve dimostrare tre cose:
 Per scelta della specifica non sono fissati tempi garantiti: le soglie si decidono **dopo** aver letto le misure. Al termine si annotano i risultati in `CONTEXT.md` e nelle decisioni marcate **[da verificare]** di `docs/DECISIONS.md`.
 
 ## 0. Preparazione
-- Compilare con `build.cmd -InstallDotnet` e annotare la dimensione dell'EXE e la versione stampata.
+- Compilare con `build.cmd` e annotare la dimensione dell'EXE e la versione stampata.
 - Copiare `viBro.exe` in una cartella scrivibile, per esempio `C:\Tools\viBro\`. Il file `viBro-metrics.csv` verrà creato lì.
 - Preparare file campione (non vanno nel repository):
 

@@ -43,7 +43,7 @@ Il test con libmpv ha trovato e fatto correggere un bug: con i cambi rapidi di f
 
 ## Comandi di compilazione
 ```
-build.cmd -InstallDotnet          :: SDK per utente in .dotnet\, libmpv, publish, zip
+build.cmd          :: SDK per utente in .dotnet\, libmpv, publish, zip
 build\build.ps1 -Compress         :: variante con EXE compresso (confronto)
 build\analyze-metrics.ps1 -Path <csv>
 ```
@@ -53,7 +53,7 @@ Uscite: `artifacts\publish\viBro.exe`, `dist\viBro-0.1.0-win-x64.zip`.
 Ultimo commit locale su `main`: vedere `git log -1`. Al primo `build.cmd` riuscito su Windows, annotare qui l'hash del commit compilato e testato.
 
 ## Prossimo passo
-1. Eseguire `build.cmd -InstallDotnet` sul PC Windows e correggere eventuali errori di compilazione WPF.
+1. Eseguire `build.cmd` sul PC Windows e correggere eventuali errori di compilazione WPF.
 2. Eseguire [docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md) su SSD e NAS.
 3. Riportare qui i risultati, aggiornare le decisioni [da verificare], creare il tag `v0.1.0` e la fotografia `docs/handover/CONTEXT-v0.1.0.md`.
 4. Poi la 0.2.0: albero delle cartelle, ordinamento per colonna, `viBro.ini`.

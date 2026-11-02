@@ -52,7 +52,7 @@ Al primo avvio .NET estrae le librerie native, tra cui libmpv, nella cache per u
 Requisiti: Windows 10/11 x64 e connessione a Internet per il primo download. Non servono privilegi di amministratore.
 
 ```
-build.cmd -InstallDotnet
+build.cmd
 ```
 
 Lo script:

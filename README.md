@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 0.2.0** (interfaccia completa); in sviluppo: 0.3.0 (operazioni sui file). La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 0.3.0 in sviluppo** (operazioni sui file); ultima versione rilasciata: 0.2.0. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 
 ## Funzionalità
 
@@ -19,7 +19,9 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - Albero delle cartelle (cartelle utente, unità locali e di rete, condivisioni UNC aperte), caricato progressivamente e sincronizzato con la cartella aperta.
 - Ordinamento per Name, Size, Date modified; tre riquadri ridimensionabili; impostazioni in `viBro.ini`.
 
-Non ancora presenti: eliminazione, rinomina e spostamento (0.3.0); temi Light/Dark (0.4.0).
+- Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
+
+Non ancora presenti: temi Light/Dark (0.4.0).
 
 ## viBro.ini
 
@@ -35,7 +37,7 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 
 ## Scorciatoie da tastiera
 
-| Tasto | Azione | 0.1.0 |
+| Tasto | Azione | Da |
 |---|---|---|
 | ← / → | Indietro / avanti di circa 1 s | ✔ |
 | ↓ / ↑ | Indietro / avanti di circa 5 s | ✔ |
@@ -46,7 +48,10 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | M | Mute on/off | ✔ |
 | F11 / Esc | Entra in / esce da schermo intero | ✔ |
 | Ctrl + L | Attiva la barra del percorso (Invio apre, Esc annulla) | ✔ |
-| Canc o R, F2, W, Shift + W | Elimina, rinomina, sposta | 0.3.0 |
+| Canc o R | Elimina il file con conferma (Cestino se locale, definitiva se in rete) | 0.3.0 |
+| F2 | Rinomina il file (solo il nome; l'estensione resta) | 0.3.0 |
+| W | Sceglie la cartella di destinazione e sposta il file | 0.3.0 |
+| Shift + W | Sposta nell'ultima destinazione usata | 0.3.0 |
 
 Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come da specifica, le frecce eseguono sempre i salti, anche con lo stato attivo sull'albero o sull'elenco: la navigazione nell'albero avviene con il mouse.
 

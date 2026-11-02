@@ -2,6 +2,18 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [0.3.0] - non ancora rilasciata
+
+Operazioni sui file.
+
+### Aggiunto
+- **Canc / R — elimina** con conferma, che indica il nome del file e il tipo di eliminazione (Invio = conferma). File locali: Cestino; se Windows non può cestinarli, chiede prima di eliminarli definitivamente e un rifiuto lascia il file dov'è. File di rete e unità mappate: eliminazione definitiva, dichiarata nella conferma.
+- **F2 — rinomina** in una piccola finestra: si modifica solo il nome, l'estensione resta; caratteri non validi, nomi riservati e lunghezza vengono controllati; nessuna sovrascrittura (in caso di errore la finestra si riapre con il messaggio). Il file rinominato resta selezionato e viene ricaricato in pausa nella posizione precedente.
+- **W — sposta** scegliendo la cartella nella finestra di Windows, aperta sull'ultima destinazione; **Shift+W** usa direttamente l'ultima destinazione, o chiede se non ce n'è una. La destinazione confermata viene salvata subito in `viBro.ini`. Destinazione non raggiungibile: messaggio e possibilità di sceglierne un'altra. Stessa cartella: nessuna operazione. Nome già presente: *Mantieni entrambi* (`nome (2).ext`), *Sovrascrivi* (solo come scelta esplicita) o *Annulla*.
+- Spostamento tra volumi diversi: copia in un file temporaneo con avanzamento e annullamento (la finestra compare se dura più di 0,4 s), controllo della dimensione, poi rinomina e solo alla fine eliminazione della sorgente. Stesso volume: rinomina istantanea.
+- Prima di ogni operazione il player rilascia il file e si attende che Windows ne chiuda l'handle. Dopo eliminazione o spostamento riusciti viene caricato in pausa il file successivo (o il precedente, se era l'ultimo); se la cartella resta vuota, l'area video si svuota. L'elenco riflette sempre lo stato reale del disco.
+- La ripetizione automatica dei tasti e le operazioni concorrenti vengono ignorate.
+
 ## [0.2.0] - 2026-11-02
 
 Interfaccia completa.

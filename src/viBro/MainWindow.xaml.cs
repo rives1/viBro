@@ -498,7 +498,7 @@ public partial class MainWindow : Window
         if (r.Tag is not VideoItem item || !ReferenceEquals(item, _loadingItem)) return;
         _currentInfo = r.Info;
         string res = r.Info.Width > 0 ? $"{r.Info.Width}x{r.Info.Height}" : "no video";
-        SetStatus($"{item.Name}  |  {r.Info.Codec} {res}  |  hwdec: {Display(r.Info.Hwdec)}");
+        SetStatus(ApplyPostLoadActions(item, $"{item.Name}  |  {r.Info.Codec} {res}  |  hwdec: {Display(r.Info.Hwdec)}"));
         _lastLoadText = $"{r.Kind} {r.ElapsedMs:0} ms";
         UpdateMetricsText();
 
@@ -594,6 +594,7 @@ public partial class MainWindow : Window
 
         bool alt = (mods & ModifierKeys.Alt) != 0;
         bool ctrl = (mods & ModifierKeys.Control) != 0;
+        bool shift = (mods & ModifierKeys.Shift) != 0;
 
         switch (key)
         {
@@ -625,6 +626,20 @@ public partial class MainWindow : Window
 
             case Key.L when ctrl && !alt:
                 FocusPathBox();
+                return true;
+
+            // File operations: never on key auto-repeat (one key press = at most one operation).
+            case Key.Delete when !alt && !ctrl:
+            case Key.R when !alt && !ctrl:
+                if (!isRepeat) DeleteSelected();
+                return true;
+
+            case Key.F2 when !alt && !ctrl:
+                if (!isRepeat) RenameSelected();
+                return true;
+
+            case Key.W when !alt && !ctrl:
+                if (!isRepeat) MoveSelected(useLastDestination: shift);
                 return true;
         }
         return false;

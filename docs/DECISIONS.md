@@ -96,3 +96,24 @@ La specifica sospende le scorciatoie solo nei campi di testo e nelle finestre mo
 
 ## D-021 — Ordinamento dell'elenco
 Clic sull'intestazione: ordine crescente; nuovo clic sulla stessa colonna: inverte. A parità di dimensione o data si ordina per nome (naturale). La selezione corrente resta selezionata e il video non viene ricaricato. `NaturalComparer` usa `StrCmpLogicalW` su Windows, con un'implementazione interna di ripiego usata nei test.
+
+## D-022 — Operazioni sui file: scelte d'interfaccia (0.3.0, scelte dell'utente)
+- W apre la finestra standard di Windows per la scelta della cartella, inizializzata sull'ultima destinazione (o sulla cartella corrente).
+- Conferma di eliminazione con `MessageBox` Sì/No e **Sì predefinito**: Canc e poi Invio eliminano. Il testo indica nome e tipo (Cestino o definitiva); per la rete l'icona è di avviso e il testo dice che il file non sarà recuperabile.
+- Rinomina in una piccola finestra (non nell'elenco virtualizzato).
+- Conflitto di nome nello spostamento: *Mantieni entrambi* (predefinito), *Sovrascrivi* (solo come scelta esplicita), *Annulla*.
+
+## D-023 — Cestino e "nessuna eliminazione definitiva senza nuova conferma"
+I file locali vanno al Cestino con `SHFileOperation(FO_DELETE)` e i flag `FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT | FOF_WANTNUKEWARNING`. Con `FOF_WANTNUKEWARNING`, quando Windows non può cestinare un file (troppo grande, unità senza Cestino) chiede lui stesso prima di eliminarlo definitivamente: è la "nuova conferma esplicita" della specifica. Un rifiuto lascia il file. L'esito si verifica sempre controllando che il file non esista più. Limite: `SHFileOperation` non accetta percorsi oltre 260 caratteri, e in quel caso l'operazione fallisce e viene segnalata. L'alternativa `IFileOperation` (COM) è più complessa ed è rimandata.
+I file UNC e delle unità mappate (`DriveType.Network`) si eliminano con `File.Delete`, perché in rete il Cestino non esiste; la conferma lo dichiara.
+
+## D-024 — Rilascio del file prima delle operazioni
+`MpvPlayer.ReleaseFileAsync()` invia `stop` e termina con `END_FILE` o `idle-active=true` (timeout 3 s). Poi `FileOps.WaitUntilReleasedAsync` prova ad aprire il file in modo esclusivo fino a 5 s, perché l'handle di Windows può chiudersi un attimo dopo l'evento. Se il file resta occupato da un altro programma, l'operazione prosegue e l'errore reale viene mostrato. In caso di fallimento il file viene ricaricato in pausa nella posizione precedente.
+
+## D-025 — Spostamento sicuro
+- Stesso volume (stessa radice; la stessa condivisione UNC conta come un volume): `File.Move`, cioè una rinomina atomica.
+- Volumi diversi: copia in `<destinazione>.vibro-partial` a blocchi di 4 MB con avanzamento e annullamento, pre-allocazione (fallisce subito se il disco è pieno), flush su disco, controllo della dimensione, copia delle date, rinomina nel nome finale (senza sovrascrivere, salvo scelta esplicita) e **solo alla fine** eliminazione della sorgente. Annullamento o errore: si elimina il temporaneo e la sorgente resta intatta. Se la sorgente non si può eliminare dopo una copia riuscita, viene segnalato che il file è in entrambe le posizioni.
+- Un'unità mappata e il percorso UNC della stessa condivisione hanno radici diverse, quindi passano per la copia: più lento, ma corretto.
+
+## D-026 — Verifica della compilazione WPF fuori da Windows
+Dalla 0.3.0 il progetto completo, XAML compreso, viene compilato anche su Linux (.NET SDK 10.0.114 con `EnableWindowsTargeting`), usando gli assembly di riferimento `Microsoft.WindowsDesktop.App.Ref` 10.0.14 presi dall'SDK installato da `build.cmd`. In questo modo gli errori di compilazione si scoprono prima della prova su Windows; il comportamento va comunque verificato su Windows.

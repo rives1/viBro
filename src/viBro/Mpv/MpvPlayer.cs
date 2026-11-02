@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ViBro.Mpv;
 
@@ -24,7 +25,7 @@ internal sealed class MpvPlayer : IDisposable
     private const ulong UdOther = 0, UdSeek = 2;
     private const ulong UdLoadBase = 1UL << 32; // loadfile requests carry UdLoadBase + load sequence
     private const long AnyEntry = -2;           // fallback when mpv does not report the entry id
-    private const ulong ObsTimePos = 1, ObsDuration = 2, ObsPause = 3, ObsEof = 4, ObsVolume = 5, ObsMute = 6;
+    private const ulong ObsTimePos = 1, ObsDuration = 2, ObsPause = 3, ObsEof = 4, ObsVolume = 5, ObsMute = 6, ObsIdle = 7;
     private static readonly TimeSpan SeekTimeout = TimeSpan.FromSeconds(3);
 
     private IntPtr _handle;
@@ -39,6 +40,8 @@ internal sealed class MpvPlayer : IDisposable
     private volatile bool _paused = true;
     private volatile bool _eof;
     private volatile bool _muted;
+    private volatile bool _idle = true;
+    private TaskCompletionSource<bool>? _releaseTcs;
 
     // Load tracking (guarded by _gate). The reply to "loadfile" reports the playlist entry id
     // of the new file; START_FILE / END_FILE carry the same id. Files replaced before they
@@ -122,6 +125,7 @@ internal sealed class MpvPlayer : IDisposable
             Observe(ObsEof, "eof-reached", MpvFormat.Flag);
             Observe(ObsVolume, "volume", MpvFormat.Double);
             Observe(ObsMute, "mute", MpvFormat.Flag);
+            Observe(ObsIdle, "idle-active", MpvFormat.Flag);
         }
         catch
         {
@@ -169,6 +173,44 @@ internal sealed class MpvPlayer : IDisposable
             Command(UdOther, "set", "pause", "yes");
             Command(UdLoadBase + (ulong)_loadSeq, "loadfile", path, "replace");
         }
+    }
+
+    /// <summary>
+    /// Unloads the current file so that it can be renamed, moved or deleted. Completes when mpv
+    /// reports the end of the file or is idle (callers also wait for the OS handle to close).
+    /// </summary>
+    public Task ReleaseFileAsync()
+    {
+        TaskCompletionSource<bool> tcs;
+        bool wasActive;
+        lock (_gate)
+        {
+            if (_handle == IntPtr.Zero) return Task.CompletedTask;
+            wasActive = _hasFile || _pendingLoad != null;
+            _pendingLoad = null;
+            _loadArmed = false;
+            _hasFile = false;
+            _currentTag = null;
+            ResetSeekLocked();
+            Volatile.Write(ref _duration, 0);
+            Volatile.Write(ref _timePos, 0);
+            tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _releaseTcs = tcs;
+            Command(UdOther, "stop");
+        }
+        if (!wasActive && _idle) CompleteRelease(); // nothing was loaded: no END_FILE will come
+        return tcs.Task;
+    }
+
+    private void CompleteRelease()
+    {
+        TaskCompletionSource<bool>? tcs;
+        lock (_gate)
+        {
+            tcs = _releaseTcs;
+            _releaseTcs = null;
+        }
+        tcs?.TrySetResult(true);
     }
 
     public void Stop()
@@ -371,11 +413,16 @@ internal sealed class MpvPlayer : IDisposable
             case ObsMute:
                 _muted = has && Marshal.ReadInt32(prop.Data) != 0;
                 break;
+            case ObsIdle:
+                _idle = has && Marshal.ReadInt32(prop.Data) != 0;
+                if (_idle) CompleteRelease();
+                break;
         }
     }
 
     private void OnEndFile(MpvEventEndFile ef)
     {
+        CompleteRelease();
         PendingLoad? failed = null;
         lock (_gate)
         {

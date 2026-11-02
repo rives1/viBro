@@ -1,6 +1,6 @@
 # CONTEXT — stato del progetto per riprendere il lavoro
 
-_Aggiornato: 2026-11-02 · ultima versione: **0.2.0** (tag `v0.2.0`) · prossima: 0.3.0 · branch: `main`_
+_Aggiornato: 2026-11-02 · ultima versione: 0.2.0 (tag `v0.2.0`) · **in sviluppo: 0.3.0** · branch: `main`_
 
 ## Obiettivo corrente
 Prototipo 0.1.0. Deve dimostrare che l'EXE è autonomo, che il video si carica in pausa e che la navigazione è abbastanza rapida sui file reali (SSD e NAS). Solo dopo questa verifica si passa alla 0.2.0 (interfaccia completa). Specifica: [SPEC.md](SPEC.md).
@@ -75,5 +75,16 @@ Funzionalità: albero delle cartelle (`Tree/`), `viBro.ini` (`Settings/`), layou
 
 Codice verificato: commit `13095f5`. Il tag `v0.2.0` è sul commit di chiusura della documentazione, senza modifiche al codice.
 
+## 0.3.0 — stato
+Codice scritto: `Util/FileOps.cs` (validazione dei nomi, rinomina, Cestino o eliminazione definitiva, spostamento con copia, avanzamento e annullamento), `MpvPlayer.ReleaseFileAsync`, `Dialogs.cs` (rinomina, conflitto, avanzamento), `MainWindow.FileOps.cs` (Canc/R, F2, W, Shift+W). Decisioni D-022…D-026.
+
+Verificato fuori da Windows:
+- **progetto completo, WPF e XAML compresi, compilato** con .NET SDK 10.0.114 e assembly di riferimento WindowsDesktop 10.0.14 (D-026);
+- 35 test su `FileOps`: nomi non validi e riservati, conflitti di rinomina, nomi univoci, spostamento sullo stesso volume e con copia, avanzamento, date conservate, conflitto senza sovrascrittura, sovrascrittura esplicita, annullamento a metà copia (sorgente intatta, nessun temporaneo), attesa del rilascio dell'handle;
+- rilascio del file con libmpv reale: dopo un file caricato, a player inattivo, e caricamento successivo.
+
+Da verificare su Windows: Cestino e avviso di eliminazione definitiva di Windows, eliminazione sul NAS, finestre di dialogo, spostamento tra disco locale e NAS con avanzamento (vedi [docs/TEST-PLAN-0.3.0.md](docs/TEST-PLAN-0.3.0.md)).
+
 ## Prossimo passo
-Versione 0.3.0: eliminazione (Cestino per file locali, eliminazione definitiva per file di rete e unità mappate, conferma con nome e tipo, nessuna eliminazione definitiva di ripiego senza nuova conferma), rinomina (F2, estensione preservata, nomi non validi, nessuna sovrascrittura, ricarica in pausa nella posizione precedente), spostamento (W / Shift+W, destinazione in `viBro.ini`, avanzamento e annullamento, sorgente conservata fino al termine della copia). Prima di ogni operazione il player rilascia il file; la ripetizione automatica dei tasti non deve provocare operazioni multiple. Prima di iniziare, chiarire con l'utente i punti aperti dell'interfaccia (dialoghi di conferma, scelta della destinazione).
+1. Compilare la 0.3.0 su Windows ed eseguire [docs/TEST-PLAN-0.3.0.md](docs/TEST-PLAN-0.3.0.md) **su file di prova copiati apposta**.
+2. Chiudere la 0.3.0, poi la 0.4.0: temi Light/Dark, gestione degli errori, ottimizzazione, portabilità.

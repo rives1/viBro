@@ -43,7 +43,7 @@ _Aggiornato: 2026-11-02 22:30 · branch `main` · ultimo commit `54d2a9e` · ult
 - `Mpv/MpvNative.cs` (P/Invoke, verificato su `client.h`); `Mpv/MpvPlayer.cs` (comandi asincroni, caricamenti tracciati per `playlist_entry_id`, salti accorpati, `ReleaseFileAsync`, messaggi di errore); `Mpv/MpvHost.cs` (finestra nativa figlia).
 - `MainWindow.xaml(.cs)` (layout, albero, elenco, tastiera con hook `ThreadPreprocessMessage` per tasti e mouse sul video, schermo intero, temi, misure); `MainWindow.FileOps.cs` (elimina, rinomina, sposta); `Dialogs.cs` (rinomina, conflitto, avanzamento).
 - `Settings/IniFile.cs`, `Settings/AppSettings.cs` (`viBro.ini`, schema 1); `Tree/FolderNode.cs`, `Tree/FolderTreeModel.cs`.
-- `Util/`: `FileOps` (operazioni sicure, Cestino tramite `SHFileOperation` / `IFileOperation`), `FolderScanner`, `NaturalComparer`, `ThemeManager`, `ErrorLog`, `NativePreload` (Vulkan), `MetricsLog`, `AppInfo`, `StartupOptions`, `NativeMethods`.
+- `Util/`: `FileOps` (operazioni sicure, Cestino tramite `SHFileOperation` / `IFileOperation`), `FolderScanner`, `NaturalComparer`, `ThemeManager`, `ErrorLog`, `NativePreload` (Vulkan), `MetricsLog`, `AppInfo`, `StartupOptions`, `NativeMethods`, `TreeIcons` (icone dell'albero + convertitore), `SliderDrag` (clic e trascinamento sui cursori).
 
 ## 7. Note operative per l'assistente (come si è lavorato)
 - **Preferenze dell'utente:** risposte dirette e critiche, in italiano; spiegare il perché; fare domande prima di decidere i punti aperti (usate scelte multiple); rispondere solo con certezze elevate. Interfaccia in inglese.

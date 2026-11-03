@@ -169,7 +169,7 @@ Versione	Obiettivo
 0.4.0	Temi, gestione errori, ottimizzazione e verifiche di portabilità (confluita nella 0.5.0)
 0.5.0	Mouse sul video: clic per Play/Pause, doppio clic per lo schermo intero, menu del tasto destro, rotella a schermo intero
 0.6.0	Riproduzione conservata al cambio di file, copia, trascinamento col tasto destro, rotella sul video, barra di stato con conteggio, fascia in basso a schermo intero, conferma vicino al puntatore, Ctrl+W
-1.0.0	Prima versione completa e verificata
+1.0.0	Prima versione completa e verificata (rilasciata il 2026-11-03)
 
 
 Prima di sviluppare tutta l’applicazione, il prototipo 0.1.0 deve dimostrare tre cose: EXE autonomo funzionante, caricamento del video in pausa e navigazione sufficientemente rapida sui tuoi file. Questo è il controllo più utile per confermare la scelta tecnica senza investire subito nell’intera interfaccia.

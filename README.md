@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.0.0 in final testing**, the first complete and verified version; latest release: 0.6.0. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.0.0 released**, the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 

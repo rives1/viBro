@@ -248,3 +248,6 @@ I commit erano firmati con il segnaposto `viBro developer`. Dalla 1.0.0: `rives1
 
 ## D-055 — Contenuto della 1.0.0 (2026-11-03)
 Nessuna funzione nuova: la 1.0.0 è la 0.6.0 verificata nel suo insieme. Revisione rispetto alla SPEC: requisiti soddisfatti; WMV resta tra i formati (provato nella 0.1.0: VC-1 con decodifica hardware, WMV3 in software; l'assistente aveva detto per errore che non era mai stato provato, e l'utente ha confermato di tenerlo). Piano di prova `TEST-PLAN-1.0.0.md`: regressione compatta di tutte le funzioni, un file per formato (WMV compreso) e sessione di memoria di almeno 50 cambi di video (scelta dell'utente). Il tag `v1.0.0` si crea dopo la conferma di tutte le prove.
+
+## D-056 — Chiusura della 1.0.0 (2026-11-03)
+L'utente ha confermato tutte le prove di `TEST-PLAN-1.0.0.md` con l'EXE compilato da `7a7d0d5` (codice invariato fino al tag). Sessione di memoria: 90 caricamenti in 38 minuti, memoria di lavoro mediana 333 MB nei primi 10 e 325 MB negli ultimi 10, privata 364 → 400 MB, nessuna crescita continua; apertura/cambio mediana 86 ms, salti rapidi 17 ms, esatti 43 ms, nessun timeout. Limite: la sessione non conteneva file 4K (per il 4K vale D-049). Rilascio: tag `v1.0.0`, distribuzione solo come sorgente (D-052). Nessuna prova aperta passa alla versione successiva.

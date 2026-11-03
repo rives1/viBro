@@ -1,11 +1,11 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-03 · branch `main` · ultimo commit `ad8ecec` · ultima versione rilasciata **0.5.0** (tag `v0.5.0`) · **in sviluppo: 0.6.0, scritta e compilata, da provare su Windows**_
+_Aggiornato: 2026-11-03 · branch `main` · ultima versione rilasciata **0.6.0** (tag `v0.6.0`) · **prossima versione: contenuto da definire**_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-047 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-048 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
-- Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0` e `v0.5.0` non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
+- Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0`, `v0.5.0` e `v0.6.0` forse non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`. **Variante predefinita: EXE normale** (D-047: avvio 410 ms contro 575, ~70 MB di memoria in meno).
 - Versione: in un solo punto, `Directory.Build.props` (ora `0.6.0`). Appare nel titolo e nelle proprietà dell'EXE come `0.6.0+<commit>`.
 
@@ -17,7 +17,7 @@ _Aggiornato: 2026-11-03 · branch `main` · ultimo commit `ad8ecec` · ultima ve
 | 0.3.0 | Elimina (Canc/R: Cestino locale, definitiva in rete), rinomina (F2), sposta (W/Shift+W, conflitti, avanzamento e annullamento, copia verificata prima di eliminare la sorgente) | ✔ tag `v0.3.0` |
 | 0.4.0 | Temi Light/Dark (Fluent + pulsante *Theme*), barra dei controlli **sopra** il video, fascia a schermo intero con barra temporale centrata al 40% che si nasconde da sola, `viBro-errors.log`, loader Vulkan incorporato, Cestino per percorsi di 260+ caratteri, misura del tempo di avvio, icona, icone dell'albero, righe compatte, clic e trascinamento sui cursori | ✔ confluita nella 0.5.0 (D-039) |
 | 0.5.0 | Mouse sul video: clic per Play/Pause, doppio clic per lo schermo intero, menu del tasto destro (Delete, Move..., Move to <ultima cartella>), rotella a schermo intero (giù = successivo), rotella sulla barra temporale (±5 s), `--trace-input` | ✔ tag `v0.5.0` (2026-11-03): prove superate tranne i tempi di avvio (spostati nella 0.6.0) |
-| 0.6.0 | Play/Pause conservato al cambio di file, copia (C/Shift+C e menu), trascinamento col tasto destro per spostarsi nel video, rotella sul video anche a finestra normale, rotella sulla barra ±3 s, barra di stato compatta con numero e dimensione dei video, fascia in basso a schermo intero, conferma di eliminazione vicino al puntatore, Ctrl+W | **scritta e compilata; da provare su Windows** |
+| 0.6.0 | Play/Pause conservato al cambio di file, copia (C/Shift+C e menu), trascinamento col tasto destro per spostarsi nel video, rotella sul video anche a finestra normale, rotella sulla barra ±3 s, barra di stato compatta con numero e dimensione dei video, fascia in basso a schermo intero, conferma di eliminazione vicino al puntatore, Ctrl+W | ✔ tag `v0.6.0` (2026-11-03): tutte le prove superate |
 | 1.0.0 | Prima versione completa e verificata | da fare |
 
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
@@ -26,12 +26,10 @@ _Aggiornato: 2026-11-03 · branch `main` · ultimo commit `ad8ecec` · ultima ve
 - Memoria: 260–470 MB, stabile. I salti sui fotogrammi chiave per ±1/±5 s **non spostavano l'immagine** (GOP di 5–24 s): da qui la modalità mista (D-007).
 
 ## 4. Stato attuale e prossimo passo
-1. **0.5.0 rilasciata il 2026-11-03** (tag `v0.5.0`, D-042), comprende la 0.4.0.
-2. **0.6.0 scritta e compilata nel container, non provata su Windows** (richieste dell'utente del 2026-11-03): Play/Pause conservato al cambio di file (D-043, modifica della SPEC), copia (D-044), trascinamento col tasto destro (D-045), rotella sul video a finestra normale, ±3 s sulla barra, barra di stato compatta con conteggio, fascia in basso a schermo intero, `DeleteConfirmDialog` vicino al puntatore, Ctrl+W (D-046).
-3. Piano di prova aperto: [docs/TEST-PLAN-0.6.0.md](docs/TEST-PLAN-0.6.0.md): prove 0.6.0. I 5+5 avvii sono fatti (2026-11-03): scelto l'EXE normale (D-047), D-032 chiusa.
-4. Punti da osservare nelle prove: il trascinamento col tasto destro usa la cattura del mouse della finestra principale (`SetCapture`); la conferma di eliminazione calcola la posizione con DPI e monitor del puntatore.
-5. Rotella: la causa del primo comportamento osservato nella 0.5.0 (D-041) non è stata identificata; `--trace-input` resta per la diagnostica.
-6. Verso la 1.0.0. Punti aperti: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione.
+1. **0.6.0 rilasciata il 2026-11-03** (tag `v0.6.0`, D-048): tutte le prove di [docs/TEST-PLAN-0.6.0.md](docs/TEST-PLAN-0.6.0.md) superate. Contenuto: Play/Pause conservato al cambio di file (D-043), copia (D-044), trascinamento col tasto destro (D-045), rotella sul video e ±3 s sulla barra, barra di stato compatta con conteggio, fascia in basso a schermo intero, conferma vicino al puntatore, Ctrl+W (D-046).
+2. EXE distribuito: **normale** (D-047, misure di avvio: 410 ms contro 575 del compresso). D-032 chiusa.
+3. Nessuna prova aperta. Il prossimo piano di prova nasce con la prossima versione (`docs/TEST-PLAN-0.7.0.md` o `1.0.0`).
+4. Prossimo passo: l'utente definisce la prossima versione. Punti aperti verso la 1.0.0: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione. Rotella: causa del primo comportamento della 0.5.0 non identificata (D-041), `--trace-input` disponibile.
 
 ## 5. Dipendenze fissate
 | Dipendenza | Versione | Dove |
@@ -56,4 +54,4 @@ _Aggiornato: 2026-11-03 · branch `main` · ultimo commit `ad8ecec` · ultima ve
 - **Flusso per ogni versione:** domande, codice, compilazione e test su Linux, copia sul PC, documentazione (CHANGELOG, DECISIONS, CONTEXT, TEST-PLAN), commit; poi l'utente esegue `build.cmd` e il piano di prova; infine chiusura con data, fotografia `docs/handover/CONTEXT-vX.Y.Z.md` e tag.
 
 ## 8. Messaggio per riprendere in una nuova chat
-> Progetto viBro nella cartella `C:\Users\ammin\Documents\Claude_vibro\viBro`. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. Siamo alla 0.6.0, in prova: ho ricompilato con `build.cmd` e ti riporto l'esito di `docs/TEST-PLAN-0.6.0.md`.
+> Progetto viBro nella cartella `C:\Users\ammin\Documents\Claude_vibro\viBro`. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 0.6.0 è rilasciata (tag `v0.6.0`); ti descrivo cosa voglio nella prossima versione.

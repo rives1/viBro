@@ -205,3 +205,6 @@ Misura su Windows 11 con l'EXE 0.6.0, 5 avvii per variante (righe `startup` di `
 | Memoria privata | ~108 MB | ~178 MB | +70 MB |
 
 Il compresso decomprime in memoria gli assembly contenuti nell'EXE a ogni avvio: più tempo e più memoria per tutta la sessione, in cambio solo di spazio su disco e di trasferimento. Con la reattività come priorità della SPEC, la variante predefinita è l'**EXE normale** (`build.cmd`, `artifacts\publish`, zip in `dist\`). Il compresso resta disponibile con `build\build.ps1 -Compress`, non documentato come principale. Il primo avvio dell'EXE normale (549 ms) è più alto degli altri, probabilmente per la cache del disco di Windows; nessuno dei due primi avvii mostra un'estrazione nella cache del bundle (già presente).
+
+## D-048 — Chiusura della 0.6.0 (2026-11-03)
+L'utente ha confermato tutte le prove di `TEST-PLAN-0.6.0.md` con l'EXE compilato da `647beda` (codice invariato fino al tag). La 0.6.0 viene rilasciata (tag `v0.6.0`). Nessuna prova aperta passa alla versione successiva; il prossimo piano di prova nascerà con la definizione della 0.7.0 (o della 1.0.0).

@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [0.6.0] - non ancora rilasciata
+## [0.6.0] - 2026-11-03
 
 ### Aggiunto
 - Copia del file: tasti C / Shift+C e voci *Copy...* / *Copy to <cartella>* nel menu del tasto destro. Stesse regole dello spostamento (cartella raggiungibile, stessa cartella rifiutata, conflitto di nome con *Keep both* / *Overwrite*, avanzamento e annullamento, copia verificata in un file temporaneo). L'originale resta e il video continua a essere riprodotto. Ultima destinazione di copia separata (`[Folders] LastCopyDestination`).

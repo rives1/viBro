@@ -276,6 +276,13 @@ internal sealed class MpvPlayer : IDisposable
 
     public void ToggleMute() => Command(UdOther, "cycle", "mute");
 
+    /// <summary>
+    /// Text drawn by mpv over the video (OSD) for <paramref name="durationMs"/>. Commands sent as an
+    /// argument array are not property-expanded, so the text is shown literally.
+    /// </summary>
+    public void ShowText(string text, int durationMs)
+        => Command(UdOther, "show-text", text, durationMs.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
     public void SetHwdec(string mode) => Command(UdOther, "set", "hwdec", mode);
 
     // ---------------------------------------------------------------- seek internals

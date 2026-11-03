@@ -342,6 +342,7 @@ public partial class MainWindow
         // The next file loaded after this operation keeps the current play/pause state.
         _playAfterRelease = _player != null && !_player.IsPaused;
         _loadingItem = null;
+        SetCurrentItem(null); // nothing is loaded while the file operation runs
         _currentInfo = null;
         if (_player != null)
             await Task.WhenAny(_player.ReleaseFileAsync(), Task.Delay(3000));

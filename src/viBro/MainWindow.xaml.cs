@@ -208,6 +208,9 @@ public partial class MainWindow : Window
             new("ytdl", "no"),
             new("terminal", "no"),
             new("osc", "no"),
+            // OSD text (show-text: time after a seek and file name in fullscreen): smaller than mpv's default.
+            new("osd-font-size", "36"),
+            new("osd-border-size", "2"),
             new("input-default-bindings", "no"),
             new("input-vo-keyboard", "no"),
             new("input-cursor", "no"),
@@ -496,6 +499,7 @@ public partial class MainWindow : Window
 
     private void FileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        UpdateFolderSummary(); // "12 / 128 videos"
         if (_suppressSelectionLoad) return;
         if (FileList.SelectedItem is VideoItem item)
             LoadItem(item);
@@ -517,13 +521,15 @@ public partial class MainWindow : Window
         _player.Load(item.FullPath, item, play);
     }
 
+    /// <summary>"12 / 128 videos · 412.5 GB": position of the selected file, count and total size.</summary>
     private void UpdateFolderSummary()
     {
         long total = 0;
         foreach (var v in _items) total += v.Size;
-        FolderSummaryText.Text = _items.Count == 1
-            ? "1 video · " + VideoItem.FormatSize(total)
-            : $"{_items.Count} videos · {VideoItem.FormatSize(total)}";
+        int index = FileList.SelectedIndex;
+        string count = _items.Count == 1 ? "1 video" : $"{_items.Count} videos";
+        if (index >= 0 && index < _items.Count) count = $"{index + 1} / {count}";
+        FolderSummaryText.Text = count + " · " + VideoItem.FormatSize(total);
     }
 
     /// <summary>E / D and the wheel: previous / next file in the current order, keeping play/pause. No wrap-around.</summary>
@@ -541,6 +547,8 @@ public partial class MainWindow : Window
     {
         if (r.Tag is not VideoItem item || !ReferenceEquals(item, _loadingItem)) return;
         _currentInfo = r.Info;
+        SetCurrentItem(item);
+        if (_isFullscreen) _player?.ShowText(item.Name, FileNameOsdMs); // which file, without the list
         string res = r.Info.Width > 0 ? $"{r.Info.Width}x{r.Info.Height}" : "no video";
         SetStatus(ApplyPostLoadActions(item, $"{item.Name}  |  {r.Info.Codec} {res}  |  hwdec: {Display(r.Info.Hwdec)}"));
         _lastLoadText = $"{r.Kind} {r.ElapsedMs:0} ms";
@@ -551,6 +559,7 @@ public partial class MainWindow : Window
 
     private void OnLoadFailed(string path, string error)
     {
+        SetCurrentItem(null);
         SetStatus($"Cannot play {Path.GetFileName(path)}: {error}");
         ErrorLog.Write("playback", $"Cannot open {Path.GetFileName(path)}: {error}");
     }
@@ -572,6 +581,7 @@ public partial class MainWindow : Window
         UpdateMetricsText();
 
         RecordMetric(kind, r.ElapsedMs, item, r.Exact ? "exact" : "keyframes", r.Delta, r.Target, r.Landed, r.Coalesced);
+        if (!r.TimedOut) ShowTimeOsd(r.Landed ?? r.Target); // fullscreen only
     }
 
     private void TimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -588,8 +598,8 @@ public partial class MainWindow : Window
         double position = Math.Min(_player.TimePos, Math.Max(duration, 0));
 
         TimeText.Text = FormatTime(position) + " / " + FormatTime(duration);
-        PlayButton.Content = _player.IsPaused ? "Play" : "Pause";
-        MuteButton.Content = _player.IsMuted ? "Unmute" : "Mute";
+        UpdateTransportIcons(_player.IsPaused, _player.IsMuted);
+        _currentItem?.SetCurrent(true, _player.IsPaused);
 
         if (!TimeSlider.IsMouseCaptureWithin && !_scrubbing) // the user is choosing the position
         {
@@ -720,6 +730,10 @@ public partial class MainWindow : Window
             case Key.Delete when !alt && !ctrl:
             case Key.R when !alt && !ctrl:
                 if (!isRepeat) DeleteSelected();
+                return true;
+
+            case Key.F2 when ctrl && !alt:
+                if (!isRepeat) Dispatcher.BeginInvoke(new Action(() => CommandsDialog.Open(this))); // after this key
                 return true;
 
             case Key.F2 when !alt && !ctrl:
@@ -883,7 +897,11 @@ public partial class MainWindow : Window
     }
 
     private void UpdateThemeButton()
-        => ThemeButton.Content = ThemeManager.IsDark(_settings.Theme) ? "Theme: Dark" : "Theme: Light";
+    {
+        bool dark = ThemeManager.IsDark(_settings.Theme);
+        ThemeButton.Content = dark ? MoonGlyph : SunGlyph; // the current theme
+        ThemeButton.ToolTip = dark ? "Theme: Dark (click for Light)" : "Theme: Light (click for Dark)";
+    }
 
     // ================================================================ errors and startup
 

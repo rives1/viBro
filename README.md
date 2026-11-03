@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.1.0 in testing** (controls below the video, wheel seeks in the normal window); latest release: 1.0.0, the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.2.0 in testing** (icon buttons, time under the pointer, loaded file marked in the list, on-screen time and file name in fullscreen, Ctrl+F2 commands window; includes 1.1.0); latest release: 1.0.0, the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -21,7 +21,9 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 - Sorting by Name, Size, Date modified; three resizable panes; settings in `viBro.ini`.
 - Delete, rename, move and copy files, with confirmations, progress and cancellation.
 - Light/Dark themes (*Theme* button), control bar (timeline, volume) below the video and above the file list, a timeline band below the video in fullscreen.
-- Folder icon in front of the path bar.
+- Folder icon in front of the path bar; icon buttons for Play/Pause, Mute (shows the state), Browse and Theme.
+- Time under the pointer on the timeline; the loaded file is marked in the list (▶ playing, ❚❚ paused, bold name); the status bar shows the position, e.g. `12 / 128 videos · 412.5 GB`.
+- In fullscreen, the time appears over the video for about 1 s after a seek and the file name for 0.8 s after a change (mpv on-screen display).
 - Compact status bar: number of videos in the folder and their total size, status, measurements.
 - Error log `viBro-errors.log` next to the EXE.
 
@@ -57,6 +59,7 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | Shift + W | Move to the last destination used | 0.3.0 |
 | C | Choose a destination folder and copy the file (same rules as moving; the original stays) | 0.6.0 |
 | Shift + C | Copy to the last copy destination (separate from the move destination) | 0.6.0 |
+| Ctrl + F2 | Show the commands window (keyboard and mouse) | 1.2.0 |
 | Ctrl + W | Close viBro | 0.6.0 |
 
 ## Mouse on the video

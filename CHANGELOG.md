@@ -2,7 +2,19 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.1.0] - non ancora rilasciata
+## [1.2.0] - non ancora rilasciata
+
+Aspetto e indicazioni. Comprende anche le modifiche della 1.1.0, non rilasciata separatamente.
+
+### Aggiunto
+- Pulsanti a icone (Segoe Fluent Icons di Windows 11): Play/Pause, Mute (l'icona indica lo stato), Browse, Theme (sole/luna); tooltip con il tasto corrispondente.
+- Tempo sotto il puntatore sulla barra temporale (es. `00:42:17`), senza anteprima dell'immagine.
+- File caricato evidenziato nell'elenco: icona ▶ (in riproduzione) o ❚❚ (in pausa) davanti al nome e nome in grassetto, indipendente dalla selezione.
+- Posizione nella cartella nella barra di stato: `12 / 128 videos · 412.5 GB`.
+- A schermo intero: tempo sovrapposto al video (OSD di mpv) per circa 1 s dopo un salto, e nome del file per 0,8 s al cambio di file.
+- Ctrl+F2: finestra *Commands* con i comandi di tastiera e mouse.
+
+## [1.1.0] - non rilasciata separatamente (confluita nella 1.2.0)
 
 ### Aggiunto
 - Icona della cartella davanti alla barra del percorso (decorativa, la stessa dell'albero).

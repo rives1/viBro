@@ -13,10 +13,12 @@
     <DockPanel>
         <!-- Path bar -->
         <DockPanel x:Name="TopBar" DockPanel.Dock="Top" Margin="4">
-            <Button x:Name="ThemeButton" DockPanel.Dock="Right" Content="Theme" Margin="4,0,0,0"
-                    Padding="10,2" Focusable="False" Click="ThemeButton_Click" ToolTip="Switch between Light and Dark theme" />
-            <Button x:Name="BrowseButton" DockPanel.Dock="Right" Content="Browse..." Margin="4,0,0,0"
-                    Padding="10,2" Focusable="False" Click="BrowseButton_Click" />
+            <!-- Icon buttons (Segoe Fluent Icons, built into Windows 11; MDL2 Assets as fallback). -->
+            <Button x:Name="ThemeButton" DockPanel.Dock="Right" Content="&#xE706;" Margin="4,0,0,0" Width="36"
+                    FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14" Padding="0,4" Focusable="False" Click="ThemeButton_Click" />
+            <Button x:Name="BrowseButton" DockPanel.Dock="Right" Content="&#xE838;" Margin="4,0,0,0" Width="36"
+                    FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14" Padding="0,4" Focusable="False" Click="BrowseButton_Click"
+                    ToolTip="Browse for a folder" />
             <!-- Decorative folder icon, the same as in the tree. -->
             <Image x:Name="PathIcon" DockPanel.Dock="Left" Width="16" Height="16" Margin="2,0,6,0"
                    VerticalAlignment="Center" Focusable="False" />
@@ -91,20 +93,30 @@
                          band with only the timeline, centred and ~40% wide, shown on mouse movement or seeks. -->
                     <Border x:Name="TransportBar" DockPanel.Dock="Bottom" Padding="4" MouseMove="TransportBar_MouseMove">
                         <DockPanel>
-                            <Button x:Name="PlayButton" DockPanel.Dock="Left" Width="70" Content="Play" Focusable="False"
-                                    Click="PlayButton_Click" />
+                            <Button x:Name="PlayButton" DockPanel.Dock="Left" Width="40" Content="&#xE768;" Focusable="False"
+                                    FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14" Padding="0,4" Click="PlayButton_Click"
+                                    ToolTip="Play (Space, or click on the video)" />
                             <StackPanel x:Name="AudioControls" DockPanel.Dock="Right" Orientation="Horizontal">
-                                <Button x:Name="MuteButton" Width="64" Content="Mute" Focusable="False"
-                                        Margin="8,0,6,0" Click="MuteButton_Click" />
+                                <Button x:Name="MuteButton" Width="40" Content="&#xE767;" Focusable="False"
+                                        FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14" Padding="0,4" Margin="8,0,6,0" Click="MuteButton_Click"
+                                        ToolTip="Mute (M)" />
                                 <Slider x:Name="VolumeSlider" Width="110" Minimum="0" Maximum="100" Value="100"
                                         Focusable="False" VerticalAlignment="Center" IsMoveToPointEnabled="True"
                                         ValueChanged="VolumeSlider_ValueChanged" />
                             </StackPanel>
                             <DockPanel x:Name="SeekPanel">
+                                <!-- Time under the pointer (no picture preview: nothing is read from the file). -->
+                                <Popup x:Name="TimeHoverPopup" PlacementTarget="{Binding ElementName=TimeSlider}" Placement="Top"
+                                       IsHitTestVisible="False" Focusable="False" StaysOpen="True">
+                                    <Border x:Name="TimeHoverBorder" BorderThickness="1" Padding="6,2" CornerRadius="4">
+                                        <TextBlock x:Name="TimeHoverText" FontFamily="Consolas" />
+                                    </Border>
+                                </Popup>
                                 <TextBlock x:Name="TimeText" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="10,0,0,0"
                                            FontFamily="Consolas" Text="00:00:00 / 00:00:00" />
                                 <Slider x:Name="TimeSlider" Minimum="0" Maximum="1" Focusable="False" IsMoveToPointEnabled="True"
-                                        VerticalAlignment="Center" Margin="10,0,0,0" ValueChanged="TimeSlider_ValueChanged" />
+                                        VerticalAlignment="Center" Margin="10,0,0,0" ValueChanged="TimeSlider_ValueChanged"
+                                        MouseMove="TimeSlider_MouseMove" MouseLeave="TimeSlider_MouseLeave" />
                             </DockPanel>
                         </DockPanel>
                     </Border>
@@ -123,8 +135,23 @@
                           GridViewColumnHeader.Click="FileList_HeaderClick">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn x:Name="NameColumn" Header="Name" Width="480"
-                                            DisplayMemberBinding="{Binding Name}" />
+                            <!-- The loaded file: play/pause glyph and semibold name, independent of the selection. -->
+                            <GridViewColumn x:Name="NameColumn" Header="Name" Width="480">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding StateGlyph}" Width="18" FontSize="11" VerticalAlignment="Center"
+                                                       FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" />
+                                            <TextBlock x:Name="NameText" Text="{Binding Name}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                <Setter TargetName="NameText" Property="FontWeight" Value="SemiBold" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                             <GridViewColumn x:Name="SizeColumn" Header="Size" Width="100">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>

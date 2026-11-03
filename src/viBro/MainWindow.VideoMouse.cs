@@ -129,6 +129,7 @@ public partial class MainWindow
         _updatingTimeSlider = false;
         TimeText.Text = FormatTime(target) + " / " + FormatTime(_scrubDuration);
         ShowFullscreenBar();
+        ShowTimeOsd(target);
     }
 
     /// <summary>Called on Window.Activated (WM_ACTIVATE is handled before the click that caused it).</summary>

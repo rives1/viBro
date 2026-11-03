@@ -240,3 +240,94 @@ internal sealed class ProgressDialog : Window
         Close();
     }
 }
+
+/// <summary>Ctrl+F2: keyboard and mouse commands in one window. Esc or Enter closes it.</summary>
+internal sealed class CommandsDialog : Window
+{
+    private static readonly (string Section, (string Keys, string Action)[] Rows)[] Commands =
+    {
+        ("Keyboard", new[]
+        {
+            ("← / →", "Back / forward 1 s"),
+            ("↓ / ↑", "Back / forward 5 s"),
+            ("PgDown / PgUp", "Back / forward 1 min"),
+            ("Alt + PgDown / PgUp", "Back / forward 5 min"),
+            ("Space", "Play / Pause"),
+            ("E / D", "Previous / next video (play state kept)"),
+            ("M", "Mute on / off"),
+            ("F11 / Esc", "Enter / leave fullscreen"),
+            ("Ctrl + L", "Edit the path (Enter opens, Esc cancels)"),
+            ("Del or R", "Delete the file (confirmation)"),
+            ("F2", "Rename the file"),
+            ("W / Shift + W", "Move to a folder / to the last move folder"),
+            ("C / Shift + C", "Copy to a folder / to the last copy folder"),
+            ("Ctrl + F2", "This window"),
+            ("Ctrl + W", "Close viBro"),
+        }),
+        ("Mouse on the video", new[]
+        {
+            ("Click", "Play / Pause"),
+            ("Double click", "Enter / leave fullscreen"),
+            ("Right click", "Menu: Delete, Move, Copy"),
+            ("Right button + drag", "Move in the video (full width = full length)"),
+            ("Wheel, window", "Back / forward 3 s"),
+            ("Wheel, fullscreen", "Next (down) / previous (up) video"),
+        }),
+        ("Timeline", new[]
+        {
+            ("Click and drag", "Move in the video"),
+            ("Wheel", "Back / forward 3 s"),
+            ("Pointer", "Time under the pointer"),
+        }),
+    };
+
+    private CommandsDialog(Window owner)
+    {
+        DialogStyle.Apply(this, owner, "Commands");
+        Width = 560;
+        var grid = new Grid { Margin = new Thickness(12) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(170) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        int row = 0;
+        foreach (var (section, rows) in Commands)
+        {
+            AddRow(grid, row++, new TextBlock
+            {
+                Text = section,
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, row == 1 ? 0 : 10, 0, 4),
+            }, span: true);
+            foreach (var (keys, action) in rows)
+            {
+                AddRow(grid, row, new TextBlock { Text = keys, Margin = new Thickness(0, 1, 8, 1) });
+                var text = new TextBlock { Text = action, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 1, 0, 1) };
+                Grid.SetColumn(text, 1);
+                Grid.SetRow(text, row++);
+                grid.Children.Add(text);
+            }
+        }
+        var close = new Button { Content = "Close", IsDefault = true, IsCancel = true };
+        var panel = new StackPanel();
+        panel.Children.Add(new ScrollViewer
+        {
+            Content = grid,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            MaxHeight = SystemParameters.WorkArea.Height * 0.8,
+        });
+        var buttons = DialogStyle.Buttons(close);
+        buttons.Margin = new Thickness(12, 0, 12, 12);
+        panel.Children.Add(buttons);
+        Content = panel;
+        Loaded += (_, _) => close.Focus();
+    }
+
+    private static void AddRow(Grid grid, int row, UIElement element, bool span = false)
+    {
+        while (grid.RowDefinitions.Count <= row) grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        Grid.SetRow(element, row);
+        if (span) Grid.SetColumnSpan(element, 2);
+        grid.Children.Add(element);
+    }
+
+    public static void Open(Window owner) => new CommandsDialog(owner).ShowDialog();
+}

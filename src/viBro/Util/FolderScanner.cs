@@ -7,8 +7,30 @@ using System.Threading;
 
 namespace ViBro.Util;
 
-internal sealed class VideoItem
+internal sealed class VideoItem : System.ComponentModel.INotifyPropertyChanged
 {
+    // Segoe Fluent Icons: Play and Pause glyphs shown in front of the loaded file.
+    private const string PlayGlyph = "\uE768", PauseGlyph = "\uE769";
+    private bool _isCurrent, _isPaused = true;
+
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>The file loaded in the player (independent of the list selection).</summary>
+    public bool IsCurrent => _isCurrent;
+
+    /// <summary>Play glyph while playing, pause glyph while paused, empty when not loaded.</summary>
+    public string StateGlyph => !_isCurrent ? "" : _isPaused ? PauseGlyph : PlayGlyph;
+
+    public void SetCurrent(bool current, bool paused)
+    {
+        if (_isCurrent == current && _isPaused == paused) return;
+        bool currentChanged = _isCurrent != current;
+        _isCurrent = current;
+        _isPaused = paused;
+        if (currentChanged) PropertyChanged?.Invoke(this, new(nameof(IsCurrent)));
+        PropertyChanged?.Invoke(this, new(nameof(StateGlyph)));
+    }
+
     public VideoItem(string name, string fullPath, long size, DateTime modified, string storage)
     {
         Name = name;

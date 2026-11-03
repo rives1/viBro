@@ -80,6 +80,7 @@ Shift + W	Sposta nella destinazione utilizzata l’ultima volta
 C	Sceglie la cartella di destinazione e copia il file (0.6.0)
 Shift + C	Copia nell’ultima destinazione di copia (0.6.0)
 Ctrl + W	Chiude viBro (0.6.0)
+Ctrl + F2	Finestra dei comandi di tastiera e mouse (1.2.0)
 M	Mute on/off
 F11	Schermo intero
 Esc	Esce dallo schermo intero
@@ -95,6 +96,8 @@ Rotella sopra il video, a finestra normale (1.1.0)	Su: avanti 3 s; giù: indietr
 Rotella a schermo intero, tranne sopra la barra temporale	Giù: video successivo; su: video precedente (come D / E)
 
 Interfaccia (1.1.0): barra dei controlli (Play, barra temporale, tempo, Mute, volume) sotto il video e sopra l’elenco dei file a finestra normale; icona della cartella davanti alla barra del percorso; nella rinomina il cursore parte dall’inizio del nome, senza selezione.
+
+Interfaccia (1.2.0): pulsanti Play/Pause, Mute, Browse e Theme a icone (Segoe Fluent Icons) con tooltip che riporta il tasto; tempo sotto il puntatore sulla barra temporale, senza anteprima dell’immagine; file caricato evidenziato nell’elenco (icona ▶/❚❚ e grassetto); posizione nella cartella nella barra di stato; a schermo intero, tempo sovrapposto al video per circa 1 s dopo un salto e nome del file per 0,8 s al cambio di file (OSD di mpv).
 
 Interfaccia (0.6.0): barra di stato compatta con numero di video della cartella e spazio totale; a schermo intero la fascia con la barra temporale è sotto il video; la conferma di eliminazione si apre vicino al puntatore del mouse.
 
@@ -173,7 +176,8 @@ Versione	Obiettivo
 0.5.0	Mouse sul video: clic per Play/Pause, doppio clic per lo schermo intero, menu del tasto destro, rotella a schermo intero
 0.6.0	Riproduzione conservata al cambio di file, copia, trascinamento col tasto destro, rotella sul video, barra di stato con conteggio, fascia in basso a schermo intero, conferma vicino al puntatore, Ctrl+W
 1.0.0	Prima versione completa e verificata (rilasciata il 2026-11-03)
-1.1.0	Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
+1.2.0	Pulsanti a icone, tempo sotto il puntatore, file caricato evidenziato, posizione nella barra di stato, tempo e nome del file sovrapposti a schermo intero, Ctrl+F2 (comprende la 1.1.0)
+1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 
 Prima di sviluppare tutta l’applicazione, il prototipo 0.1.0 deve dimostrare tre cose: EXE autonomo funzionante, caricamento del video in pausa e navigazione sufficientemente rapida sui tuoi file. Questo è il controllo più utile per confermare la scelta tecnica senza investire subito nell’intera interfaccia.

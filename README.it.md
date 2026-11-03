@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.1.0 in prova** (controlli sotto il video, rotella per spostarsi nel video a finestra normale); ultima versione rilasciata: 1.0.0, prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.2.0 in prova** (pulsanti a icone, tempo sotto il puntatore, file caricato evidenziato, tempo e nome del file sovrapposti a schermo intero, finestra dei comandi con Ctrl+F2; comprende la 1.1.0); ultima versione rilasciata: 1.0.0, prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -24,7 +24,9 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
 
 - Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.
-- Icona della cartella davanti alla barra del percorso.
+- Icona della cartella davanti alla barra del percorso; pulsanti a icone per Play/Pause, Mute (indica lo stato), Browse e Theme.
+- Tempo sotto il puntatore sulla barra temporale; il file caricato è evidenziato nell'elenco (▶ in riproduzione, ❚❚ in pausa, nome in grassetto); la barra di stato mostra la posizione, es. `12 / 128 videos · 412.5 GB`.
+- A schermo intero il tempo compare sopra il video per circa 1 s dopo un salto e il nome del file per 0,8 s al cambio di file (OSD di mpv).
 - Barra di stato compatta: numero di video della cartella e spazio totale, stato, misure.
 - Registro degli errori `viBro-errors.log` accanto all'EXE.
 
@@ -60,6 +62,7 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | Shift + W | Sposta nell'ultima destinazione usata | 0.3.0 |
 | C | Sceglie la cartella di destinazione e copia il file (stesse regole dello spostamento; l'originale resta) | 0.6.0 |
 | Shift + C | Copia nell'ultima destinazione di copia (separata da quella dello spostamento) | 0.6.0 |
+| Ctrl + F2 | Mostra la finestra dei comandi (tastiera e mouse) | 1.2.0 |
 | Ctrl + W | Chiude viBro | 0.6.0 |
 
 ## Mouse sul video

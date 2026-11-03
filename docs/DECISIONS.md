@@ -258,3 +258,12 @@ Nuove funzioni compatibili, quindi versione MINOR.
 - **Rotella sopra il video a finestra normale = ±3 s** (scelta dell'utente: lo stesso passo della barra, invece di 5 o 10 s; su = avanti). A schermo intero resta il cambio di video, tranne sopra la barra temporale (±3 s). Il conteggio degli scatti si azzera quando cambia la funzione (salto o cambio video).
 - **Icona della barra del percorso:** `TreeIcons.Folder`, decorativa (scelta dell'utente; per scegliere una cartella resta *Browse...*).
 - **Rinomina:** cursore all'inizio del nome (`CaretIndex = 0`), senza selezione.
+
+## D-058 — Contenuto della 1.2.0 (2026-11-03, richieste dell'utente)
+Proposte dell'assistente scelte dall'utente, tutte senza costo sulle prestazioni (nessuna lettura dei file, nessuna animazione). La 1.1.0, non ancora provata, confluisce nella 1.2.0 senza tag proprio (come la 0.4.0, D-039); il piano `TEST-PLAN-1.1.0.md` diventa `TEST-PLAN-1.2.0.md`.
+- **Pulsanti a icone:** font `Segoe Fluent Icons` (Windows 11) con ripiego su `Segoe MDL2 Assets` (stessi codici: E768 Play, E769 Pause, E767 Volume, E74F Mute, E838 cartella aperta, E706 sole, E708 luna). Il pulsante del tema mostra il tema attuale. Contenuto e tooltip cambiano solo quando cambia lo stato.
+- **Tempo sotto il puntatore:** `Popup` sopra la barra (finestra a sé, quindi visibile anche sopra il video), valore da `Track.ValueFromPoint`; nessuna anteprima.
+- **File caricato nell'elenco:** `VideoItem` notifica `IsCurrent` e `StateGlyph`; la colonna Name ha un modello con icona ▶/❚❚ e nome in grassetto (scelta dell'utente: icona e grassetto). Lo stato si aggiorna con il timer dell'interfaccia (100 ms), solo quando cambia; azzerato quando un'operazione sui file libera il player o un caricamento fallisce.
+- **Posizione nella cartella:** "indice / totale" nella barra di stato, aggiornato a ogni cambio di selezione.
+- **OSD di mpv:** comando `show-text` (testo letterale: i comandi passati come array non espandono le proprietà); tempo per 1 s dopo ogni salto completato (con la posizione raggiunta) e durante il trascinamento col tasto destro, nome del file per 0,8 s dopo ogni caricamento. Solo a schermo intero (scelta dell'utente: a finestra normale la barra è sempre visibile). Carattere OSD ridotto (`osd-font-size=36`, `osd-border-size=2`). Da osservare: il primo testo potrebbe richiedere un breve tempo per caricare i caratteri.
+- **Ctrl+F2:** finestra *Commands* (modale, Esc/Invio chiude) con tastiera, mouse sul video e barra temporale. F2 da solo resta la rinomina.

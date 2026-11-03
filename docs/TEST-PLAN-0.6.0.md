@@ -11,7 +11,8 @@ Compilare con `build.cmd` (EXE normale, `artifacts\\publish`) e poi con
 ## Da versioni precedenti
 
 ### Tempo di avvio e dimensione dell'EXE (dalla 0.4.0, non eseguita nella 0.5.0)
-- [ ] Avviare e chiudere 5 volte l'EXE normale, poi 5 volte quello compresso; il primo avvio di ciascuno include l'estrazione nella cache. Inviare `viBro-metrics.csv` di entrambe le cartelle (righe `startup`) per decidere la variante predefinita (D-032).
+- [x] Avviare e chiudere 5 volte l'EXE normale, poi 5 volte quello compresso; il primo avvio di ciascuno include l'estrazione nella cache. Inviare `viBro-metrics.csv` di entrambe le cartelle (righe `startup`) per decidere la variante predefinita (D-032).
+  **Esito (2026-11-03, EXE 0.6.0):** normale 549 / 407 / 415 / 410 / 409 ms (mediana 410), memoria di lavoro ~141 MB; compresso 573 / 569 / 575 / 595 / 588 ms (mediana 575), ~210 MB. Scelta: EXE normale (D-047).
 
 ## 0.6.0
 

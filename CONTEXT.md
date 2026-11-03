@@ -3,10 +3,10 @@
 _Aggiornato: 2026-11-03 · branch `main` · ultimo commit `647beda` · ultima versione rilasciata **0.5.0** (tag `v0.5.0`) · **in sviluppo: 0.6.0, scritta e compilata, da provare su Windows**_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-046 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-047 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 - Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0` e `v0.5.0` non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
-- Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`.
+- Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`. **Variante predefinita: EXE normale** (D-047: avvio 410 ms contro 575, ~70 MB di memoria in meno).
 - Versione: in un solo punto, `Directory.Build.props` (ora `0.6.0`). Appare nel titolo e nelle proprietà dell'EXE come `0.6.0+<commit>`.
 
 ## 2. Versioni
@@ -28,7 +28,7 @@ _Aggiornato: 2026-11-03 · branch `main` · ultimo commit `647beda` · ultima ve
 ## 4. Stato attuale e prossimo passo
 1. **0.5.0 rilasciata il 2026-11-03** (tag `v0.5.0`, D-042), comprende la 0.4.0.
 2. **0.6.0 scritta e compilata nel container, non provata su Windows** (richieste dell'utente del 2026-11-03): Play/Pause conservato al cambio di file (D-043, modifica della SPEC), copia (D-044), trascinamento col tasto destro (D-045), rotella sul video a finestra normale, ±3 s sulla barra, barra di stato compatta con conteggio, fascia in basso a schermo intero, `DeleteConfirmDialog` vicino al puntatore, Ctrl+W (D-046).
-3. Piano di prova aperto: [docs/TEST-PLAN-0.6.0.md](docs/TEST-PLAN-0.6.0.md): prove 0.6.0 più i 5+5 avvii (EXE normale e compresso, righe `startup`) rimasti dalla 0.5.0, che servono a decidere la compressione (D-032; fino ad allora EXE normale).
+3. Piano di prova aperto: [docs/TEST-PLAN-0.6.0.md](docs/TEST-PLAN-0.6.0.md): prove 0.6.0. I 5+5 avvii sono fatti (2026-11-03): scelto l'EXE normale (D-047), D-032 chiusa.
 4. Punti da osservare nelle prove: il trascinamento col tasto destro usa la cattura del mouse della finestra principale (`SetCapture`); la conferma di eliminazione calcola la posizione con DPI e monitor del puntatore.
 5. Rotella: la causa del primo comportamento osservato nella 0.5.0 (D-041) non è stata identificata; `--trace-input` resta per la diagnostica.
 6. Verso la 1.0.0. Punti aperti: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione.

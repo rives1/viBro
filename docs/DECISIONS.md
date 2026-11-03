@@ -139,6 +139,7 @@ Per i percorsi di 260 o più caratteri si usa `IFileOperation` (COM, thread UI) 
 
 ## D-032 — Dimensione dell'EXE: decisione rimandata alle misure (0.4.0)
 L'EXE normale pesa ~256 MB, quello compresso ~110 MB (stima dalla dimensione dello zip). La compressione decomprime gli assembly a ogni avvio. Ogni avvio registra ora `startup` (ms dall'avvio del processo al primo disegno della finestra) con la dimensione dell'EXE, così le due varianti si distinguono nel CSV. La scelta predefinita si farà dopo la misura (TEST-PLAN-0.5.0).
+- **Chiusa con D-047 (2026-11-03):** EXE normale.
 
 ## D-033 — Icona (0.4.0, richiesta dell'utente)
 `src/viBro/viBro.ico`: disegno originale (quadrato arrotondato blu sfumato, triangolo play bianco, barra temporale con avanzamento), generato in modo programmatico in 9 dimensioni (16–256 px), con una versione semplificata per 16–24 px. È usata come `ApplicationIcon` (EXE, barra delle applicazioni, Esplora risorse) e come icona della finestra.
@@ -191,3 +192,16 @@ Pressione del tasto destro sul video: inizio del trascinamento potenziale; la fi
 - **Schermo intero:** la fascia della barra temporale è agganciata in basso (`DockPanel.Dock=Bottom`), in alto a finestra normale.
 - **Conferma di eliminazione:** `DeleteConfirmDialog` sostituisce la `MessageBox` (che non si può posizionare) e si apre sotto e a destra del puntatore, dentro l'area di lavoro di quel monitor (`MonitorFromPoint`); scelta dell'utente: vicino al puntatore anche con Canc/R.
 - **Ctrl+W:** chiude la finestra come il pulsante di chiusura (impostazioni salvate come sempre), anche con il cursore nella barra del percorso. Durante uno spostamento o una copia lunga la finestra principale è disattivata e Ctrl+W non agisce.
+
+## D-047 — EXE normale come variante predefinita (2026-11-03, scelta dell'utente)
+Misura su Windows 11 con l'EXE 0.6.0, 5 avvii per variante (righe `startup` di `viBro-metrics.csv`, ms dall'avvio del processo al primo disegno della finestra):
+
+| | EXE normale | EXE compresso | Differenza |
+|---|---|---|---|
+| Dimensione | 269 629 542 B (257 MiB) | 113 723 616 B (108 MiB) | −58% |
+| Avvio, singoli | 549 / 407 / 415 / 410 / 409 | 573 / 569 / 575 / 595 / 588 | |
+| Avvio, mediana | 410 ms | 575 ms | +165 ms (+40%) |
+| Memoria di lavoro | ~141 MB | ~210 MB | +69 MB |
+| Memoria privata | ~108 MB | ~178 MB | +70 MB |
+
+Il compresso decomprime in memoria gli assembly contenuti nell'EXE a ogni avvio: più tempo e più memoria per tutta la sessione, in cambio solo di spazio su disco e di trasferimento. Con la reattività come priorità della SPEC, la variante predefinita è l'**EXE normale** (`build.cmd`, `artifacts\publish`, zip in `dist\`). Il compresso resta disponibile con `build\build.ps1 -Compress`, non documentato come principale. Il primo avvio dell'EXE normale (549 ms) è più alto degli altri, probabilmente per la cache del disco di Windows; nessuno dei due primi avvii mostra un'estrazione nella cache del bundle (già presente).

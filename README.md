@@ -100,7 +100,7 @@ Lo script:
 3. pubblica `artifacts\publish\viBro.exe` e controlla che sia l'unico file prodotto;
 4. crea `dist\viBro-<versione>-win-x64.zip` con il relativo `.sha256`.
 
-Comandi singoli: `build\build.ps1 [-Compress] [-DepsOnly]` e `build\package.ps1`. Su GitHub, il workflow `.github/workflows/build.yml` esegue gli stessi script.
+Comandi singoli: `build\build.ps1 [-Compress] [-DepsOnly]` e `build\package.ps1`. La variante distribuita è l'EXE normale; `-Compress` produce un EXE più piccolo (−58%) ma più lento ad avviarsi (+165 ms) e con circa 70 MB di memoria in più (misure in `docs/DECISIONS.md`, D-047). Su GitHub, il workflow `.github/workflows/build.yml` esegue gli stessi script.
 
 La versione si trova **solo** in `Directory.Build.props` e viene riportata nel titolo della finestra e nelle proprietà dell'EXE.
 

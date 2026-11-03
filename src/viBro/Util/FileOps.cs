@@ -226,19 +226,7 @@ internal static class FileOps
             return target;
         }
 
-        string temp = target + ".vibro-partial";
-        await Task.Run(() => CopyWithProgress(source, temp, progress, ct), ct).ConfigureAwait(false);
-
-        try
-        {
-            ct.ThrowIfCancellationRequested();
-            File.Move(temp, target, overwrite); // fails if a file appeared meanwhile and overwrite is false
-        }
-        catch
-        {
-            TryDelete(temp);
-            throw;
-        }
+        await CopyAsync(source, destFolder, destName, overwrite, progress, ct).ConfigureAwait(false);
 
         // Copy complete and in place: only now remove the source.
         try
@@ -248,6 +236,33 @@ internal static class FileOps
         catch (Exception ex)
         {
             throw new SourceNotDeletedException(target, ex);
+        }
+        return target;
+    }
+
+    /// <summary>
+    /// Copies a file into <paramref name="destFolder"/> under <paramref name="destName"/>: copy to a
+    /// temporary file with progress and cancellation, check the size, then give it its final name.
+    /// The source is only read (it may stay open in the player). Returns the final path.
+    /// </summary>
+    public static async Task<string> CopyAsync(string source, string destFolder, string destName, bool overwrite,
+        IProgress<double>? progress, CancellationToken ct)
+    {
+        string target = Path.Combine(destFolder, destName);
+        if (string.Equals(Path.GetFullPath(source), Path.GetFullPath(target), StringComparison.OrdinalIgnoreCase))
+            throw new IOException("Source and destination are the same file.");
+
+        string temp = target + ".vibro-partial";
+        await Task.Run(() => CopyWithProgress(source, temp, progress, ct), ct).ConfigureAwait(false);
+        try
+        {
+            ct.ThrowIfCancellationRequested();
+            File.Move(temp, target, overwrite); // fails if a file appeared meanwhile and overwrite is false
+        }
+        catch
+        {
+            TryDelete(temp);
+            throw;
         }
         return target;
     }

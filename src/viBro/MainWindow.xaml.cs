@@ -116,6 +116,12 @@ public partial class MainWindow : Window
         ComponentDispatcher.ThreadPreprocessMessage += OnThreadPreprocessMessage;
         Activated += (_, _) => RecordActivation(); // the activating click must not Play/Pause
 
+        // Status bar: number of videos in the list and their total size, whenever the list changes.
+        System.ComponentModel.DependencyPropertyDescriptor
+            .FromProperty(ItemsControl.ItemsSourceProperty, typeof(ListView))
+            .AddValueChanged(FileList, (_, _) => UpdateFolderSummary());
+        UpdateFolderSummary();
+
         ShowWarnings();
     }
 
@@ -494,16 +500,32 @@ public partial class MainWindow : Window
             LoadItem(item);
     }
 
+    /// <summary>
+    /// Loads a file keeping the play/pause state: if the current video is playing, the new one
+    /// starts playing; if it is paused (or nothing was playing), the new one is loaded paused.
+    /// After a file operation the state recorded before the player was released is used.
+    /// </summary>
     private void LoadItem(VideoItem item)
     {
         if (_player == null) return;
+        bool play = _playAfterRelease ?? !_player.IsPaused;
+        _playAfterRelease = null;
         _loadingItem = item;
         _currentInfo = null;
         SetStatus("Loading " + item.Name + " ...");
-        _player.Load(item.FullPath, item);
+        _player.Load(item.FullPath, item, play);
     }
 
-    /// <summary>E / D: previous / next file in the current order, loaded paused. No wrap-around.</summary>
+    private void UpdateFolderSummary()
+    {
+        long total = 0;
+        foreach (var v in _items) total += v.Size;
+        FolderSummaryText.Text = _items.Count == 1
+            ? "1 video · " + VideoItem.FormatSize(total)
+            : $"{_items.Count} videos · {VideoItem.FormatSize(total)}";
+    }
+
+    /// <summary>E / D and the wheel: previous / next file in the current order, keeping play/pause. No wrap-around.</summary>
     private void SelectRelative(int direction)
     {
         if (_items.Count == 0) return;
@@ -568,7 +590,7 @@ public partial class MainWindow : Window
         PlayButton.Content = _player.IsPaused ? "Play" : "Pause";
         MuteButton.Content = _player.IsMuted ? "Unmute" : "Mute";
 
-        if (!TimeSlider.IsMouseCaptureWithin)
+        if (!TimeSlider.IsMouseCaptureWithin && !_scrubbing) // the user is choosing the position
         {
             _updatingTimeSlider = true;
             TimeSlider.Maximum = duration > 0 ? duration : 1;
@@ -591,7 +613,14 @@ public partial class MainWindow : Window
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        // Shortcuts are suspended while a text field is being edited.
+        // Ctrl+W closes viBro even while a text field is being edited.
+        if (e.Key == Key.W && Keyboard.Modifiers == ModifierKeys.Control && IsActive)
+        {
+            e.Handled = true;
+            Dispatcher.BeginInvoke(new Action(Close));
+            return;
+        }
+        // Other shortcuts are suspended while a text field is being edited.
         if (Keyboard.FocusedElement is TextBoxBase) return;
 
         Key key = e.Key == Key.System ? e.SystemKey : e.Key;
@@ -621,7 +650,8 @@ public partial class MainWindow : Window
         }
 
         bool isMouse = msg.message is NativeMethods.WM_MOUSEMOVE or NativeMethods.WM_LBUTTONDOWN
-                                   or NativeMethods.WM_LBUTTONDBLCLK or NativeMethods.WM_RBUTTONUP;
+                                   or NativeMethods.WM_LBUTTONDBLCLK or NativeMethods.WM_RBUTTONDOWN
+                                   or NativeMethods.WM_RBUTTONUP;
         if (!isKey && !isMouse) return;
 
         IntPtr host = VideoHost.Handle;
@@ -632,7 +662,9 @@ public partial class MainWindow : Window
         {
             // Normally mpv's window gets the mouse; if it ever let messages through to the main
             // window, the pointer position still tells whether the click was on the video.
-            if (toVideo || (msg.hwnd == new WindowInteropHelper(this).Handle && IsPointOverVideo(msg.pt_x, msg.pt_y)))
+            // During a right-button drag the main window holds the mouse capture: all its messages count.
+            IntPtr main = new WindowInteropHelper(this).Handle;
+            if (toVideo || (msg.hwnd == main && (_rightDown || IsPointOverVideo(msg.pt_x, msg.pt_y))))
                 OnVideoMouseMessage(msg); // double click, right-click menu, fullscreen band
             return; // never mark mouse messages as handled
         }
@@ -693,8 +725,16 @@ public partial class MainWindow : Window
                 if (!isRepeat) RenameSelected();
                 return true;
 
+            case Key.W when ctrl && !alt && !shift:
+                if (!isRepeat) Dispatcher.BeginInvoke(new Action(Close)); // after this key message
+                return true;
+
             case Key.W when !alt && !ctrl:
                 if (!isRepeat) MoveSelected(useLastDestination: shift);
+                return true;
+
+            case Key.C when !alt && !ctrl:
+                if (!isRepeat) CopySelected(useLastDestination: shift);
                 return true;
         }
         return false;
@@ -747,12 +787,14 @@ public partial class MainWindow : Window
         SetTransportFullscreen(false);
     }
 
-    // Fullscreen band: a black strip above the video (the picture is never covered) holding only the
+    // Fullscreen band: a black strip below the video (the picture is never covered) holding only the
     // timeline, centred and ~40% of the screen wide. It appears on mouse movement or seeks and hides
     // after 2 s without activity; the strip itself stays, so the video does not resize.
+    // In the normal window the transport bar stays above the video.
     private void SetTransportFullscreen(bool on)
     {
         _fullscreenBarTimer.Stop();
+        DockPanel.SetDock(TransportBar, on ? Dock.Bottom : Dock.Top);
         if (on)
         {
             TransportBar.Background = System.Windows.Media.Brushes.Black;

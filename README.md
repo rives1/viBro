@@ -4,14 +4,14 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 0.5.0 rilasciata** (mouse sul video; comprende la 0.4.0: temi, gestione errori, ottimizzazione, portabilità). Prossima versione: da definire. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 0.6.0 in sviluppo** (riproduzione conservata al cambio di file, copia, trascinamento col tasto destro, barra di stato con conteggio); ultima versione rilasciata: 0.5.0. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 
 ## Funzionalità
 
 - Un unico EXE autonomo: nessuna installazione, nessun privilegio di amministratore, nessun codec da installare.
 - Barra del percorso: cartelle locali, unità mappate e percorsi UNC (`\\server\share`). L'apertura avviene in background, quindi una condivisione irraggiungibile non blocca l'interfaccia.
 - Elenco dei soli video della cartella (MP4, MKV, MOV, WMV), senza ricorsione, in ordine naturale dei nomi (lo stesso di Esplora risorse).
-- Il video selezionato viene caricato **in pausa**, mostrando il primo fotogramma; la selezione non avvia mai la riproduzione.
+- Al cambio di file lo stato **Play/Pause si conserva**: se il video era in pausa (o all'avvio) il nuovo si carica in pausa sul primo fotogramma; se era in riproduzione, il nuovo parte.
 - Salti: ±1 s e ±5 s esatti, ±1 min e ±5 min su fotogrammi chiave (rapidi, approssimati) oppure esatti con *Exact long seeks*. Le richieste ripetute vengono accorpate, quindi non si accumula una coda.
 - Play/Pause, barra temporale, volume, mute, schermo intero.
 - **Misure automatiche** in `viBro-metrics.csv`, accanto all'EXE: tempo al primo fotogramma, cambio video, latenza dei salti, memoria.
@@ -21,7 +21,8 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 
 - Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
 
-- Temi Light/Dark (pulsante *Theme*), barra dei controlli sopra il video, fascia con la barra temporale a schermo intero.
+- Temi Light/Dark (pulsante *Theme*), barra dei controlli sopra il video, fascia con la barra temporale sotto il video a schermo intero.
+- Barra di stato compatta: numero di video della cartella e spazio totale, stato, misure.
 - Registro degli errori `viBro-errors.log` accanto all'EXE.
 
 ## viBro.ini
@@ -46,7 +47,7 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | PgDown / PgUp | Indietro / avanti di circa 1 min | ✔ |
 | Alt + PgDown / Alt + PgUp | Indietro / avanti di circa 5 min | ✔ |
 | Spazio | Play/Pause (alla fine del video riparte dall'inizio) | ✔ |
-| E / D | Video precedente / successivo, in pausa, senza ricominciare dall'estremità opposta | ✔ |
+| E / D | Video precedente / successivo (Play/Pause conservato), senza ricominciare dall'estremità opposta | ✔ |
 | M | Mute on/off | ✔ |
 | F11 / Esc | Entra in / esce da schermo intero | ✔ |
 | Ctrl + L | Attiva la barra del percorso (Invio apre, Esc annulla) | ✔ |
@@ -54,6 +55,9 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | F2 | Rinomina il file (solo il nome; l'estensione resta) | 0.3.0 |
 | W | Sceglie la cartella di destinazione e sposta il file | 0.3.0 |
 | Shift + W | Sposta nell'ultima destinazione usata | 0.3.0 |
+| C | Sceglie la cartella di destinazione e copia il file (stesse regole dello spostamento; l'originale resta) | 0.6.0 |
+| Shift + C | Copia nell'ultima destinazione di copia (separata da quella dello spostamento) | 0.6.0 |
+| Ctrl + W | Chiude viBro | 0.6.0 |
 
 ## Mouse sul video
 
@@ -61,9 +65,10 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 |---|---|---|
 | Clic | Play/Pause (il clic che riporta viBro in primo piano non cambia la riproduzione) | 0.5.0 |
 | Doppio clic | Entra in / esce da schermo intero; la riproduzione resta com'era | 0.5.0 |
-| Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W) | 0.5.0 |
-| Rotella sopra la barra temporale | Su: avanti 5 s; giù: indietro 5 s (come ↑ / ↓), a finestra normale e a schermo intero | 0.5.0 |
-| Rotella altrove, a schermo intero | Giù: video successivo; su: video precedente (come D / E) | 0.5.0 |
+| Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W), *Copy...* (C), *Copy to <ultima cartella>* (Shift+C) | 0.5.0 (copia 0.6.0) |
+| Tasto destro tenuto + trascinamento a destra/sinistra | Spostamento nel video: tutta la larghezza del video = tutta la durata; il video segue il mouse, salto esatto al rilascio (nessun menu) | 0.6.0 |
+| Rotella sopra la barra temporale | Su: avanti 3 s; giù: indietro 3 s, a finestra normale e a schermo intero | 0.6.0 |
+| Rotella sopra il video, o ovunque a schermo intero | Giù: video successivo; su: video precedente (come D / E) | 0.6.0 |
 | Clic sulla barra temporale e trascinamento | Spostamento nel video; l'indicatore segue il mouse | 0.4.0 |
 
 Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come da specifica, le frecce eseguono sempre i salti, anche con lo stato attivo sull'albero o sull'elenco: la navigazione nell'albero avviene con il mouse.

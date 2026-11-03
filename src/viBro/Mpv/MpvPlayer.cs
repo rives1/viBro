@@ -158,7 +158,8 @@ internal sealed class MpvPlayer : IDisposable
     // ---------------------------------------------------------------- commands (UI thread)
 
     /// <summary>Loads a file and shows its first frame without starting playback.</summary>
-    public void Load(string path, object? tag)
+    /// <summary>Loads a file paused, or playing when <paramref name="play"/> is true.</summary>
+    public void Load(string path, object? tag, bool play = false)
     {
         lock (_gate)
         {
@@ -174,8 +175,8 @@ internal sealed class MpvPlayer : IDisposable
             Volatile.Write(ref _duration, 0);
             Volatile.Write(ref _timePos, 0);
 
-            // Requests are processed by mpv in order: pause first, then replace the file.
-            Command(UdOther, "set", "pause", "yes");
+            // Requests are processed by mpv in order: pause state first, then replace the file.
+            Command(UdOther, "set", "pause", play ? "no" : "yes");
             Command(UdLoadBase + (ulong)_loadSeq, "loadfile", path, "replace");
         }
     }

@@ -42,8 +42,8 @@ Requisiti:
 Le unità mappate e i percorsi NAS devono essere utilizzabili senza bloccare l’interfaccia quando non sono raggiungibili.
 Caricamento e riproduzione
 Formati richiesti: MP4, MKV, MOV e WMV. La compatibilità effettiva va verificata anche sui codec contenuti nei file campione.
-- Caricare il video selezionato e mostrare il primo fotogramma disponibile, senza avviare la riproduzione.
-- Nessun avvio automatico quando cambia la selezione, anche se il video precedente era in riproduzione.
+- Caricare il video selezionato e mostrare il primo fotogramma disponibile, senza avviare la riproduzione se il video precedente era in pausa (o se non c'era un video).
+- Dalla 0.6.0 (richiesta dell'utente) lo stato Play/Pause si conserva al cambio di file: se il video corrente è in riproduzione, il nuovo parte in riproduzione. Vale per ogni cambio (E/D, rotella, clic nell'elenco, file proposto dopo elimina, rinomina o sposta).
 - Un salto temporale effettuato in pausa deve mostrare il fotogramma raggiunto e mantenere la pausa.
 - Un salto durante la riproduzione deve mantenere la riproduzione.
 - Alla fine del video, fermarsi senza passare al successivo.
@@ -71,12 +71,15 @@ Tasto	Azione
 PgDown / PgUp	Indietro / avanti di circa 1 minuto
 Alt + PgDown / Alt + PgUp	Indietro / avanti di circa 5 minuti
 Spazio	Play/Pause
-E	Seleziona e carica il video precedente, in pausa
-D	Seleziona e carica il video successivo, in pausa
+E	Seleziona e carica il video precedente (Play/Pause conservato)
+D	Seleziona e carica il video successivo (Play/Pause conservato)
 Canc oppure R	Elimina il file con conferma
 F2	Rinomina il file
 W	Sceglie la cartella di destinazione e sposta il file
 Shift + W	Sposta nella destinazione utilizzata l’ultima volta
+C	Sceglie la cartella di destinazione e copia il file (0.6.0)
+Shift + C	Copia nell’ultima destinazione di copia (0.6.0)
+Ctrl + W	Chiude viBro (0.6.0)
 M	Mute on/off
 F11	Schermo intero
 Esc	Esce dallo schermo intero
@@ -85,9 +88,12 @@ Ctrl + L	Attiva la barra del percorso
 Mouse sul video (0.5.0, richiesta dell'utente):
 Clic	Play/Pause (non il clic che riattiva la finestra)
 Doppio clic	Schermo intero; a schermo intero, ritorno alla finestra normale (la riproduzione resta com'era)
-Tasto destro	Menu con Delete (come Canc/R), Move... (come W) e Move to <ultima destinazione> (come Shift+W)
-Rotella sopra la barra temporale	Su: avanti 5 s; giù: indietro 5 s (come ↑ / ↓)
-Rotella altrove, a schermo intero	Giù: video successivo; su: video precedente (come D / E)
+Tasto destro	Menu con Delete (come Canc/R), Move... (come W), Move to <ultima destinazione> (come Shift+W), Copy... (come C), Copy to <ultima destinazione di copia> (come Shift+C)
+Tasto destro tenuto + trascinamento orizzontale (0.6.0)	Spostamento nel video: tutta la larghezza del video = tutta la durata; il video segue il mouse, salto esatto al rilascio; nessun menu
+Rotella sopra la barra temporale	Su: avanti 3 s; giù: indietro 3 s (0.6.0; prima 5 s)
+Rotella sopra il video, o ovunque a schermo intero	Giù: video successivo; su: video precedente (come D / E; a finestra normale dalla 0.6.0)
+
+Interfaccia (0.6.0): barra di stato compatta con numero di video della cartella e spazio totale; a schermo intero la fascia con la barra temporale è sotto il video; la conferma di eliminazione si apre vicino al puntatore del mouse.
 
 
 Regole:
@@ -103,13 +109,13 @@ Eliminazione
 - File di rete, comprese unità di rete mappate: eliminazione definitiva.
 - Conferma sempre richiesta, con nome del file e tipo di eliminazione chiaramente indicati.
 - Se un file locale non può essere cestinato, non eliminarlo definitivamente senza una nuova conferma esplicita.
-- Dopo il successo: selezionare e caricare il file successivo in pausa, oppure il precedente se era l’ultimo.
+- Dopo il successo: selezionare e caricare il file successivo, oppure il precedente se era l’ultimo (Play/Pause conservato dalla 0.6.0).
 - Se la lista diventa vuota, svuotare il riquadro video.
 Rinomina
 - Modificare normalmente il solo nome, preservando l’estensione.
 - Verificare nomi non validi e conflitti.
 - Non sovrascrivere file esistenti.
-- Dopo il successo, mantenere selezionato il file rinominato e ricaricarlo in pausa, possibilmente nella posizione precedente.
+- Dopo il successo, mantenere selezionato il file rinominato e ricaricarlo, possibilmente nella posizione precedente (Play/Pause conservato dalla 0.6.0).
 Spostamento
 - W apre la scelta della destinazione, inizializzata sull’ultimo percorso utilizzato.
 - La destinazione confermata viene salvata nell’INI.
@@ -118,7 +124,7 @@ Spostamento
 - Nessuna sovrascrittura silenziosa in caso di conflitto.
 - Per trasferimenti lunghi: avanzamento e possibilità di annullamento.
 - Negli spostamenti che richiedono copia e cancellazione, preservare la sorgente fino al completamento corretto della copia.
-- Dopo il successo, caricare il video successivo in pausa.
+- Dopo il successo, caricare il video successivo (Play/Pause conservato dalla 0.6.0).
 - Nessuna operazione se sorgente e destinazione coincidono.
 File INI
 Memorizzare almeno:
@@ -162,6 +168,7 @@ Versione	Obiettivo
 0.3.0	Eliminazione, rinomina e spostamento
 0.4.0	Temi, gestione errori, ottimizzazione e verifiche di portabilità (confluita nella 0.5.0)
 0.5.0	Mouse sul video: clic per Play/Pause, doppio clic per lo schermo intero, menu del tasto destro, rotella a schermo intero
+0.6.0	Riproduzione conservata al cambio di file, copia, trascinamento col tasto destro, rotella sul video, barra di stato con conteggio, fascia in basso a schermo intero, conferma vicino al puntatore, Ctrl+W
 1.0.0	Prima versione completa e verificata
 
 

@@ -8,7 +8,7 @@ using ViBro.Util;
 
 namespace ViBro;
 
-/// <summary>Small modal dialogs built in code (rename, name conflict, transfer progress).</summary>
+/// <summary>Small modal dialogs built in code (delete confirmation, rename, name conflict, transfer progress).</summary>
 internal static class DialogStyle
 {
     public static void Apply(Window w, Window owner, string title)
@@ -101,12 +101,68 @@ internal sealed class RenameDialog : Window
     }
 }
 
-/// <summary>Name conflict at the move destination. Overwrite is offered only as an explicit choice.</summary>
+/// <summary>
+/// Delete confirmation (replaces the MessageBox, which cannot be positioned): opens next to the mouse
+/// pointer, inside the work area of that monitor. Enter = delete, Esc = keep the file.
+/// </summary>
+internal sealed class DeleteConfirmDialog : Window
+{
+    private DeleteConfirmDialog(Window owner, string title, string text, bool warning)
+    {
+        DialogStyle.Apply(this, owner, title);
+        Width = 440;
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        var panel = new StackPanel { Margin = new Thickness(12) };
+        var message = new TextBlock { TextWrapping = TextWrapping.Wrap, Text = text };
+        if (warning) message.Foreground = Brushes.DarkOrange; // permanent deletion (network)
+        panel.Children.Add(message);
+        var yes = new Button { Content = "Delete", IsDefault = true };
+        var no = new Button { Content = "Cancel", IsCancel = true };
+        yes.Click += (_, _) => DialogResult = true;
+        panel.Children.Add(DialogStyle.Buttons(yes, no));
+        Content = panel;
+        Loaded += (_, _) =>
+        {
+            PlaceNearPointer();
+            yes.Focus();
+        };
+    }
+
+    public static bool Ask(Window owner, string title, string text, bool warning)
+        => new DeleteConfirmDialog(owner, title, text, warning).ShowDialog() == true;
+
+    /// <summary>Top-left corner just below-right of the pointer; moved inside the monitor's work area.</summary>
+    private void PlaceNearPointer()
+    {
+        var source = PresentationSource.FromVisual(Owner);
+        if (source?.CompositionTarget == null || !NativeMethods.GetCursorPos(out var cursor))
+        {
+            Left = Owner.Left + (Owner.ActualWidth - ActualWidth) / 2;
+            Top = Owner.Top + (Owner.ActualHeight - ActualHeight) / 2;
+            return;
+        }
+        var toDip = source.CompositionTarget.TransformFromDevice;
+        Point p = toDip.Transform(new Point(cursor.X + 12, cursor.Y + 12));
+        double left = p.X, top = p.Y;
+        var area = NativeMethods.WorkAreaAt(cursor.X, cursor.Y);
+        if (area is var (l, t, r, b))
+        {
+            Point min = toDip.Transform(new Point(l, t));
+            Point max = toDip.Transform(new Point(r, b));
+            left = Math.Max(min.X, Math.Min(left, max.X - ActualWidth));
+            top = Math.Max(min.Y, Math.Min(top, max.Y - ActualHeight));
+        }
+        Left = left;
+        Top = top;
+    }
+}
+
+/// <summary>Name conflict at the move/copy destination. Overwrite is offered only as an explicit choice.</summary>
 internal sealed class ConflictDialog : Window
 {
     private ConflictChoice _choice = ConflictChoice.Cancel;
 
-    private ConflictDialog(Window owner, string fileName, string destFolder, string keepBothName)
+    private ConflictDialog(Window owner, string fileName, string destFolder, string keepBothName, bool copy)
     {
         DialogStyle.Apply(this, owner, "File already exists");
         var panel = new StackPanel { Margin = new Thickness(12) };
@@ -114,7 +170,7 @@ internal sealed class ConflictDialog : Window
         {
             TextWrapping = TextWrapping.Wrap,
             Text = $"A file named \"{fileName}\" already exists in:\n{destFolder}\n\n" +
-                   $"Keep both: the moved file is saved as \"{keepBothName}\".\n" +
+                   $"Keep both: the {(copy ? "copied" : "moved")} file is saved as \"{keepBothName}\".\n" +
                    "Overwrite: the existing file in the destination is replaced and cannot be recovered.",
         });
 
@@ -128,9 +184,9 @@ internal sealed class ConflictDialog : Window
         Loaded += (_, _) => keep.Focus();
     }
 
-    public static ConflictChoice Ask(Window owner, string fileName, string destFolder, string keepBothName)
+    public static ConflictChoice Ask(Window owner, string fileName, string destFolder, string keepBothName, bool copy = false)
     {
-        var d = new ConflictDialog(owner, fileName, destFolder, keepBothName);
+        var d = new ConflictDialog(owner, fileName, destFolder, keepBothName, copy);
         return d.ShowDialog() == true ? d._choice : ConflictChoice.Cancel;
     }
 }
@@ -143,12 +199,13 @@ internal sealed class ProgressDialog : Window
     private readonly CancellationTokenSource _cts;
     private bool _finished;
 
-    public ProgressDialog(Window owner, string fileName, string destFolder, CancellationTokenSource cts)
+    public ProgressDialog(Window owner, string fileName, string destFolder, CancellationTokenSource cts, bool copy = false)
     {
-        DialogStyle.Apply(this, owner, "Moving file");
+        string verb = copy ? "Copying" : "Moving";
+        DialogStyle.Apply(this, owner, verb + " file");
         _cts = cts;
         var panel = new StackPanel { Margin = new Thickness(12) };
-        panel.Children.Add(new TextBlock { TextWrapping = TextWrapping.Wrap, Text = $"Moving \"{fileName}\"\nto {destFolder}" });
+        panel.Children.Add(new TextBlock { TextWrapping = TextWrapping.Wrap, Text = $"{verb} \"{fileName}\"\nto {destFolder}" });
         _bar = new ProgressBar { Minimum = 0, Maximum = 1, Height = 18, Margin = new Thickness(0, 10, 0, 4) };
         panel.Children.Add(_bar);
         _percent = new TextBlock { Text = "0 %" };

@@ -2,6 +2,22 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [0.6.0] - non ancora rilasciata
+
+### Aggiunto
+- Copia del file: tasti C / Shift+C e voci *Copy...* / *Copy to <cartella>* nel menu del tasto destro. Stesse regole dello spostamento (cartella raggiungibile, stessa cartella rifiutata, conflitto di nome con *Keep both* / *Overwrite*, avanzamento e annullamento, copia verificata in un file temporaneo). L'originale resta e il video continua a essere riprodotto. Ultima destinazione di copia separata (`[Folders] LastCopyDestination`).
+- Tasto destro tenuto premuto sul video e trascinamento orizzontale: spostamento nel video (tutta la larghezza = tutta la durata), con il video che segue il mouse e salto esatto al rilascio. Un clic destro senza trascinamento apre il menu come prima.
+- Barra di stato: numero di video nella cartella e spazio totale (es. `128 videos · 412.5 GB`).
+- Ctrl+W chiude viBro (anche mentre si scrive nella barra del percorso).
+
+### Modificato
+- Lo stato Play/Pause si conserva al cambio di file: se il video è in riproduzione, il successivo (E/D, rotella, clic nell'elenco, dopo elimina/rinomina/sposta) parte in riproduzione; se è in pausa resta in pausa. Prima ogni file si caricava sempre in pausa.
+- Rotella sopra il video anche a finestra normale: giù video successivo, su precedente. Sopra elenco e albero continua a scorrere la lista.
+- Rotella sopra la barra temporale: 3 s per scatto (prima 5 s).
+- Schermo intero: la fascia con la barra temporale è **sotto** il video (prima sopra).
+- Barra di stato più bassa (poco più alta del testo).
+- Conferma di eliminazione: finestra di viBro (tema Light/Dark) che si apre vicino al puntatore del mouse, sia dal menu sia con Canc/R. Invio = *Delete*, Esc = *Cancel*.
+
 ## [0.5.0] - 2026-11-03
 
 Mouse sul video. Comprende anche le modifiche della 0.4.0, che non è stata rilasciata separatamente.

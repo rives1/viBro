@@ -22,15 +22,21 @@
                      PreviewKeyDown="PathBox_PreviewKeyDown" />
         </DockPanel>
 
-        <StatusBar x:Name="StatusPanel" DockPanel.Dock="Bottom">
-            <StatusBarItem>
+        <!-- Compact status bar: Fluent pads it by 12 px and each item by 4 px; here it is just taller
+             than its text. Left: videos in the folder and their total size. -->
+        <StatusBar x:Name="StatusPanel" DockPanel.Dock="Bottom" Padding="4,0">
+            <StatusBarItem Padding="4,1">
                 <TextBlock x:Name="WarningText" Foreground="DarkOrange" FontWeight="SemiBold" Visibility="Collapsed" />
             </StatusBarItem>
-            <StatusBarItem>
+            <StatusBarItem Padding="4,1">
+                <TextBlock x:Name="FolderSummaryText" />
+            </StatusBarItem>
+            <Separator />
+            <StatusBarItem Padding="4,1">
                 <TextBlock x:Name="StatusText" Text="Ready" />
             </StatusBarItem>
             <Separator />
-            <StatusBarItem>
+            <StatusBarItem Padding="4,1">
                 <TextBlock x:Name="MetricsText" />
             </StatusBarItem>
         </StatusBar>

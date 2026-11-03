@@ -11,7 +11,9 @@ internal static class NativeMethods
     public const int WM_SYSKEYDOWN = 0x0104;
     public const int WM_LBUTTONDOWN = 0x0201;
     public const int WM_LBUTTONDBLCLK = 0x0203;
+    public const int WM_RBUTTONDOWN = 0x0204;
     public const int WM_RBUTTONUP = 0x0205;
+    public const int MK_RBUTTON = 0x0002;
     public const int WM_MOUSEWHEEL = 0x020A;
     public const int WHEEL_DELTA = 120;
 
@@ -39,6 +41,42 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     public static extern uint GetDoubleClickTime();
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr SetCapture(IntPtr hwnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool ReleaseCapture();
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct POINT { public int X, Y; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT { public int Left, Top, Right, Bottom; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MONITORINFO { public int cbSize; public RECT rcMonitor, rcWork; public uint dwFlags; }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool GetCursorPos(out POINT point);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromPoint(POINT pt, uint flags);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetMonitorInfo(IntPtr monitor, ref MONITORINFO info);
+
+    /// <summary>Work area (device pixels) of the monitor containing the point, or null.</summary>
+    public static (int Left, int Top, int Right, int Bottom)? WorkAreaAt(int x, int y)
+    {
+        IntPtr m = MonitorFromPoint(new POINT { X = x, Y = y }, 2 /* MONITOR_DEFAULTTONEAREST */);
+        var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+        if (m == IntPtr.Zero || !GetMonitorInfo(m, ref info)) return null;
+        return (info.rcWork.Left, info.rcWork.Top, info.rcWork.Right, info.rcWork.Bottom);
+    }
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder name, int maxCount);

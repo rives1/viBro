@@ -9,7 +9,7 @@ using ViBro.Util;
 
 namespace ViBro;
 
-// Delete (Canc / R), rename (F2), move (W / Shift+W).
+// Delete (Canc / R), rename (F2), move (W / Shift+W), copy (C / Shift+C).
 // Every operation acts on the selected file, releases it from the player first, updates the
 // list only from what really happened on disk, and ignores key auto-repeat and re-entry.
 public partial class MainWindow
@@ -18,6 +18,7 @@ public partial class MainWindow
     private VideoItem? _pendingStartItem;
     private double _pendingStartPosition;
     private string? _lastOpMessage;
+    private bool? _playAfterRelease; // playback state before a file operation released the player
 
     private VideoItem? SelectedVideo => FileList.SelectedItem as VideoItem;
 
@@ -32,9 +33,8 @@ public partial class MainWindow
             ? $"Permanently delete this file?\n\n{item.Name}\n\nThe file is on a network location: it will be deleted " +
               "permanently, without the Recycle Bin, and cannot be recovered."
             : $"Move this file to the Recycle Bin?\n\n{item.Name}";
-        var answer = MessageBox.Show(this, text, network ? "Delete permanently" : "Delete file",
-            MessageBoxButton.YesNo, network ? MessageBoxImage.Warning : MessageBoxImage.Question, MessageBoxResult.Yes);
-        if (answer != MessageBoxResult.Yes) return;
+        // viBro's own dialog, opened next to the mouse pointer (a MessageBox cannot be positioned).
+        if (!DeleteConfirmDialog.Ask(this, network ? "Delete permanently" : "Delete file", text, warning: network)) return;
 
         _fileOpBusy = true;
         double position = _player?.TimePos ?? 0;
@@ -136,24 +136,43 @@ public partial class MainWindow
         }
     }
 
-    private async Task MoveCoreAsync(VideoItem item, bool useLastDestination)
+    /// <summary>C / Shift+C and the video menu: copy with the same rules as the move.</summary>
+    private async void CopySelected(bool useLastDestination)
     {
-        // 1. Destination: Shift+W reuses the last one; W (or no stored destination) asks.
-        string? dest = useLastDestination ? _settings.LastMoveDestination : null;
+        if (_fileOpBusy || SelectedVideo is not VideoItem item) return;
+        _fileOpBusy = true;
+        try
+        {
+            await CopyCoreAsync(item, useLastDestination);
+        }
+        finally
+        {
+            _fileOpBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Steps shared by move and copy: destination (last one or chosen), reachability, same folder,
+    /// name conflict. Returns null when the operation is cancelled.
+    /// </summary>
+    private async Task<(string Dest, string Name, bool Overwrite)?> PrepareTransferAsync(VideoItem item, bool useLastDestination, bool copy)
+    {
+        string op = copy ? "Copy" : "Move";
+        string? dest = useLastDestination ? (copy ? _settings.LastCopyDestination : _settings.LastMoveDestination) : null;
         while (true)
         {
-            dest ??= ChooseDestination();
-            if (dest == null) return;
+            dest ??= ChooseDestination(copy);
+            if (dest == null) return null;
 
             SetStatus("Checking destination " + dest + " ...");
             if (await IsFolderReachableAsync(dest, TimeSpan.FromSeconds(10))) break;
 
             var retry = MessageBox.Show(this, $"The destination folder is not reachable:\n\n{dest}\n\nChoose another folder?",
-                "Move file", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes);
+                op + " file", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes);
             if (retry != MessageBoxResult.Yes)
             {
-                SetStatus("Move cancelled.");
-                return;
+                SetStatus(op + " cancelled.");
+                return null;
             }
             dest = null;
         }
@@ -161,28 +180,77 @@ public partial class MainWindow
         string sourceFolder = Path.GetDirectoryName(item.FullPath) ?? "";
         if (FileOps.IsSameFolder(dest, sourceFolder))
         {
-            SetStatus("The file is already in that folder: nothing was moved.");
-            return;
+            SetStatus($"The file is already in that folder: nothing was {(copy ? "copied" : "moved")}.");
+            return null;
         }
 
-        _settings.LastMoveDestination = dest;
+        if (copy) _settings.LastCopyDestination = dest;
+        else _settings.LastMoveDestination = dest;
         SaveSettingsNow();
 
-        // 2. Name conflict: never overwrite silently.
+        // Name conflict: never overwrite silently.
         string name = item.Name;
         bool overwrite = false;
         if (await Task.Run(() => File.Exists(Path.Combine(dest, name))))
         {
             string keepBoth = await Task.Run(() => FileOps.UniqueName(dest, name));
-            switch (ConflictDialog.Ask(this, name, dest, keepBoth))
+            switch (ConflictDialog.Ask(this, name, dest, keepBoth, copy))
             {
                 case ConflictChoice.KeepBoth: name = keepBoth; break;
                 case ConflictChoice.Overwrite: overwrite = true; break;
                 default:
-                    SetStatus("Move cancelled.");
-                    return;
+                    SetStatus(op + " cancelled.");
+                    return null;
             }
         }
+        return (dest, name, overwrite);
+    }
+
+    /// <summary>The source is only read, so the player keeps the file open and keeps playing.</summary>
+    private async Task CopyCoreAsync(VideoItem item, bool useLastDestination)
+    {
+        var prepared = await PrepareTransferAsync(item, useLastDestination, copy: true);
+        if (prepared is not { } ready) return;
+        var (dest, name, overwrite) = ready;
+
+        using var cts = new CancellationTokenSource();
+        ProgressDialog? progressDialog = null;
+        var progress = new Progress<double>(p => progressDialog?.Report(p));
+        try
+        {
+            SetStatus("Copying " + item.Name + " ...");
+            var copyTask = FileOps.CopyAsync(item.FullPath, dest, name, overwrite, progress, cts.Token);
+            if (await Task.WhenAny(copyTask, Task.Delay(400)) != copyTask)
+            {
+                progressDialog = new ProgressDialog(this, item.Name, dest, cts, copy: true);
+                IsEnabled = false;
+                progressDialog.Show();
+            }
+            string finalPath = await copyTask;
+            SetStatus($"Copied {item.Name} to {Path.GetDirectoryName(finalPath)}" + (name != item.Name ? $" as {name}" : ""));
+        }
+        catch (OperationCanceledException)
+        {
+            SetStatus("Copy cancelled: nothing was copied.");
+        }
+        catch (Exception ex)
+        {
+            progressDialog = CloseProgress(progressDialog);
+            MessageBox.Show(this, "The file was not copied.\n\n" + ex.Message, "Copy file", MessageBoxButton.OK, MessageBoxImage.Warning);
+            SetStatus("Copy failed: " + ex.Message);
+        }
+        finally
+        {
+            progressDialog = CloseProgress(progressDialog);
+        }
+    }
+
+    private async Task MoveCoreAsync(VideoItem item, bool useLastDestination)
+    {
+        // 1-2. Destination (Shift+W reuses the last one), checks and name conflict.
+        var prepared = await PrepareTransferAsync(item, useLastDestination, copy: false);
+        if (prepared is not { } ready) return;
+        var (dest, name, overwrite) = ready;
 
         // 3. Move. A progress window appears only if the transfer is not immediate.
         double position = _player?.TimePos ?? 0;
@@ -239,10 +307,10 @@ public partial class MainWindow
         return null;
     }
 
-    private string? ChooseDestination()
+    private string? ChooseDestination(bool copy)
     {
-        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "Move to folder" };
-        string? initial = _settings.LastMoveDestination ?? _currentFolder;
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = copy ? "Copy to folder" : "Move to folder" };
+        string? initial = (copy ? _settings.LastCopyDestination : _settings.LastMoveDestination) ?? _currentFolder;
         if (!string.IsNullOrEmpty(initial)) dialog.InitialDirectory = initial;
         return dialog.ShowDialog(this) == true ? dialog.FolderName : null;
     }
@@ -271,6 +339,8 @@ public partial class MainWindow
     /// <summary>Unloads the file from the player and waits until Windows has closed its handle.</summary>
     private async Task ReleaseAsync(VideoItem item)
     {
+        // The next file loaded after this operation keeps the current play/pause state.
+        _playAfterRelease = _player != null && !_player.IsPaused;
         _loadingItem = null;
         _currentInfo = null;
         if (_player != null)
@@ -328,6 +398,7 @@ public partial class MainWindow
 
         if (_items.Count == 0)
         {
+            _playAfterRelease = null; // nothing is loaded next: do not carry the state further
             // The player has already released the file: the video area stays empty.
             SetStatus((_lastOpMessage ?? "") + "  |  No more videos in this folder.");
             _lastOpMessage = null;

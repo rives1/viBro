@@ -15,9 +15,11 @@ namespace ViBro;
 //  - single click: Play/Pause at once; double click: fullscreen on/off and the pause toggle of
 //    its first click is undone (the video only stops for an instant)
 //  - the click that brings viBro back to the foreground only activates the window
-//  - right click: menu with Delete, Move..., Move to <last folder>
-//  - wheel over the time bar (both modes): up = forward 5 s, down = back 5 s (like Up/Down keys)
-//  - wheel elsewhere in fullscreen: down = next video, up = previous
+//  - right click: menu with Delete, Move..., Move to <last folder>, Copy..., Copy to <last folder>
+//  - right button held + horizontal drag: moves in the video; the whole video width = the whole
+//    duration, keyframe seeks while dragging and an exact seek on release (no menu then)
+//  - wheel over the time bar (both modes): up = forward 3 s, down = back 3 s
+//  - wheel over the video (both modes) or anywhere in fullscreen: down = next video, up = previous
 public partial class MainWindow
 {
     private uint _lastClickTime;
@@ -27,7 +29,14 @@ public partial class MainWindow
     private uint _activatedTick; // GetTickCount time of the last window activation
     private int _wheelAccumulator;
     private bool _wheelOnTimeBar;
-    private const double WheelSeekSeconds = 5;
+    private const double WheelSeekSeconds = 3;
+
+    // Right-button drag (scrubbing).
+    private bool _rightDown;      // right button pressed on the video, mouse captured by the window
+    private bool _scrubbing;      // the drag went past the threshold: no menu on release
+    private int _rightDownX, _rightDownY;
+    private double _scrubStartTime, _scrubDuration, _scrubTarget;
+    private const double ScrubThresholdDip = 6; // smaller movements are still a right click
 
     private void OnVideoMouseMessage(MSG msg)
     {
@@ -41,6 +50,15 @@ public partial class MainWindow
                     _lastMouseY = msg.pt_y;
                     ShowFullscreenBar();
                 }
+                if (_rightDown)
+                {
+                    if ((msg.wParam.ToInt64() & NativeMethods.MK_RBUTTON) == 0) EndRightDrag(showMenu: false); // released unseen
+                    else OnRightDrag(msg.pt_x, msg.pt_y);
+                }
+                break;
+
+            case NativeMethods.WM_RBUTTONDOWN:
+                BeginRightDrag(msg.pt_x, msg.pt_y);
                 break;
 
             // mpv's window may or may not have CS_DBLCLKS: the second click arrives as WM_LBUTTONDOWN
@@ -52,9 +70,64 @@ public partial class MainWindow
                 break;
 
             case NativeMethods.WM_RBUTTONUP:
-                ShowVideoMenu();
+                if (_rightDown) EndRightDrag(showMenu: true);
+                else ShowVideoMenu();
                 break;
         }
+    }
+
+    private void BeginRightDrag(int x, int y)
+    {
+        _rightDown = true;
+        _scrubbing = false;
+        _rightDownX = x;
+        _rightDownY = y;
+        _scrubStartTime = _player?.TimePos ?? 0;
+        _scrubDuration = _player?.Duration ?? 0;
+        _scrubTarget = _scrubStartTime;
+        // Windows does not capture the mouse for the right button: without this, releasing it
+        // outside the video would be lost. The main window belongs to this thread.
+        NativeMethods.SetCapture(new WindowInteropHelper(this).Handle);
+    }
+
+    private void OnRightDrag(int x, int y)
+    {
+        if (_player == null || _scrubDuration <= 0 || VideoHost.ActualWidth <= 0) return;
+        // Distances in DIPs, relative to the video, so the scale follows the video's width.
+        double dx = VideoHost.PointFromScreen(new Point(x, y)).X - VideoHost.PointFromScreen(new Point(_rightDownX, _rightDownY)).X;
+        if (!_scrubbing)
+        {
+            if (Math.Abs(dx) < ScrubThresholdDip) return;
+            _scrubbing = true;
+        }
+        double target = Math.Clamp(_scrubStartTime + dx / VideoHost.ActualWidth * _scrubDuration, 0, _scrubDuration);
+        if (Math.Abs(target - _scrubTarget) < 0.05) return;
+        _scrubTarget = target;
+        _player.SeekAbsolute(target, exact: false); // keyframes while dragging; requests are coalesced
+        ShowScrubPosition(target);
+    }
+
+    private void EndRightDrag(bool showMenu)
+    {
+        bool wasScrubbing = _scrubbing;
+        _rightDown = false;
+        _scrubbing = false;
+        NativeMethods.ReleaseCapture();
+        if (wasScrubbing)
+            _player?.SeekAbsolute(_scrubTarget, exact: true); // land exactly where the drag ended
+        else if (showMenu)
+            ShowVideoMenu();
+    }
+
+    /// <summary>While dragging, the bar and the time show the target, not the (lagging) decoded position.</summary>
+    private void ShowScrubPosition(double target)
+    {
+        _updatingTimeSlider = true;
+        TimeSlider.Maximum = _scrubDuration;
+        TimeSlider.Value = target;
+        _updatingTimeSlider = false;
+        TimeText.Text = FormatTime(target) + " / " + FormatTime(_scrubDuration);
+        ShowFullscreenBar();
     }
 
     /// <summary>Called on Window.Activated (WM_ACTIVATE is handled before the click that caused it).</summary>
@@ -115,13 +188,14 @@ public partial class MainWindow
 
     /// <summary>
     /// One wheel notch (120) = one step; smaller steps (touchpads) are accumulated. Over the time bar:
-    /// seek 5 s (up = forward); elsewhere in fullscreen: change video (down = next).
+    /// seek 3 s (up = forward). Over the video, or anywhere in fullscreen: change video (down = next).
+    /// Elsewhere in the normal window (file list, tree) the wheel scrolls as usual.
     /// </summary>
     private bool OnWheel(int delta, int screenX, int screenY)
     {
         if (!IsActive || delta == 0) return false;
         bool onTimeBar = IsPointOver(TimeSlider, screenX, screenY);
-        if (!onTimeBar && !_isFullscreen) return false; // normal window, not on the bar: unchanged
+        if (!onTimeBar && !_isFullscreen && !IsPointOverVideo(screenX, screenY)) return false;
 
         // Restart counting when the direction or the target (bar / video) changes.
         if (Math.Sign(delta) != Math.Sign(_wheelAccumulator) || onTimeBar != _wheelOnTimeBar) _wheelAccumulator = 0;
@@ -150,16 +224,24 @@ public partial class MainWindow
         menu.Items.Add(CreateMenuItem("Delete", "Del / R", canAct, DeleteSelected));
         menu.Items.Add(CreateMenuItem("Move...", "W", canAct, () => MoveSelected(useLastDestination: false)));
 
-        string? last = _settings.LastMoveDestination;
-        if (!string.IsNullOrWhiteSpace(last))
-        {
-            string name = Path.GetFileName(Path.TrimEndingDirectorySeparator(last));
-            if (string.IsNullOrEmpty(name)) name = last;
-            var item = CreateMenuItem("Move to " + name, "Shift+W", canAct, () => MoveSelected(useLastDestination: true));
-            item.ToolTip = last;
-            menu.Items.Add(item);
-        }
+        AddLastDestinationItem(menu, "Move to ", _settings.LastMoveDestination, "Shift+W", canAct,
+            () => MoveSelected(useLastDestination: true));
+        menu.Items.Add(new Separator());
+        menu.Items.Add(CreateMenuItem("Copy...", "C", canAct, () => CopySelected(useLastDestination: false)));
+        AddLastDestinationItem(menu, "Copy to ", _settings.LastCopyDestination, "Shift+C", canAct,
+            () => CopySelected(useLastDestination: true));
         menu.IsOpen = true;
+    }
+
+    /// <summary>"Move to / Copy to &lt;folder&gt;", only when a previous destination exists (full path in the tooltip).</summary>
+    private void AddLastDestinationItem(ContextMenu menu, string prefix, string? last, string gesture, bool enabled, Action action)
+    {
+        if (string.IsNullOrWhiteSpace(last)) return;
+        string name = Path.GetFileName(Path.TrimEndingDirectorySeparator(last));
+        if (string.IsNullOrEmpty(name)) name = last;
+        var item = CreateMenuItem(prefix + name, gesture, enabled, action);
+        item.ToolTip = last;
+        menu.Items.Add(item);
     }
 
     private MenuItem CreateMenuItem(string text, string gesture, bool enabled, Action action)

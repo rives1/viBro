@@ -27,7 +27,7 @@ internal sealed class VideoItem
     public string SizeText => FormatSize(Size);
     public string ModifiedText => Modified.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture);
 
-    private static string FormatSize(long bytes)
+    public static string FormatSize(long bytes)
     {
         string[] units = { "B", "KB", "MB", "GB", "TB" };
         double v = bytes;

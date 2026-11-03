@@ -47,6 +47,7 @@ internal sealed class AppSettings
     // [Folders]
     public string? LastFolder { get; set; }
     public string? LastMoveDestination { get; set; }
+    public string? LastCopyDestination { get; set; }
 
     // [Audio]
     public double Volume { get; set; } = 100;
@@ -113,6 +114,7 @@ internal sealed class AppSettings
 
         LastFolder = ReadString("Folders", "LastFolder");
         LastMoveDestination = ReadString("Folders", "LastMoveDestination");
+        LastCopyDestination = ReadString("Folders", "LastCopyDestination");
 
         Volume = ReadDouble("Audio", "Volume", Volume, 0, 100);
         Mute = ReadBool("Audio", "Mute", Mute);
@@ -197,6 +199,7 @@ internal sealed class AppSettings
 
         _ini.Set("Folders", "LastFolder", LastFolder ?? "");
         _ini.Set("Folders", "LastMoveDestination", LastMoveDestination ?? "");
+        _ini.Set("Folders", "LastCopyDestination", LastCopyDestination ?? "");
 
         _ini.Set("Audio", "Volume", D(Volume));
         _ini.Set("Audio", "Mute", B(Mute));

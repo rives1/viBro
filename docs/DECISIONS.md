@@ -239,3 +239,12 @@ Alternative presentate: (A) nessun EXE pubblico; (B) build di libmpv in proprio 
 - `THIRD-PARTY-NOTICES.md`: politica di distribuzione al posto della lista di obblighi.
 - **Pulizia una tantum su GitHub (utente):** cancellare gli artifact delle esecuzioni precedenti (Actions → esecuzione → Artifacts, oppure `gh api` sull'endpoint `actions/artifacts`) e le release in bozza dei tag (contengono lo zip; le bozze sono visibili solo a chi ha accesso in scrittura, ma conviene eliminarle). Verificare che non esistano release pubblicate con lo zip.
 - Per tornare a pubblicare un EXE: strada B.
+
+## D-053 — Nessun percorso personale nel repository (2026-11-03, scelta dell'utente)
+La SPEC vieta percorsi personali nel repository pubblico, ma `CONTEXT.md` e le fotografie `CONTEXT-v0.5.0.md` e `CONTEXT-v0.6.0.md` contenevano il percorso della cartella del progetto con il nome utente di Windows. Rimosso da tutti i file; il percorso resta solo nel documento privato del progetto claude.ai. Scelta dell'utente: nessuna riscrittura della storia Git già pubblicata (resta nei commit precedenti). Le fotografie, normalmente da non modificare, sono state corrette solo in questo punto.
+
+## D-054 — Autore: rives1 (2026-11-03, scelta dell'utente)
+I commit erano firmati con il segnaposto `viBro developer`. Dalla 1.0.0: `rives1 <rives1@users.noreply.github.com>` (configurazione Git locale del repository) e, nelle proprietà dell'EXE, `Company = rives1`, `Copyright (C) 2026 rives1. GPL-3.0-or-later.` L'indirizzo noreply nel formato `ID+rives1@users.noreply.github.com` (account creati dopo il 2017) collega i commit al profilo GitHub; quello usato non espone l'email ma potrebbe non collegarli: va sostituito con quello indicato in GitHub → Settings → Emails se l'utente lo desidera. I commit precedenti restano con il segnaposto.
+
+## D-055 — Contenuto della 1.0.0 (2026-11-03)
+Nessuna funzione nuova: la 1.0.0 è la 0.6.0 verificata nel suo insieme. Revisione rispetto alla SPEC: requisiti soddisfatti; WMV resta tra i formati (provato nella 0.1.0: VC-1 con decodifica hardware, WMV3 in software; l'assistente aveva detto per errore che non era mai stato provato, e l'utente ha confermato di tenerlo). Piano di prova `TEST-PLAN-1.0.0.md`: regressione compatta di tutte le funzioni, un file per formato (WMV compreso) e sessione di memoria di almeno 50 cambi di video (scelta dell'utente). Il tag `v1.0.0` si crea dopo la conferma di tutte le prove.

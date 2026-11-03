@@ -17,8 +17,8 @@
     <Product>viBro</Product>
     <AssemblyTitle>viBro video browser</AssemblyTitle>
     <Description>Fast folder video browser (WPF + libmpv)</Description>
-    <Company>viBro contributors</Company>
-    <Copyright>Copyright (C) viBro contributors. GPL-3.0-or-later.</Copyright>
+    <Company>rives1</Company>
+    <Copyright>Copyright (C) 2026 rives1. GPL-3.0-or-later.</Copyright>
 
     <!-- Single portable EXE: self-contained, native libraries (libmpv, WPF) embedded and
          extracted on first run to the per-user .NET bundle cache (versioned, reused). -->

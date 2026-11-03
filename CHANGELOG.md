@@ -2,6 +2,19 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.0.0] - non ancora rilasciata
+
+Prima versione completa e verificata. Nessuna funzione nuova rispetto alla 0.6.0.
+
+### Modificato
+- Autore e copyright: `rives1` (proprietà dell'EXE e commit).
+- README in inglese (`README.md`), versione italiana in `README.it.md`.
+- Distribuzione solo come sorgente: il workflow GitHub compila come verifica ma non pubblica l'EXE (vedi THIRD-PARTY-NOTICES).
+- Avvisi di licenza corretti: la build di libmpv inclusa è GPL-3.0 (FFmpeg `--enable-version3`).
+
+### Rimosso
+- Percorsi personali dai documenti del repository.
+
 ## [0.6.0] - 2026-11-03
 
 ### Aggiunto

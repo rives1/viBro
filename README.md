@@ -1,117 +1,116 @@
 # viBro
 
-viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartelle di video, vederli all'istante e organizzarli (eliminare, rinominare, spostare). La priorità è la reattività: il primo fotogramma deve comparire subito, il passaggio da un video all'altro deve essere immediato e i salti temporali rapidi, anche su NAS.
+viBro is a desktop application for Windows 11 x64 to browse folders of videos, view them instantly and organize them (delete, rename, move, copy). Responsiveness comes first: the first frame must appear at once, switching from one video to the next must be immediate and seeking must be fast, on a NAS too.
 
-Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
+Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Stato: 0.6.0 rilasciata** (riproduzione conservata al cambio di file, copia, trascinamento col tasto destro, barra di stato con conteggio). Prossima versione: da definire. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Status: 0.6.0 released** (play state kept when the file changes, copy, right-button drag to seek, status bar with file count). Next version: to be defined. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+>
+> Italian version of this file: [README.it.md](README.it.md).
 
-## Funzionalità
+## Features
 
-- Un unico EXE autonomo: nessuna installazione, nessun privilegio di amministratore, nessun codec da installare.
-- Barra del percorso: cartelle locali, unità mappate e percorsi UNC (`\\server\share`). L'apertura avviene in background, quindi una condivisione irraggiungibile non blocca l'interfaccia.
-- Elenco dei soli video della cartella (MP4, MKV, MOV, WMV), senza ricorsione, in ordine naturale dei nomi (lo stesso di Esplora risorse).
-- Al cambio di file lo stato **Play/Pause si conserva**: se il video era in pausa (o all'avvio) il nuovo si carica in pausa sul primo fotogramma; se era in riproduzione, il nuovo parte.
-- Salti: ±1 s e ±5 s esatti, ±1 min e ±5 min su fotogrammi chiave (rapidi, approssimati) oppure esatti con *Exact long seeks*. Le richieste ripetute vengono accorpate, quindi non si accumula una coda.
-- Play/Pause, barra temporale, volume, mute, schermo intero.
-- **Misure automatiche** in `viBro-metrics.csv`, accanto all'EXE: tempo al primo fotogramma, cambio video, latenza dei salti, memoria.
-
-- Albero delle cartelle (cartelle utente, unità locali e di rete, condivisioni UNC aperte), caricato progressivamente e sincronizzato con la cartella aperta.
-- Ordinamento per Name, Size, Date modified; tre riquadri ridimensionabili; impostazioni in `viBro.ini`.
-
-- Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
-
-- Temi Light/Dark (pulsante *Theme*), barra dei controlli sopra il video, fascia con la barra temporale sotto il video a schermo intero.
-- Barra di stato compatta: numero di video della cartella e spazio totale, stato, misure.
-- Registro degli errori `viBro-errors.log` accanto all'EXE.
+- A single self-contained EXE: no installation, no administrator rights, no codecs to install.
+- Path bar: local folders, mapped drives and UNC paths (`\\server\share`). Folders open in the background, so an unreachable share never blocks the interface.
+- Lists only the videos of the folder (MP4, MKV, MOV, WMV), non-recursive, in natural name order (the same as File Explorer).
+- **Play/Pause is kept when the file changes**: if the video was paused (or at startup) the new one is loaded paused on its first frame; if it was playing, the new one starts playing.
+- Seeking: ±1 s and ±5 s exact, ±1 min and ±5 min on keyframes (fast, approximate) or exact with *Exact long seeks*. Repeated requests are coalesced, so no queue builds up.
+- Play/Pause, timeline, volume, mute, fullscreen.
+- **Automatic measurements** in `viBro-metrics.csv`, next to the EXE: time to first frame, video switch, seek latency, memory, startup time.
+- Folder tree (user folders, local and network drives, open UNC shares), loaded progressively and kept in sync with the open folder.
+- Sorting by Name, Size, Date modified; three resizable panes; settings in `viBro.ini`.
+- Delete, rename, move and copy files, with confirmations, progress and cancellation.
+- Light/Dark themes (*Theme* button), control bar above the video, a timeline band below the video in fullscreen.
+- Compact status bar: number of videos in the folder and their total size, status, measurements.
+- Error log `viBro-errors.log` next to the EXE.
 
 ## viBro.ini
 
-Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo a programma chiuso. Un valore non valido viene sostituito dal predefinito e segnalato nella barra di stato. Oltre alla finestra, ai riquadri, alle colonne, all'ultima cartella e all'audio, che il programma salva da solo, contiene:
+It sits next to `viBro.exe` and is written when the program closes. Edit it only while viBro is closed. An invalid value is replaced by its default and reported in the status bar. Besides the window, panes, columns, last folder, last move/copy destinations and audio, which the program saves by itself, it contains:
 
-| Sezione / chiave | Predefinito | Significato |
+| Section / key | Default | Meaning |
 |---|---|---|
-| `[Playback] HardwareDecoding` | `auto-safe` | Decodifica hardware (`no` = solo software, oppure un valore `hwdec` di mpv) |
-| `[Playback] ExactLongSeeks` | `false` | Rende esatti anche ±1/±5 min e la barra temporale |
-| `[Playback] ExactSeekThresholdSeconds` | `30` | I salti più brevi di questa soglia sono sempre esatti |
-| `[Cache] MaxMB` | `0` | 0 = cache di mpv disattivata; >0 = cache attiva con questo limite |
-| `[Diagnostics] MetricsLog` | `true` | Registro delle misure `viBro-metrics.csv` |
-| `[Appearance] Theme` | `System` | `Light`, `Dark`, oppure `System` (segue Windows finché non si sceglie con il pulsante *Theme*) |
+| `[Playback] HardwareDecoding` | `auto-safe` | Hardware decoding (`no` = software only, or any mpv `hwdec` value) |
+| `[Playback] ExactLongSeeks` | `false` | Makes ±1/±5 min and the timeline exact too |
+| `[Playback] ExactSeekThresholdSeconds` | `30` | Seeks shorter than this are always exact |
+| `[Cache] MaxMB` | `0` | 0 = mpv cache disabled; >0 = cache enabled with this limit |
+| `[Diagnostics] MetricsLog` | `true` | Measurement log `viBro-metrics.csv` |
+| `[Appearance] Theme` | `System` | `Light`, `Dark`, or `System` (follows Windows until a theme is chosen with the *Theme* button) |
 
-## Scorciatoie da tastiera
+## Keyboard shortcuts
 
-| Tasto | Azione | Da |
+| Key | Action | Since |
 |---|---|---|
-| ← / → | Indietro / avanti di circa 1 s | ✔ |
-| ↓ / ↑ | Indietro / avanti di circa 5 s | ✔ |
-| PgDown / PgUp | Indietro / avanti di circa 1 min | ✔ |
-| Alt + PgDown / Alt + PgUp | Indietro / avanti di circa 5 min | ✔ |
-| Spazio | Play/Pause (alla fine del video riparte dall'inizio) | ✔ |
-| E / D | Video precedente / successivo (Play/Pause conservato), senza ricominciare dall'estremità opposta | ✔ |
+| ← / → | Back / forward about 1 s | ✔ |
+| ↓ / ↑ | Back / forward about 5 s | ✔ |
+| PgDown / PgUp | Back / forward about 1 min | ✔ |
+| Alt + PgDown / Alt + PgUp | Back / forward about 5 min | ✔ |
+| Space | Play/Pause (at the end of the video it restarts from the beginning) | ✔ |
+| E / D | Previous / next video (Play/Pause kept), without wrapping around | ✔ |
 | M | Mute on/off | ✔ |
-| F11 / Esc | Entra in / esce da schermo intero | ✔ |
-| Ctrl + L | Attiva la barra del percorso (Invio apre, Esc annulla) | ✔ |
-| Canc o R | Elimina il file con conferma (Cestino se locale, definitiva se in rete) | 0.3.0 |
-| F2 | Rinomina il file (solo il nome; l'estensione resta) | 0.3.0 |
-| W | Sceglie la cartella di destinazione e sposta il file | 0.3.0 |
-| Shift + W | Sposta nell'ultima destinazione usata | 0.3.0 |
-| C | Sceglie la cartella di destinazione e copia il file (stesse regole dello spostamento; l'originale resta) | 0.6.0 |
-| Shift + C | Copia nell'ultima destinazione di copia (separata da quella dello spostamento) | 0.6.0 |
-| Ctrl + W | Chiude viBro | 0.6.0 |
+| F11 / Esc | Enter / leave fullscreen | ✔ |
+| Ctrl + L | Focus the path bar (Enter opens, Esc cancels) | ✔ |
+| Del or R | Delete the file after confirmation (Recycle Bin if local, permanent if on the network) | 0.3.0 |
+| F2 | Rename the file (name only; the extension is kept) | 0.3.0 |
+| W | Choose a destination folder and move the file | 0.3.0 |
+| Shift + W | Move to the last destination used | 0.3.0 |
+| C | Choose a destination folder and copy the file (same rules as moving; the original stays) | 0.6.0 |
+| Shift + C | Copy to the last copy destination (separate from the move destination) | 0.6.0 |
+| Ctrl + W | Close viBro | 0.6.0 |
 
-## Mouse sul video
+## Mouse on the video
 
-| Azione | Effetto | Da |
+| Action | Effect | Since |
 |---|---|---|
-| Clic | Play/Pause (il clic che riporta viBro in primo piano non cambia la riproduzione) | 0.5.0 |
-| Doppio clic | Entra in / esce da schermo intero; la riproduzione resta com'era | 0.5.0 |
-| Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W), *Copy...* (C), *Copy to <ultima cartella>* (Shift+C) | 0.5.0 (copia 0.6.0) |
-| Tasto destro tenuto + trascinamento a destra/sinistra | Spostamento nel video: tutta la larghezza del video = tutta la durata; il video segue il mouse, salto esatto al rilascio (nessun menu) | 0.6.0 |
-| Rotella sopra la barra temporale | Su: avanti 3 s; giù: indietro 3 s, a finestra normale e a schermo intero | 0.6.0 |
-| Rotella sopra il video, o ovunque a schermo intero | Giù: video successivo; su: video precedente (come D / E) | 0.6.0 |
-| Clic sulla barra temporale e trascinamento | Spostamento nel video; l'indicatore segue il mouse | 0.4.0 |
+| Click | Play/Pause (the click that brings viBro to the foreground does not change playback) | 0.5.0 |
+| Double click | Enter / leave fullscreen; playback stays as it was | 0.5.0 |
+| Right click | Menu: *Delete* (Del/R), *Move...* (W), *Move to <last folder>* (Shift+W), *Copy...* (C), *Copy to <last folder>* (Shift+C) | 0.5.0 (copy 0.6.0) |
+| Right button held + drag left/right | Seek within the video: the whole video width = the whole duration; the picture follows the mouse, exact seek on release (no menu) | 0.6.0 |
+| Wheel over the timeline | Up: forward 3 s; down: back 3 s, in the normal window and in fullscreen | 0.6.0 |
+| Wheel over the video, or anywhere in fullscreen | Down: next video; up: previous video (like D / E) | 0.6.0 |
+| Click on the timeline and drag | Seek within the video; the thumb follows the mouse | 0.4.0 |
 
-Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come da specifica, le frecce eseguono sempre i salti, anche con lo stato attivo sull'albero o sull'elenco: la navigazione nell'albero avviene con il mouse.
+Shortcuts are suspended while typing in the path bar (except Ctrl+W). As specified, the arrow keys always seek, even when the tree or the list has the focus: the tree is navigated with the mouse.
 
-## Uso
+## Usage
 
 ```
-viBro.exe [cartella] [--exact-seeks] [--trace-input] [--mpv-opt nome=valore]...
+viBro.exe [folder] [--exact-seeks] [--trace-input] [--mpv-opt name=value]...
 ```
 
-- `cartella`: cartella da aprire all'avvio.
-- `--trace-input`: diagnostica; scrive in `viBro-errors.log` ogni tasto e ogni messaggio della rotella ricevuti da viBro, con la finestra di destinazione.
-- `--exact-seeks`: rende esatti anche i salti lunghi e la barra temporale per questa sessione (non viene salvato; l'impostazione permanente è `ExactLongSeeks` in `viBro.ini`).
-- `--mpv-opt nome=valore`: sovrascrive un'opzione di mpv. Serve per le prove di prestazione, per esempio `--mpv-opt cache=yes --mpv-opt demuxer-max-bytes=64MiB`, oppure `--mpv-opt log-file=C:\temp\mpv.log` per la diagnostica.
+- `folder`: folder to open at startup.
+- `--trace-input`: diagnostics; writes every key and wheel message received by viBro, with its target window, to `viBro-errors.log`.
+- `--exact-seeks`: makes long seeks and the timeline exact for this session (not saved; the permanent setting is `ExactLongSeeks` in `viBro.ini`).
+- `--mpv-opt name=value`: overrides an mpv option. Meant for performance tests, e.g. `--mpv-opt cache=yes --mpv-opt demuxer-max-bytes=64MiB`, or `--mpv-opt log-file=C:\temp\mpv.log` for diagnostics.
 
-Al primo avvio .NET estrae le librerie native, tra cui libmpv, nella cache per utente `%TEMP%\.net\viBro\<hash>`. Gli avvii successivi riutilizzano la cache; una nuova build usa un nuovo hash.
+On the first start .NET extracts the native libraries, libmpv among them, to the per-user cache `%TEMP%\.net\viBro\<hash>`. Later starts reuse the cache; a new build uses a new hash.
 
-## Compilazione
+## Building
 
-Requisiti: Windows 10/11 x64 e connessione a Internet per il primo download. Non servono privilegi di amministratore.
+Requirements: Windows 10/11 x64 and an Internet connection for the first download. No administrator rights are needed.
 
 ```
 build.cmd
 ```
 
-Lo script:
-1. usa il .NET 10 SDK, se presente; altrimenti, con `-InstallDotnet`, lo installa per l'utente corrente in `.dotnet\`;
-2. scarica la build di libmpv fissata in `build/dependencies.json`, ne verifica lo SHA-256 ed estrae `libmpv-2.dll` in `deps\libmpv\`;
-3. pubblica `artifacts\publish\viBro.exe` e controlla che sia l'unico file prodotto;
-4. crea `dist\viBro-<versione>-win-x64.zip` con il relativo `.sha256`.
+The script:
+1. uses the .NET 10 SDK if present; otherwise, with `-InstallDotnet`, installs it for the current user in `.dotnet\`;
+2. downloads the libmpv build pinned in `build/dependencies.json`, checks its SHA-256 and extracts `libmpv-2.dll` to `deps\libmpv\`;
+3. publishes `artifacts\publish\viBro.exe` and checks that it is the only file produced;
+4. creates `dist\viBro-<version>-win-x64.zip` with its `.sha256`.
 
-Comandi singoli: `build\build.ps1 [-Compress] [-DepsOnly]` e `build\package.ps1`. La variante distribuita è l'EXE normale; `-Compress` produce un EXE più piccolo (−58%) ma più lento ad avviarsi (+165 ms) e con circa 70 MB di memoria in più (misure in `docs/DECISIONS.md`, D-047). Su GitHub, il workflow `.github/workflows/build.yml` esegue gli stessi script.
+Individual commands: `build\build.ps1 [-Compress] [-DepsOnly]` and `build\package.ps1`. The distributed variant is the normal EXE; `-Compress` produces a smaller EXE (−58%) that starts more slowly (+165 ms) and uses about 70 MB more memory (measurements in `docs/DECISIONS.md`, D-047). On GitHub, the workflow `.github/workflows/build.yml` runs the same scripts.
 
-La versione si trova **solo** in `Directory.Build.props` e viene riportata nel titolo della finestra e nelle proprietà dell'EXE.
+The version lives **only** in `Directory.Build.props` and is shown in the window title and in the EXE properties.
 
-## Misure
+## Measurements
 
 ```
-powershell -ExecutionPolicy Bypass -File build\analyze-metrics.ps1 -Path <cartella-exe>\viBro-metrics.csv
+powershell -ExecutionPolicy Bypass -File build\analyze-metrics.ps1 -Path <exe-folder>\viBro-metrics.csv
 ```
 
-Il protocollo di prova è descritto in [docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md).
+The test protocol is described in [docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md) (in Italian).
 
-## Licenza
+## License
 
-GPL-3.0-or-later (vedi [LICENSE](LICENSE)). L'EXE incorpora libmpv in una build GPL; vedi [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+GPL-3.0-or-later (see [LICENSE](LICENSE)). The EXE embeds a GPL build of libmpv whose FFmpeg is built with `--enable-gpl --enable-version3`, so the distributed EXE as a whole is under GPL version 3. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

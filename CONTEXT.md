@@ -1,9 +1,9 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-03 · branch `main` · ultimo commit `39d2eec` · ultima versione rilasciata **1.0.0** (tag `v1.0.0`) · **in sviluppo: 1.2.0 (comprende la 1.1.0), scritta e compilata, da provare su Windows**_
+_Aggiornato: 2026-11-03 · branch `main` · ultima versione rilasciata **1.2.0** (tag `v1.2.0`) · **prossima versione: da definire**_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-058 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-059 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 - Cartella sul PC dell'utente: il percorso è nel documento privato del progetto claude.ai, non nel repository pubblico (D-053). Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0`, `v0.5.0` e `v0.6.0` forse non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`. **Variante predefinita: EXE normale** (D-047: avvio 410 ms contro 575, ~70 MB di memoria in meno).
@@ -20,7 +20,7 @@ _Aggiornato: 2026-11-03 · branch `main` · ultimo commit `39d2eec` · ultima ve
 | 0.6.0 | Play/Pause conservato al cambio di file, copia (C/Shift+C e menu), trascinamento col tasto destro per spostarsi nel video, rotella sul video anche a finestra normale, rotella sulla barra ±3 s, barra di stato compatta con numero e dimensione dei video, fascia in basso a schermo intero, conferma di eliminazione vicino al puntatore, Ctrl+W | ✔ tag `v0.6.0` (2026-11-03): tutte le prove superate |
 | 1.0.0 | Prima versione completa e verificata: nessuna funzione nuova, regressione completa e sessione di memoria (D-055) | ✔ tag `v1.0.0` (2026-11-03): tutte le prove superate, memoria stabile su 90 caricamenti (D-056) |
 | 1.1.0 | Barra dei controlli sotto il video e sopra l'elenco, rotella sul video = ±3 s a finestra normale (cambio video solo a schermo intero), icona della barra del percorso, cursore all'inizio nella rinomina (D-057) | non rilasciata separatamente: confluisce nella 1.2.0 |
-| 1.2.0 | Pulsanti a icone, tempo sotto il puntatore sulla barra, file caricato evidenziato (▶/❚❚ e grassetto), posizione nella barra di stato, OSD di mpv a schermo intero (tempo dopo i salti, nome del file al cambio), finestra dei comandi Ctrl+F2 (D-058) | **scritta e compilata; da provare su Windows** |
+| 1.2.0 | Pulsanti a icone, tempo sotto il puntatore sulla barra, file caricato evidenziato (▶/❚❚ e grassetto), posizione nella barra di stato, OSD di mpv a schermo intero (tempo dopo i salti, nome del file al cambio), finestra dei comandi Ctrl+F2 (D-058) | ✔ tag `v1.2.0` (2026-11-03): tutte le prove superate, comprese quelle della 1.1.0 (D-059) |
 
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
 - Cambio video: mediana 140–500 ms sul NAS (MP4 più lenti per la lettura dell'indice; MKV 66–120 ms), ~38 ms in locale. viBro aggiunge pochi ms rispetto a mpv (verificato con il log di mpv).
@@ -30,9 +30,9 @@ _Aggiornato: 2026-11-03 · branch `main` · ultimo commit `39d2eec` · ultima ve
 - Memoria: 260–470 MB, stabile. I salti sui fotogrammi chiave per ±1/±5 s **non spostavano l'immagine** (GOP di 5–24 s): da qui la modalità mista (D-007).
 
 ## 4. Stato attuale e prossimo passo
-1. **1.0.0 rilasciata il 2026-11-03** (tag `v1.0.0`, D-056). Distribuzione solo come sorgente (D-052); EXE predefinito normale (D-047); autore `rives1` (D-054).
-2. **1.2.0 scritta e compilata nel container, non provata su Windows** (D-058). Comprende la 1.1.0 (D-057), mai provata: barra dei controlli sotto il video, rotella sul video = ±3 s a finestra normale, icona della barra del percorso, cursore all'inizio nella rinomina. Nuovo nella 1.2.0: pulsanti a icone, tempo sotto il puntatore, file caricato evidenziato, posizione nella barra di stato, OSD a schermo intero, Ctrl+F2 (`MainWindow.Ui.cs`, `CommandsDialog`).
-3. Piano di prova aperto: [docs/TEST-PLAN-1.2.0.md](docs/TEST-PLAN-1.2.0.md) (prove 1.2.0 + 1.1.0 + regressione). Punti da osservare: glifi delle icone, primo testo OSD (caricamento dei caratteri), ordinamento per Name con la nuova colonna.
+1. **1.2.0 rilasciata il 2026-11-03** (tag `v1.2.0`, D-059), comprende la 1.1.0. Tutte le prove di [docs/TEST-PLAN-1.2.0.md](docs/TEST-PLAN-1.2.0.md) superate.
+2. Distribuzione solo come sorgente (D-052); EXE predefinito normale (D-047); autore `rives1` (D-054).
+3. Nessuna prova aperta. Prossimo passo: l'utente definisce eventuali versioni successive. Proposte non scelte per la 1.2.0: cursore nascosto a schermo intero dopo 2 s, barra del percorso a "briciole" con Backspace per la cartella superiore, stato vuoto del video.
 4. Da fare dall'utente su GitHub, se non già fatto: cancellare gli artifact delle esecuzioni precedenti e le release in bozza dei tag (D-052); `git push --follow-tags`.
 5. Punti noti non bloccanti: picchi sul NAS fino a 2 s (0.1.0, non riprodotti); causa del primo comportamento della rotella nella 0.5.0 non identificata (D-041, `--trace-input` disponibile); con il 4K la memoria arriva a ~550 MB di lavoro / ~790 MB privata (D-049), la sessione lunga della 1.0.0 non conteneva 4K; per pubblicare un EXE servirebbe una build di libmpv in proprio con revisioni registrate (D-052).
 
@@ -59,4 +59,4 @@ _Aggiornato: 2026-11-03 · branch `main` · ultimo commit `39d2eec` · ultima ve
 - **Flusso per ogni versione:** domande, codice, compilazione e test su Linux, copia sul PC, documentazione (CHANGELOG, DECISIONS, CONTEXT, TEST-PLAN), commit; poi l'utente esegue `build.cmd` e il piano di prova; infine chiusura con data, fotografia `docs/handover/CONTEXT-vX.Y.Z.md` e tag.
 
 ## 8. Messaggio per riprendere in una nuova chat
-> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. Siamo alla 1.2.0 in prova: ho ricompilato con `build.cmd` e ti riporto l'esito di `docs/TEST-PLAN-1.2.0.md`.
+> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 1.2.0 è rilasciata (tag `v1.2.0`); ti descrivo cosa voglio nella prossima versione.

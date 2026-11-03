@@ -267,3 +267,6 @@ Proposte dell'assistente scelte dall'utente, tutte senza costo sulle prestazioni
 - **Posizione nella cartella:** "indice / totale" nella barra di stato, aggiornato a ogni cambio di selezione.
 - **OSD di mpv:** comando `show-text` (testo letterale: i comandi passati come array non espandono le proprietà); tempo per 1 s dopo ogni salto completato (con la posizione raggiunta) e durante il trascinamento col tasto destro, nome del file per 0,8 s dopo ogni caricamento. Solo a schermo intero (scelta dell'utente: a finestra normale la barra è sempre visibile). Carattere OSD ridotto (`osd-font-size=36`, `osd-border-size=2`). Da osservare: il primo testo potrebbe richiedere un breve tempo per caricare i caratteri.
 - **Ctrl+F2:** finestra *Commands* (modale, Esc/Invio chiude) con tastiera, mouse sul video e barra temporale. F2 da solo resta la rinomina.
+
+## D-059 — Chiusura della 1.2.0 (2026-11-03)
+L'utente ha confermato tutte le prove di `TEST-PLAN-1.2.0.md`, che comprende quelle della 1.1.0, con l'EXE compilato da `39d2eec` (codice invariato fino al tag). La 1.2.0 viene rilasciata (tag `v1.2.0`); la 1.1.0 non ha un tag proprio. Nessuna prova aperta passa alla versione successiva.

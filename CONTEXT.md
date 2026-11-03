@@ -1,6 +1,6 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-03 · branch `main` · ultimo commit `647beda` · ultima versione rilasciata **0.5.0** (tag `v0.5.0`) · **in sviluppo: 0.6.0, scritta e compilata, da provare su Windows**_
+_Aggiornato: 2026-11-03 · branch `main` · ultimo commit `ad8ecec` · ultima versione rilasciata **0.5.0** (tag `v0.5.0`) · **in sviluppo: 0.6.0, scritta e compilata, da provare su Windows**_
 
 ## 1. Il progetto in breve
 **viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-047 in [docs/DECISIONS.md](docs/DECISIONS.md).

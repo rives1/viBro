@@ -230,3 +230,12 @@ Obblighi solo quando l'EXE viene trasmesso ad altri (non per l'uso personale o d
 
 ## D-051 — README in inglese (2026-11-03, richiesta dell'utente)
 `README.md` è ora in inglese (pagina principale su GitHub e file incluso nello zip); la versione italiana è `README.it.md`, con collegamenti reciproci. Gli altri documenti (SPEC, CHANGELOG, DECISIONS, piani di prova, CONTEXT) restano in italiano. A ogni modifica del README vanno aggiornate entrambe le versioni.
+
+## D-052 — Solo sorgente, nessun EXE pubblicato (2026-11-03, scelta dell'utente)
+Il repository `rives1/viBro` è pubblico e il workflow caricava lo zip con l'EXE come artifact a ogni push su `main` (e in una release in bozza a ogni tag): l'EXE veniva quindi trasmesso a terzi. L'utente ha chiesto l'archivio del sorgente della libmpv inclusa, ma non è ricostruibile in modo esatto: il workflow di shinchiro (`mpv_gcc.yml`, commit `bda10a2` del 2026-10-30, l'ultimo prima della build `20261101`) esegue `ninja update` e compila l'ultima revisione di ogni libreria senza registrarla; la release non riporta le revisioni (neanche le build di zhongfly, che indicano solo il commit di mpv). Un archivio "alla data" sarebbe un'approssimazione, non il sorgente corrispondente.
+Alternative presentate: (A) nessun EXE pubblico; (B) build di libmpv in proprio con revisioni registrate e archivio del sorgente (ore di CI, archivi di centinaia di MB, tentativi che richiedono il push dell'utente); (C) A subito e B dopo. Scelta dell'utente: **A**.
+- `.github/workflows/build.yml`: resta la compilazione di verifica; tolti `upload-artifact` e la release in bozza; permessi `contents: read`.
+- README (inglese e italiano): sezione "Getting viBro / Come ottenere viBro": si compila con `build.cmd`, che scarica libmpv direttamente da shinchiro.
+- `THIRD-PARTY-NOTICES.md`: politica di distribuzione al posto della lista di obblighi.
+- **Pulizia una tantum su GitHub (utente):** cancellare gli artifact delle esecuzioni precedenti (Actions → esecuzione → Artifacts, oppure `gh api` sull'endpoint `actions/artifacts`) e le release in bozza dei tag (contengono lo zip; le bozze sono visibili solo a chi ha accesso in scrittura, ma conviene eliminarle). Verificare che non esistano release pubblicate con lo zip.
+- Per tornare a pubblicare un EXE: strada B.

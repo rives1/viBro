@@ -88,6 +88,10 @@ viBro.exe [cartella] [--exact-seeks] [--trace-input] [--mpv-opt nome=valore]...
 
 Al primo avvio .NET estrae le librerie native, tra cui libmpv, nella cache per utente `%TEMP%\.net\viBro\<hash>`. Gli avvii successivi riutilizzano la cache; una nuova build usa un nuovo hash.
 
+## Come ottenere viBro
+
+Non viene pubblicato un EXE pronto: si compila con `build.cmd` (pochi minuti, senza privilegi di amministratore). Il motivo è la GPL: l'EXE incorpora una build di libmpv di terzi di cui non si può fornire il sorgente esatto, perché quella build non registra le revisioni delle librerie che contiene. Compilando in locale, libmpv viene scaricata direttamente da chi la pubblica. Vedi [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
 ## Compilazione
 
 Requisiti: Windows 10/11 x64 e connessione a Internet per il primo download. Non servono privilegi di amministratore.
@@ -102,7 +106,7 @@ Lo script:
 3. pubblica `artifacts\publish\viBro.exe` e controlla che sia l'unico file prodotto;
 4. crea `dist\viBro-<versione>-win-x64.zip` con il relativo `.sha256`.
 
-Comandi singoli: `build\build.ps1 [-Compress] [-DepsOnly]` e `build\package.ps1`. La variante distribuita è l'EXE normale; `-Compress` produce un EXE più piccolo (−58%) ma più lento ad avviarsi (+165 ms) e con circa 70 MB di memoria in più (misure in `docs/DECISIONS.md`, D-047). Su GitHub, il workflow `.github/workflows/build.yml` esegue gli stessi script.
+Comandi singoli: `build\build.ps1 [-Compress] [-DepsOnly]` e `build\package.ps1`. La variante predefinita è l'EXE normale; `-Compress` produce un EXE più piccolo (−58%) ma più lento ad avviarsi (+165 ms) e con circa 70 MB di memoria in più (misure in `docs/DECISIONS.md`, D-047). Su GitHub, il workflow `.github/workflows/build.yml` esegue gli stessi script come verifica della compilazione; non pubblica nulla.
 
 La versione si trova **solo** in `Directory.Build.props` e viene riportata nel titolo della finestra e nelle proprietà dell'EXE.
 

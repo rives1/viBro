@@ -13,12 +13,17 @@ Because libmpv-2.dll is GPL-3.0 (FFmpeg `--enable-version3`), **viBro.exe as dis
 
 Build-only tool (not included in the EXE): 7-Zip `7zr.exe` 26.05 (LGPL-2.1), https://github.com/ip7z/7zip.
 
-## Obligations before giving the EXE to anyone else / Obblighi prima di dare l'EXE ad altri
+## Distribution policy / Politica di distribuzione
 
-These apply only when viBro.exe is **conveyed** to others (published, sent, shared outside the organization). Personal use and copies inside one organization are not distribution according to the FSF. / Valgono solo quando viBro.exe viene **trasmesso** ad altri (pubblicato, inviato, condiviso fuori dall'organizzazione). L'uso personale e le copie dentro un'organizzazione non sono distribuzione secondo la FSF.
+**viBro is distributed as source code only; no EXE is published** (decision D-052, 2026-11-03). / **viBro si distribuisce solo come sorgente; non si pubblica l'EXE.**
 
-- [x] License texts and notices in the package: `package.ps1` puts `LICENSE`, this file, `README.md` and `CHANGELOG.md` in the zip.
-- [ ] **Corresponding Source** (GPLv3 §6) of everything in the EXE, available for as long as the EXE is offered: viBro's source at the release tag (GitHub) **and** the source of the libmpv build: mpv at the commit above, FFmpeg and every library at the revisions used, and the build scripts (mpv-winbuild-cmake at the commit used). Links to upstream projects are not enough on their own: shinchiro keeps only ~30 builds and the distributor must ensure the source stays available. Practical way: archive those sources (or build libmpv from a pinned mpv-winbuild-cmake and keep the downloaded source tarballs) and publish the archive next to the release.
-- [ ] Confirm the exact list of libraries in build `20261101` (the list above comes from the current `ffmpeg.cmake` on master, read on 2026-11-03).
-- [ ] GitHub workflow: every push to `main` uploads the zip with the EXE as an *artifact*, and every tag creates a *draft release*. If the repository is public, the artifacts are downloadable by others: either complete the Corresponding Source before pushing, or stop uploading the EXE.
-- [ ] Not a GPL matter, but worth checking before a public or commercial release: patents on video formats (H.264, HEVC) in the countries of distribution.
+Why: when viBro.exe is conveyed to others, GPLv3 §6 requires the Corresponding Source of everything it contains, libmpv-2.dll included, for as long as it is offered. The pinned libmpv comes from shinchiro's daily build, whose workflow runs `ninja update` (latest revision of every library at build time) and does not record those revisions; shinchiro also keeps only ~30 builds. The exact source of that DLL therefore cannot be provided, and an approximate one (libraries "as of that date") would not be the Corresponding Source. / Perché: trasmettendo l'EXE servirebbe il sorgente corrispondente esatto della DLL, che non è ricostruibile.
+
+What this means / Cosa comporta:
+- [x] The GitHub workflow builds and packages viBro as a check but uploads no artifact and creates no release (`.github/workflows/build.yml`).
+- [x] `build.cmd` downloads libmpv directly from its publisher (shinchiro) and verifies its SHA-256: whoever builds viBro gets libmpv from the original distributor.
+- [x] License texts and notices are in the repository and in the locally built zip (`package.ps1`).
+- [ ] One-off cleanup on GitHub: delete the EXE artifacts uploaded by earlier workflow runs and the draft releases created for tags (see `docs/DECISIONS.md`, D-052).
+- Personal use and copies inside one organization are not distribution according to the FSF; giving a locally built EXE to someone outside it would bring back the obligations above.
+- To publish an EXE again in the future: build libmpv in-house from pinned scripts, record every library revision and publish the matching source archive with each release.
+- Not a GPL matter, but worth checking before any public or commercial binary release: patents on video formats (H.264, HEVC).

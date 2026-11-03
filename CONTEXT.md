@@ -1,11 +1,11 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-02 23:45 · branch `main` · ultimo commit `4b28b35` · ultima versione rilasciata **0.3.0** (tag `v0.3.0`) · **in sviluppo: 0.5.0 (comprende la 0.4.0), da provare su Windows**_
+_Aggiornato: 2026-11-03 · branch `main` · ultima versione rilasciata **0.5.0** (tag `v0.5.0`, comprende la 0.4.0) · **prossima: 0.6.0, contenuto da definire**_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-041 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-042 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
-- Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e il tag `v0.3.0` non ancora pubblicati, e il push lo fa l'utente.
+- Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0` e `v0.5.0` non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`.
 - Versione: in un solo punto, `Directory.Build.props` (ora `0.5.0`). Appare nel titolo e nelle proprietà dell'EXE come `0.5.0+<commit>`.
 
@@ -15,8 +15,8 @@ _Aggiornato: 2026-11-02 23:45 · branch `main` · ultimo commit `4b28b35` · ult
 | 0.1.0 | Prototipo: EXE singolo, motore mpv persistente nella finestra nativa (`wid`), caricamento in pausa, salti (±1/±5 s esatti; ±1/±5 min su fotogrammi chiave), accorpamento dei salti, misure CSV | ✔ tag `v0.1.0`, misurato su SSD e NAS |
 | 0.2.0 | Albero delle cartelle progressivo e sincronizzato, ordinamento per colonna (naturale), 3 riquadri, `viBro.ini` (atomico, valori predefiniti, avvisi) | ✔ tag `v0.2.0` |
 | 0.3.0 | Elimina (Canc/R: Cestino locale, definitiva in rete), rinomina (F2), sposta (W/Shift+W, conflitti, avanzamento e annullamento, copia verificata prima di eliminare la sorgente) | ✔ tag `v0.3.0` |
-| 0.4.0 | Temi Light/Dark (Fluent + pulsante *Theme*), barra dei controlli **sopra** il video, fascia a schermo intero con barra temporale centrata al 40% che si nasconde da sola, `viBro-errors.log`, loader Vulkan incorporato, Cestino per percorsi di 260+ caratteri, misura del tempo di avvio, icona, icone dell'albero, righe compatte, clic e trascinamento sui cursori | **non rilasciata separatamente: confluisce nella 0.5.0** (D-039) |
-| 0.5.0 | Mouse sul video: clic per Play/Pause, doppio clic per lo schermo intero, menu del tasto destro (Delete, Move..., Move to <ultima cartella>), rotella a schermo intero (giù = successivo) | **scritta e compilata; da provare su Windows insieme alla 0.4.0** |
+| 0.4.0 | Temi Light/Dark (Fluent + pulsante *Theme*), barra dei controlli **sopra** il video, fascia a schermo intero con barra temporale centrata al 40% che si nasconde da sola, `viBro-errors.log`, loader Vulkan incorporato, Cestino per percorsi di 260+ caratteri, misura del tempo di avvio, icona, icone dell'albero, righe compatte, clic e trascinamento sui cursori | ✔ confluita nella 0.5.0 (D-039) |
+| 0.5.0 | Mouse sul video: clic per Play/Pause, doppio clic per lo schermo intero, menu del tasto destro (Delete, Move..., Move to <ultima cartella>), rotella a schermo intero (giù = successivo), rotella sulla barra temporale (±5 s), `--trace-input` | ✔ tag `v0.5.0` (2026-11-03): prove superate tranne i tempi di avvio (spostati nella 0.6.0) |
 | 1.0.0 | Prima versione completa e verificata | da fare |
 
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
@@ -25,12 +25,10 @@ _Aggiornato: 2026-11-02 23:45 · branch `main` · ultimo commit `4b28b35` · ult
 - Memoria: 260–470 MB, stabile. I salti sui fotogrammi chiave per ±1/±5 s **non spostavano l'immagine** (GOP di 5–24 s): da qui la modalità mista (D-007).
 
 ## 4. Stato attuale e prossimo passo
-1. La 0.4.0 (temi, errori, Vulkan, Cestino percorsi lunghi, avvio, icone, righe compatte, cursori, tasti) non è mai stata provata: confluisce nella 0.5.0 senza tag proprio (D-039). Correzioni già fatte dopo le prime prove dell'utente: testo nero nel Dark (`ccd26c9`), righe `ViBro.Util.VideoItem` (`a6ac40c`), R da premere due volte (`a7cd1d0`, D-037: si usa il bit 30 di `WM_KEYDOWN` invece di `IsRepeat` di WPF).
-2. 0.5.0 (richieste dell'utente): doppio clic sul video per lo schermo intero, menu del tasto destro, rotella a schermo intero (`MainWindow.VideoMouse.cs`, D-038); clic singolo = Play/Pause immediato, annullato se diventa un doppio clic, e ignorato se è il clic che riattiva la finestra (D-040). Rotella sopra la barra temporale = ±5 s in entrambe le modalità (D-041).
-   - **Problema aperto (D-041):** l'utente vede la rotella sopra la barra saltare nello stesso video anche a schermo intero, dove viBro avrebbe dovuto cambiare video: `WM_MOUSEWHEEL` non arriva all'hook. Ipotesi: driver che converte la rotella in frecce, oppure messaggi alla finestra di mpv (thread proprio, non visto dall'hook; ciò toccherebbe anche doppio clic, menu e movimento a schermo intero). Diagnosi con `viBro.exe --trace-input` (piano di prova, prima voce della rotella). Se l'ipotesi 2 è confermata, serve un'altra via (per esempio rendere la finestra di mpv trasparente al mouse o sottoclassarla). Compilata nel container, **non provata su Windows**. Punto da osservare: se la finestra di mpv non ricevesse i clic, la verifica di riserva (finestra principale + posizione del puntatore) dovrebbe coprirla.
-3. L'utente esegue `build.cmd` e [docs/TEST-PLAN-0.5.0.md](docs/TEST-PLAN-0.5.0.md) (contiene anche tutte le prove 0.4.0). **Regola dell'utente:** il piano di prova passa alla versione successiva finché l'utente non conferma che tutte le prove sono passate.
-4. Dopo la conferma: decidere la compressione dell'EXE dai dati `startup` (D-032), chiudere la 0.5.0 (CHANGELOG con data, `docs/handover/CONTEXT-v0.5.0.md`, tag `v0.5.0`).
-5. Verso la 1.0.0. Punti aperti: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione.
+1. **0.5.0 rilasciata il 2026-11-03** (tag `v0.5.0`, D-042). Comprende la 0.4.0 (D-039). L'utente ha superato su Windows tutte le prove di [docs/TEST-PLAN-0.5.0.md](docs/TEST-PLAN-0.5.0.md) tranne i 5+5 avvii per il tempo di avvio. Correzioni fatte durante le prove: testo nero nel Dark, righe `ViBro.Util.VideoItem`, R da premere due volte (D-037).
+2. Piano di prova aperto: [docs/TEST-PLAN-0.6.0.md](docs/TEST-PLAN-0.6.0.md), che per ora contiene solo i 5+5 avvii (EXE normale e compresso, righe `startup` di `viBro-metrics.csv`) e le regressioni. Con quei dati si decide la compressione dell'EXE (D-032); fino ad allora resta l'EXE normale.
+3. Rotella: la causa del primo comportamento osservato (salto sopra la barra anche a schermo intero, D-041) non è stata identificata; dopo `a2bd495` tutto funziona come previsto. `--trace-input` resta per la diagnostica.
+4. Prossimo passo: l'utente definisce il contenuto della 0.6.0 (o passa verso la 1.0.0). Punti aperti verso la 1.0.0: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione.
 
 ## 5. Dipendenze fissate
 | Dipendenza | Versione | Dove |
@@ -55,4 +53,4 @@ _Aggiornato: 2026-11-02 23:45 · branch `main` · ultimo commit `4b28b35` · ult
 - **Flusso per ogni versione:** domande, codice, compilazione e test su Linux, copia sul PC, documentazione (CHANGELOG, DECISIONS, CONTEXT, TEST-PLAN), commit; poi l'utente esegue `build.cmd` e il piano di prova; infine chiusura con data, fotografia `docs/handover/CONTEXT-vX.Y.Z.md` e tag.
 
 ## 8. Messaggio per riprendere in una nuova chat
-> Progetto viBro nella cartella `C:\Users\ammin\Documents\Claude_vibro\viBro`. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. Siamo alla 0.5.0 (comprende la 0.4.0), in prova: ho ricompilato con `build.cmd` e ti riporto l'esito di `docs/TEST-PLAN-0.5.0.md`.
+> Progetto viBro nella cartella `C:\Users\ammin\Documents\Claude_vibro\viBro`. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 0.5.0 è rilasciata (tag `v0.5.0`); il piano di prova aperto è `docs/TEST-PLAN-0.6.0.md`. Ti descrivo cosa voglio nella 0.6.0 (oppure ti mando le misure di avvio).

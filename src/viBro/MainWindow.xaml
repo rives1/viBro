@@ -17,6 +17,9 @@
                     Padding="10,2" Focusable="False" Click="ThemeButton_Click" ToolTip="Switch between Light and Dark theme" />
             <Button x:Name="BrowseButton" DockPanel.Dock="Right" Content="Browse..." Margin="4,0,0,0"
                     Padding="10,2" Focusable="False" Click="BrowseButton_Click" />
+            <!-- Decorative folder icon, the same as in the tree. -->
+            <Image x:Name="PathIcon" DockPanel.Dock="Left" Width="16" Height="16" Margin="2,0,6,0"
+                   VerticalAlignment="Center" Focusable="False" />
             <TextBox x:Name="PathBox" VerticalContentAlignment="Center" Padding="2"
                      ToolTip="Folder path (local, mapped drive or \\server\share). Ctrl+L to edit, Enter to open, Esc to cancel."
                      PreviewKeyDown="PathBox_PreviewKeyDown" />
@@ -75,66 +78,66 @@
             <GridSplitter x:Name="TreeSplitter" Grid.Column="1" Width="5" VerticalAlignment="Stretch"
                           ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Focusable="False" />
 
-            <DockPanel Grid.Column="2">
-                <!-- Transport, above the video. In fullscreen it becomes a black band with only the
-                     timeline, centred and ~40% wide, shown on mouse movement or seeks. -->
-                <Border x:Name="TransportBar" DockPanel.Dock="Top" Padding="4" MouseMove="TransportBar_MouseMove">
-                    <DockPanel>
-                        <Button x:Name="PlayButton" DockPanel.Dock="Left" Width="70" Content="Play" Focusable="False"
-                                Click="PlayButton_Click" />
-                        <StackPanel x:Name="AudioControls" DockPanel.Dock="Right" Orientation="Horizontal">
-                            <Button x:Name="MuteButton" Width="64" Content="Mute" Focusable="False"
-                                    Margin="8,0,6,0" Click="MuteButton_Click" />
-                            <Slider x:Name="VolumeSlider" Width="110" Minimum="0" Maximum="100" Value="100"
-                                    Focusable="False" VerticalAlignment="Center" IsMoveToPointEnabled="True"
-                                    ValueChanged="VolumeSlider_ValueChanged" />
-                        </StackPanel>
-                        <DockPanel x:Name="SeekPanel">
-                            <TextBlock x:Name="TimeText" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="10,0,0,0"
-                                       FontFamily="Consolas" Text="00:00:00 / 00:00:00" />
-                            <Slider x:Name="TimeSlider" Minimum="0" Maximum="1" Focusable="False" IsMoveToPointEnabled="True"
-                                    VerticalAlignment="Center" Margin="10,0,0,0" ValueChanged="TimeSlider_ValueChanged" />
+            <Grid x:Name="RightArea" Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="120" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition x:Name="ListRow" Height="260" MinHeight="60" />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0">
+                    <!-- Transport, below the video and above the file list (same cell as the video, so the
+                         splitter resizes video + transport against the list). In fullscreen it becomes a black
+                         band with only the timeline, centred and ~40% wide, shown on mouse movement or seeks. -->
+                    <Border x:Name="TransportBar" DockPanel.Dock="Bottom" Padding="4" MouseMove="TransportBar_MouseMove">
+                        <DockPanel>
+                            <Button x:Name="PlayButton" DockPanel.Dock="Left" Width="70" Content="Play" Focusable="False"
+                                    Click="PlayButton_Click" />
+                            <StackPanel x:Name="AudioControls" DockPanel.Dock="Right" Orientation="Horizontal">
+                                <Button x:Name="MuteButton" Width="64" Content="Mute" Focusable="False"
+                                        Margin="8,0,6,0" Click="MuteButton_Click" />
+                                <Slider x:Name="VolumeSlider" Width="110" Minimum="0" Maximum="100" Value="100"
+                                        Focusable="False" VerticalAlignment="Center" IsMoveToPointEnabled="True"
+                                        ValueChanged="VolumeSlider_ValueChanged" />
+                            </StackPanel>
+                            <DockPanel x:Name="SeekPanel">
+                                <TextBlock x:Name="TimeText" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="10,0,0,0"
+                                           FontFamily="Consolas" Text="00:00:00 / 00:00:00" />
+                                <Slider x:Name="TimeSlider" Minimum="0" Maximum="1" Focusable="False" IsMoveToPointEnabled="True"
+                                        VerticalAlignment="Center" Margin="10,0,0,0" ValueChanged="TimeSlider_ValueChanged" />
+                            </DockPanel>
                         </DockPanel>
-                    </DockPanel>
-                </Border>
-
-                <Grid x:Name="RightArea">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" MinHeight="120" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition x:Name="ListRow" Height="260" MinHeight="60" />
-                    </Grid.RowDefinitions>
-
-                    <Border Grid.Row="0" Background="Black">
+                    </Border>
+                    <Border Background="Black">
                         <mpv:MpvHost x:Name="VideoHost" />
                     </Border>
+                </DockPanel>
 
-                    <GridSplitter x:Name="ListSplitter" Grid.Row="1" Height="5" HorizontalAlignment="Stretch"
-                                  ResizeBehavior="PreviousAndNext" ResizeDirection="Rows" Focusable="False" />
+                <GridSplitter x:Name="ListSplitter" Grid.Row="1" Height="5" HorizontalAlignment="Stretch"
+                              ResizeBehavior="PreviousAndNext" ResizeDirection="Rows" Focusable="False" />
 
-                    <ListView x:Name="FileList" Grid.Row="2" SelectionMode="Single"
-                              VirtualizingPanel.IsVirtualizing="True"
-                              VirtualizingPanel.VirtualizationMode="Recycling"
-                              SelectionChanged="FileList_SelectionChanged"
-                              GridViewColumnHeader.Click="FileList_HeaderClick">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn x:Name="NameColumn" Header="Name" Width="480"
-                                                DisplayMemberBinding="{Binding Name}" />
-                                <GridViewColumn x:Name="SizeColumn" Header="Size" Width="100">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding SizeText}" TextAlignment="Right" />
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn x:Name="DateColumn" Header="Date modified" Width="150"
-                                                DisplayMemberBinding="{Binding ModifiedText}" />
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                </Grid>
-            </DockPanel>
+                <ListView x:Name="FileList" Grid.Row="2" SelectionMode="Single"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          SelectionChanged="FileList_SelectionChanged"
+                          GridViewColumnHeader.Click="FileList_HeaderClick">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn x:Name="NameColumn" Header="Name" Width="480"
+                                            DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn x:Name="SizeColumn" Header="Size" Width="100">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding SizeText}" TextAlignment="Right" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn x:Name="DateColumn" Header="Date modified" Width="150"
+                                            DisplayMemberBinding="{Binding ModifiedText}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
         </Grid>
     </DockPanel>
 </Window>

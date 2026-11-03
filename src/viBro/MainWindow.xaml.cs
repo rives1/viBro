@@ -80,6 +80,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         ThemeManager.AttachWindow(this);
         ApplyItemStyles();
+        PathIcon.Source = TreeIcons.Folder; // decorative, as in the tree
         SliderDrag.Enable(TimeSlider);
         SliderDrag.Enable(VolumeSlider);
         StatusPanel.SetResourceReference(BackgroundProperty, ThemeManager.PanelKey);
@@ -787,14 +788,13 @@ public partial class MainWindow : Window
         SetTransportFullscreen(false);
     }
 
-    // Fullscreen band: a black strip below the video (the picture is never covered) holding only the
-    // timeline, centred and ~40% of the screen wide. It appears on mouse movement or seeks and hides
-    // after 2 s without activity; the strip itself stays, so the video does not resize.
-    // In the normal window the transport bar stays above the video.
+    // The transport bar is docked below the video (above the file list in the normal window).
+    // Fullscreen band: the same bar as a black strip below the video (the picture is never covered)
+    // holding only the timeline, centred and ~40% of the screen wide. It appears on mouse movement or
+    // seeks and hides after 2 s without activity; the strip itself stays, so the video does not resize.
     private void SetTransportFullscreen(bool on)
     {
         _fullscreenBarTimer.Stop();
-        DockPanel.SetDock(TransportBar, on ? Dock.Bottom : Dock.Top);
         if (on)
         {
             TransportBar.Background = System.Windows.Media.Brushes.Black;

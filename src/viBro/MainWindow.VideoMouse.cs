@@ -18,8 +18,9 @@ namespace ViBro;
 //  - right click: menu with Delete, Move..., Move to <last folder>, Copy..., Copy to <last folder>
 //  - right button held + horizontal drag: moves in the video; the whole video width = the whole
 //    duration, keyframe seeks while dragging and an exact seek on release (no menu then)
-//  - wheel over the time bar (both modes): up = forward 3 s, down = back 3 s
-//  - wheel over the video (both modes) or anywhere in fullscreen: down = next video, up = previous
+//  - wheel over the time bar (both modes) or over the video in the normal window: up = forward 3 s,
+//    down = back 3 s
+//  - wheel anywhere else in fullscreen (the video included): down = next video, up = previous
 public partial class MainWindow
 {
     private uint _lastClickTime;
@@ -28,7 +29,7 @@ public partial class MainWindow
     private bool _lastClickToggledPause;
     private uint _activatedTick; // GetTickCount time of the last window activation
     private int _wheelAccumulator;
-    private bool _wheelOnTimeBar;
+    private bool _wheelSeeks; // what the accumulated wheel steps are for: seek (true) or change video
     private const double WheelSeekSeconds = 3;
 
     // Right-button drag (scrubbing).
@@ -187,25 +188,27 @@ public partial class MainWindow
     }
 
     /// <summary>
-    /// One wheel notch (120) = one step; smaller steps (touchpads) are accumulated. Over the time bar:
-    /// seek 3 s (up = forward). Over the video, or anywhere in fullscreen: change video (down = next).
-    /// Elsewhere in the normal window (file list, tree) the wheel scrolls as usual.
+    /// One wheel notch (120) = one step; smaller steps (touchpads) are accumulated.
+    /// Normal window: over the time bar or the video, seek 3 s (up = forward); elsewhere (file list,
+    /// tree) the wheel scrolls as usual. Fullscreen: over the time bar seek 3 s, anywhere else change
+    /// video (down = next).
     /// </summary>
     private bool OnWheel(int delta, int screenX, int screenY)
     {
         if (!IsActive || delta == 0) return false;
         bool onTimeBar = IsPointOver(TimeSlider, screenX, screenY);
         if (!onTimeBar && !_isFullscreen && !IsPointOverVideo(screenX, screenY)) return false;
+        bool seek = onTimeBar || !_isFullscreen;
 
         // Restart counting when the direction or the target (bar / video) changes.
-        if (Math.Sign(delta) != Math.Sign(_wheelAccumulator) || onTimeBar != _wheelOnTimeBar) _wheelAccumulator = 0;
-        _wheelOnTimeBar = onTimeBar;
+        if (Math.Sign(delta) != Math.Sign(_wheelAccumulator) || seek != _wheelSeeks) _wheelAccumulator = 0;
+        _wheelSeeks = seek;
         _wheelAccumulator += delta;
         while (Math.Abs(_wheelAccumulator) >= NativeMethods.WHEEL_DELTA)
         {
             int up = _wheelAccumulator > 0 ? 1 : -1; // positive = away from the user
             _wheelAccumulator -= up * NativeMethods.WHEEL_DELTA;
-            if (onTimeBar) Seek(up * WheelSeekSeconds);
+            if (seek) Seek(up * WheelSeekSeconds);
             else SelectRelative(-up);
         }
         return true;

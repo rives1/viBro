@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.0.0 released**, the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.1.0 in testing** (controls below the video, wheel seeks in the normal window); latest release: 1.0.0, the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -20,7 +20,8 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 - Folder tree (user folders, local and network drives, open UNC shares), loaded progressively and kept in sync with the open folder.
 - Sorting by Name, Size, Date modified; three resizable panes; settings in `viBro.ini`.
 - Delete, rename, move and copy files, with confirmations, progress and cancellation.
-- Light/Dark themes (*Theme* button), control bar above the video, a timeline band below the video in fullscreen.
+- Light/Dark themes (*Theme* button), control bar (timeline, volume) below the video and above the file list, a timeline band below the video in fullscreen.
+- Folder icon in front of the path bar.
 - Compact status bar: number of videos in the folder and their total size, status, measurements.
 - Error log `viBro-errors.log` next to the EXE.
 
@@ -51,7 +52,7 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | F11 / Esc | Enter / leave fullscreen | ✔ |
 | Ctrl + L | Focus the path bar (Enter opens, Esc cancels) | ✔ |
 | Del or R | Delete the file after confirmation (Recycle Bin if local, permanent if on the network) | 0.3.0 |
-| F2 | Rename the file (name only; the extension is kept) | 0.3.0 |
+| F2 | Rename the file (name only; the extension is kept; the cursor starts at the beginning of the name) | 0.3.0 |
 | W | Choose a destination folder and move the file | 0.3.0 |
 | Shift + W | Move to the last destination used | 0.3.0 |
 | C | Choose a destination folder and copy the file (same rules as moving; the original stays) | 0.6.0 |
@@ -67,7 +68,8 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | Right click | Menu: *Delete* (Del/R), *Move...* (W), *Move to <last folder>* (Shift+W), *Copy...* (C), *Copy to <last folder>* (Shift+C) | 0.5.0 (copy 0.6.0) |
 | Right button held + drag left/right | Seek within the video: the whole video width = the whole duration; the picture follows the mouse, exact seek on release (no menu) | 0.6.0 |
 | Wheel over the timeline | Up: forward 3 s; down: back 3 s, in the normal window and in fullscreen | 0.6.0 |
-| Wheel over the video, or anywhere in fullscreen | Down: next video; up: previous video (like D / E) | 0.6.0 |
+| Wheel over the video, normal window | Up: forward 3 s; down: back 3 s | 1.1.0 |
+| Wheel in fullscreen (except over the timeline) | Down: next video; up: previous video (like D / E) | 0.5.0 |
 | Click on the timeline and drag | Seek within the video; the thumb follows the mouse | 0.4.0 |
 
 Shortcuts are suspended while typing in the path bar (except Ctrl+W). As specified, the arrow keys always seek, even when the tree or the list has the focus: the tree is navigated with the mouse.

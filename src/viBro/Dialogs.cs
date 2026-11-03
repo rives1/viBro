@@ -37,7 +37,7 @@ internal static class DialogStyle
     }
 }
 
-/// <summary>F2: edits the name only; the extension is kept. Enter confirms, Esc cancels.</summary>
+/// <summary>F2: edits the name only; the extension is kept. The caret starts at the beginning of the name, nothing selected. Enter confirms, Esc cancels.</summary>
 internal sealed class RenameDialog : Window
 {
     private readonly TextBox _box;
@@ -81,7 +81,7 @@ internal sealed class RenameDialog : Window
         Loaded += (_, _) =>
         {
             _box.Focus();
-            _box.SelectAll();
+            _box.CaretIndex = 0; // at the beginning of the name, nothing selected (user's choice, 1.1.0)
         };
     }
 

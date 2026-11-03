@@ -251,3 +251,10 @@ Nessuna funzione nuova: la 1.0.0 è la 0.6.0 verificata nel suo insieme. Revisio
 
 ## D-056 — Chiusura della 1.0.0 (2026-11-03)
 L'utente ha confermato tutte le prove di `TEST-PLAN-1.0.0.md` con l'EXE compilato da `7a7d0d5` (codice invariato fino al tag). Sessione di memoria: 90 caricamenti in 38 minuti, memoria di lavoro mediana 333 MB nei primi 10 e 325 MB negli ultimi 10, privata 364 → 400 MB, nessuna crescita continua; apertura/cambio mediana 86 ms, salti rapidi 17 ms, esatti 43 ms, nessun timeout. Limite: la sessione non conteneva file 4K (per il 4K vale D-049). Rilascio: tag `v1.0.0`, distribuzione solo come sorgente (D-052). Nessuna prova aperta passa alla versione successiva.
+
+## D-057 — Contenuto della 1.1.0 (2026-11-03, richieste dell'utente)
+Nuove funzioni compatibili, quindi versione MINOR.
+- **Barra dei controlli sotto il video, sopra l'elenco** (annulla in parte D-029): la barra è agganciata in basso nella stessa cella del video (`DockPanel` nella riga 0 di `RightArea`) e non in una riga propria, perché il divisore `PreviousAndNext` avrebbe ridimensionato la barra (riga `Auto`) invece del video. A schermo intero elenco e divisore sono nascosti e la riga dell'elenco è a 0, quindi la fascia resta sotto il video come nella 0.6.0; non serve più spostarla con `DockPanel.SetDock`.
+- **Rotella sopra il video a finestra normale = ±3 s** (scelta dell'utente: lo stesso passo della barra, invece di 5 o 10 s; su = avanti). A schermo intero resta il cambio di video, tranne sopra la barra temporale (±3 s). Il conteggio degli scatti si azzera quando cambia la funzione (salto o cambio video).
+- **Icona della barra del percorso:** `TreeIcons.Folder`, decorativa (scelta dell'utente; per scegliere una cartella resta *Browse...*).
+- **Rinomina:** cursore all'inizio del nome (`CaretIndex = 0`), senza selezione.

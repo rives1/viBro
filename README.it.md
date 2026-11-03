@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.0.0 rilasciata**, prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.1.0 in prova** (controlli sotto il video, rotella per spostarsi nel video a finestra normale); ultima versione rilasciata: 1.0.0, prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -23,7 +23,8 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 
 - Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
 
-- Temi Light/Dark (pulsante *Theme*), barra dei controlli sopra il video, fascia con la barra temporale sotto il video a schermo intero.
+- Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.
+- Icona della cartella davanti alla barra del percorso.
 - Barra di stato compatta: numero di video della cartella e spazio totale, stato, misure.
 - Registro degli errori `viBro-errors.log` accanto all'EXE.
 
@@ -54,7 +55,7 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | F11 / Esc | Entra in / esce da schermo intero | ✔ |
 | Ctrl + L | Attiva la barra del percorso (Invio apre, Esc annulla) | ✔ |
 | Canc o R | Elimina il file con conferma (Cestino se locale, definitiva se in rete) | 0.3.0 |
-| F2 | Rinomina il file (solo il nome; l'estensione resta) | 0.3.0 |
+| F2 | Rinomina il file (solo il nome; l'estensione resta; il cursore parte dall'inizio del nome) | 0.3.0 |
 | W | Sceglie la cartella di destinazione e sposta il file | 0.3.0 |
 | Shift + W | Sposta nell'ultima destinazione usata | 0.3.0 |
 | C | Sceglie la cartella di destinazione e copia il file (stesse regole dello spostamento; l'originale resta) | 0.6.0 |
@@ -70,7 +71,8 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W), *Copy...* (C), *Copy to <ultima cartella>* (Shift+C) | 0.5.0 (copia 0.6.0) |
 | Tasto destro tenuto + trascinamento a destra/sinistra | Spostamento nel video: tutta la larghezza del video = tutta la durata; il video segue il mouse, salto esatto al rilascio (nessun menu) | 0.6.0 |
 | Rotella sopra la barra temporale | Su: avanti 3 s; giù: indietro 3 s, a finestra normale e a schermo intero | 0.6.0 |
-| Rotella sopra il video, o ovunque a schermo intero | Giù: video successivo; su: video precedente (come D / E) | 0.6.0 |
+| Rotella sopra il video, a finestra normale | Su: avanti 3 s; giù: indietro 3 s | 1.1.0 |
+| Rotella a schermo intero (tranne sopra la barra temporale) | Giù: video successivo; su: video precedente (come D / E) | 0.5.0 |
 | Clic sulla barra temporale e trascinamento | Spostamento nel video; l'indicatore segue il mouse | 0.4.0 |
 
 Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come da specifica, le frecce eseguono sempre i salti, anche con lo stato attivo sull'albero o sull'elenco: la navigazione nell'albero avviene con il mouse.

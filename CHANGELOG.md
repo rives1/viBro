@@ -2,6 +2,16 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.1.0] - non ancora rilasciata
+
+### Aggiunto
+- Icona della cartella davanti alla barra del percorso (decorativa, la stessa dell'albero).
+
+### Modificato
+- A finestra normale la barra dei controlli (Play, barra temporale, tempo, Mute, volume) è **sotto il video e sopra l'elenco dei file** (dalla 0.4.0 era sopra il video). Il divisore ridimensiona video e controlli insieme rispetto all'elenco. A schermo intero non cambia: fascia sotto il video.
+- Rotella sopra il video a finestra normale: sposta il tempo di 3 s per scatto (su = avanti), come sopra la barra temporale; prima cambiava video. A schermo intero continua a cambiare video (tranne sopra la barra temporale, dove sposta di 3 s).
+- Rinomina (F2): il cursore parte dall'inizio del nome, senza selezione (prima il nome era tutto selezionato).
+
 ## [1.0.0] - 2026-11-03
 
 Prima versione completa e verificata. Nessuna funzione nuova rispetto alla 0.6.0.

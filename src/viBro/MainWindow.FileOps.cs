@@ -20,7 +20,8 @@ public partial class MainWindow
     private string? _lastOpMessage;
     private bool? _playAfterRelease; // playback state before a file operation released the player
 
-    private VideoItem? SelectedVideo => FileList.SelectedItem as VideoItem;
+    /// <summary>The selected row when it is a video (folders and ".." are never touched by file operations).</summary>
+    private VideoItem? SelectedVideo => FileList.SelectedItem is VideoItem { IsVideo: true } v ? v : null;
 
     // ================================================================ delete
 
@@ -397,7 +398,11 @@ public partial class MainWindow
             _suppressSelectionLoad = false;
         }
 
-        if (_items.Count == 0)
+        // The video now at the removed position, otherwise the previous video (folders are skipped).
+        int next = -1;
+        for (int i = index; i < _items.Count && next < 0; i++) if (_items[i].IsVideo) next = i;
+        for (int i = Math.Min(index, _items.Count) - 1; i >= 0 && next < 0; i--) if (_items[i].IsVideo) next = i;
+        if (next < 0)
         {
             _playAfterRelease = null; // nothing is loaded next: do not carry the state further
             // The player has already released the file: the video area stays empty.
@@ -406,8 +411,7 @@ public partial class MainWindow
             return;
         }
 
-        int next = Math.Min(index, _items.Count - 1);
-        FileList.SelectedIndex = next; // loads it, paused
+        FileList.SelectedIndex = next; // loads it (play/pause kept)
         FileList.ScrollIntoView(_items[next]);
     }
 

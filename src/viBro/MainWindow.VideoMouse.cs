@@ -18,9 +18,8 @@ namespace ViBro;
 //  - right click: menu with Delete, Move..., Move to <last folder>, Copy..., Copy to <last folder>
 //  - right button held + horizontal drag: moves in the video; the whole video width = the whole
 //    duration, keyframe seeks while dragging and an exact seek on release (no menu then)
-//  - wheel over the time bar (both modes) or over the video in the normal window: up = forward 3 s,
-//    down = back 3 s
-//  - wheel anywhere else in fullscreen (the video included): down = next video, up = previous
+//  - wheel over the time bar (both modes): down = next video, up = previous (folders skipped)
+//  - wheel over the video (both modes; in fullscreen anywhere but the bar): up = forward 3 s, down = back 3 s
 public partial class MainWindow
 {
     private uint _lastClickTime;
@@ -189,17 +188,16 @@ public partial class MainWindow
     }
 
     /// <summary>
-    /// One wheel notch (120) = one step; smaller steps (touchpads) are accumulated.
-    /// Normal window: over the time bar or the video, seek 3 s (up = forward); elsewhere (file list,
-    /// tree) the wheel scrolls as usual. Fullscreen: over the time bar seek 3 s, anywhere else change
-    /// video (down = next).
+    /// One wheel notch (120) = one step; smaller steps (touchpads) are accumulated (1.3.0, user's choice):
+    /// over the time bar, change video (down = next); over the video, and in fullscreen anywhere but the
+    /// bar, seek 3 s (up = forward). Elsewhere in the normal window (file list, tree) the wheel scrolls.
     /// </summary>
     private bool OnWheel(int delta, int screenX, int screenY)
     {
         if (!IsActive || delta == 0) return false;
         bool onTimeBar = IsPointOver(TimeSlider, screenX, screenY);
         if (!onTimeBar && !_isFullscreen && !IsPointOverVideo(screenX, screenY)) return false;
-        bool seek = onTimeBar || !_isFullscreen;
+        bool seek = !onTimeBar;
 
         // Restart counting when the direction or the target (bar / video) changes.
         if (Math.Sign(delta) != Math.Sign(_wheelAccumulator) || seek != _wheelSeeks) _wheelAccumulator = 0;
@@ -218,7 +216,7 @@ public partial class MainWindow
     private void ShowVideoMenu()
     {
         if (!IsActive) return;
-        bool canAct = !_fileOpBusy && FileList.SelectedItem is VideoItem;
+        bool canAct = !_fileOpBusy && SelectedVideo != null;
 
         var menu = new ContextMenu
         {

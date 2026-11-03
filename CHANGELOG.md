@@ -2,6 +2,15 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.3.0] - non ancora rilasciata
+
+### Aggiunto
+- Sottocartelle nell'elenco: in cima `..` (cartella superiore, assente nella radice di un'unità o di una condivisione), poi le cartelle con l'icona, poi i video. Doppio clic o Invio aprono la cartella (l'albero si sincronizza); tornando con `..` resta selezionata la cartella da cui si è usciti. Un clic su una cartella non carica nulla: il video corrente resta. D/E e la rotella saltano le cartelle; elimina, rinomina, sposta, copia e Shift+Invio valgono solo per i video. Barra di stato: `3 folders · 12 / 128 videos · 412.5 GB`. Le cartelle arrivano dalla stessa lettura della cartella: nessun accesso in più al disco o al NAS.
+- Shift+Invio: apre il video selezionato con l'applicazione predefinita di Windows; viBro va in pausa.
+
+### Modificato
+- Rotella (in entrambe le modalità): sopra la barra temporale cambia video (giù = successivo, su = precedente); sopra il video, e a schermo intero ovunque tranne la barra, sposta il tempo di 3 s (su = avanti). Prima la barra spostava il tempo e a schermo intero il video cambiava file.
+
 ## [1.2.0] - 2026-11-03
 
 Aspetto e indicazioni. Comprende anche le modifiche della 1.1.0, non rilasciata separatamente.

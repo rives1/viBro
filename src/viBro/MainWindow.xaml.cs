@@ -311,7 +311,7 @@ public partial class MainWindow : Window
 
     // ================================================================ folder
 
-    private async void OpenFolder(string rawPath, bool revealInTree)
+    private async void OpenFolder(string rawPath, bool revealInTree, string? selectAfterOpen = null)
     {
         if (string.IsNullOrWhiteSpace(rawPath)) return;
         string path;
@@ -349,7 +349,24 @@ public partial class MainWindow : Window
 
             _currentFolder = path;
             SetItems(items, keepSelection: false);
-            SetStatus($"{items.Count} video file(s) in {path}");
+            int videos = 0, folders = 0;
+            foreach (var it in items)
+            {
+                if (it.IsVideo) videos++;
+                else if (it.Kind == EntryKind.Folder) folders++;
+            }
+            SetStatus($"{videos} video file(s), {folders} folder(s) in {path}");
+            if (selectAfterOpen != null)
+            {
+                // Back with "..": select (not open) the folder just left, without loading anything.
+                var back = items.Find(i => !i.IsVideo && string.Equals(Path.TrimEndingDirectorySeparator(i.FullPath),
+                    Path.TrimEndingDirectorySeparator(selectAfterOpen), StringComparison.OrdinalIgnoreCase));
+                if (back != null)
+                {
+                    FileList.SelectedItem = back;
+                    FileList.ScrollIntoView(back);
+                }
+            }
             if (revealInTree) RevealInTree(path);
         }
         catch (OperationCanceledException)
@@ -460,6 +477,8 @@ public partial class MainWindow : Window
 
     private int CompareItems(VideoItem a, VideoItem b)
     {
+        // ".." first, then folders, then videos, whatever the sort column or direction.
+        if (a.Kind != b.Kind) return a.Kind.CompareTo(b.Kind);
         int c = _sortColumn switch
         {
             SortColumn.Size => a.Size.CompareTo(b.Size),
@@ -501,7 +520,7 @@ public partial class MainWindow : Window
     {
         UpdateFolderSummary(); // "12 / 128 videos"
         if (_suppressSelectionLoad) return;
-        if (FileList.SelectedItem is VideoItem item)
+        if (FileList.SelectedItem is VideoItem { IsVideo: true } item) // selecting a folder loads nothing
             LoadItem(item);
     }
 
@@ -521,26 +540,81 @@ public partial class MainWindow : Window
         _player.Load(item.FullPath, item, play);
     }
 
-    /// <summary>"12 / 128 videos · 412.5 GB": position of the selected file, count and total size.</summary>
+    /// <summary>
+    /// "3 folders · 12 / 128 videos · 412.5 GB": subfolders, position of the selected video among the
+    /// videos, number of videos and their total size.
+    /// </summary>
     private void UpdateFolderSummary()
     {
         long total = 0;
-        foreach (var v in _items) total += v.Size;
-        int index = FileList.SelectedIndex;
-        string count = _items.Count == 1 ? "1 video" : $"{_items.Count} videos";
-        if (index >= 0 && index < _items.Count) count = $"{index + 1} / {count}";
-        FolderSummaryText.Text = count + " · " + VideoItem.FormatSize(total);
+        int videos = 0, folders = 0, position = 0;
+        var selected = FileList.SelectedItem as VideoItem;
+        foreach (var v in _items)
+        {
+            if (v.Kind == EntryKind.Folder) folders++;
+            if (!v.IsVideo) continue;
+            videos++;
+            total += v.Size;
+            if (ReferenceEquals(v, selected)) position = videos;
+        }
+        string count = videos == 1 ? "1 video" : $"{videos} videos";
+        if (position > 0) count = $"{position} / {count}";
+        string folderText = folders == 0 ? "" : folders == 1 ? "1 folder · " : $"{folders} folders · ";
+        FolderSummaryText.Text = folderText + count + " · " + VideoItem.FormatSize(total);
     }
 
-    /// <summary>E / D and the wheel: previous / next file in the current order, keeping play/pause. No wrap-around.</summary>
+    /// <summary>E / D and the wheel: previous / next video in the current order (folders are skipped), keeping play/pause. No wrap-around.</summary>
     private void SelectRelative(int direction)
     {
         if (_items.Count == 0) return;
         int index = FileList.SelectedIndex;
         int next = index < 0 ? (direction > 0 ? 0 : _items.Count - 1) : index + direction;
+        while (next >= 0 && next < _items.Count && !_items[next].IsVideo) next += direction;
         if (next < 0 || next >= _items.Count) return;
         FileList.SelectedIndex = next;
         FileList.ScrollIntoView(_items[next]);
+    }
+
+    /// <summary>Double click on a folder or "..": opens it (videos: nothing, the single click already loaded them).</summary>
+    private void FileList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left) return;
+        if (ItemsControl.ContainerFromElement(FileList, e.OriginalSource as DependencyObject) is not ListViewItem row) return;
+        if (row.Content is VideoItem { IsVideo: false } entry)
+        {
+            OpenListEntry(entry);
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>Opens a folder of the list; going up with "..", the folder just left is selected.</summary>
+    private void OpenListEntry(VideoItem entry)
+    {
+        string? cameFrom = entry.Kind == EntryKind.Parent ? _currentFolder : null;
+        OpenFolder(entry.FullPath, revealInTree: true, selectAfterOpen: cameFrom);
+        Keyboard.Focus(FileList);
+    }
+
+    /// <summary>Shift+Enter: opens the selected video with the Windows default application; viBro pauses.</summary>
+    private void OpenWithDefaultApp()
+    {
+        if (SelectedVideo is not VideoItem item) return;
+        if (_player != null && !_player.IsPaused) _player.TogglePause(); // no two audio tracks at once
+        string path = item.FullPath;
+        SetStatus("Opening " + item.Name + " with the default application ...");
+        Task.Run(() =>
+        {
+            try
+            {
+                using var p = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+                Dispatcher.BeginInvoke(() => SetStatus("Opened " + item.Name + " with the default application."));
+            }
+            catch (Exception ex)
+            {
+                ErrorLog.Write("shell", "Cannot open " + item.Name + " with the default application", ex);
+                Dispatcher.BeginInvoke(() => SetStatus("Cannot open " + item.Name + " with the default application: " + ex.Message));
+            }
+        });
     }
 
     private void OnLoadCompleted(LoadResult r)
@@ -731,6 +805,18 @@ public partial class MainWindow : Window
             case Key.R when !alt && !ctrl:
                 if (!isRepeat) DeleteSelected();
                 return true;
+
+            case Key.Enter when shift && !ctrl && !alt:
+                if (!isRepeat) OpenWithDefaultApp();
+                return true;
+
+            case Key.Enter when !shift && !ctrl && !alt:
+                if (FileList.SelectedItem is VideoItem { IsVideo: false } entry)
+                {
+                    if (!isRepeat) OpenListEntry(entry);
+                    return true;
+                }
+                return false;
 
             case Key.F2 when ctrl && !alt:
                 if (!isRepeat) Dispatcher.BeginInvoke(new Action(() => CommandsDialog.Open(this))); // after this key

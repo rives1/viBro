@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.2.0 rilasciata** (pulsanti a icone, tempo sotto il puntatore, file caricato evidenziato, tempo e nome del file sovrapposti a schermo intero, finestra dei comandi con Ctrl+F2; comprende la 1.1.0). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.3.0 in prova** (sottocartelle nell'elenco, Shift+Invio apre il video con l'applicazione predefinita, rotella: barra = cambio video, video = spostamento nel tempo); ultima versione rilasciata: 1.2.0. La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -12,7 +12,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 
 - Un unico EXE autonomo: nessuna installazione, nessun privilegio di amministratore, nessun codec da installare.
 - Barra del percorso: cartelle locali, unità mappate e percorsi UNC (`\\server\share`). L'apertura avviene in background, quindi una condivisione irraggiungibile non blocca l'interfaccia.
-- Elenco dei soli video della cartella (MP4, MKV, MOV, WMV), senza ricorsione, in ordine naturale dei nomi (lo stesso di Esplora risorse).
+- Elenco delle sottocartelle e dei video della cartella (MP4, MKV, MOV, WMV), senza ricorsione: prima `..` (cartella superiore), poi le cartelle, poi i video, ogni gruppo nell'ordine scelto (nomi in ordine naturale, lo stesso di Esplora risorse). Doppio clic o Invio aprono una cartella; D/E, la rotella e le operazioni sui file saltano le cartelle.
 - Al cambio di file lo stato **Play/Pause si conserva**: se il video era in pausa (o all'avvio) il nuovo si carica in pausa sul primo fotogramma; se era in riproduzione, il nuovo parte.
 - Salti: ±1 s e ±5 s esatti, ±1 min e ±5 min su fotogrammi chiave (rapidi, approssimati) oppure esatti con *Exact long seeks*. Le richieste ripetute vengono accorpate, quindi non si accumula una coda.
 - Play/Pause, barra temporale, volume, mute, schermo intero.
@@ -56,6 +56,8 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | M | Mute on/off | ✔ |
 | F11 / Esc | Entra in / esce da schermo intero | ✔ |
 | Ctrl + L | Attiva la barra del percorso (Invio apre, Esc annulla) | ✔ |
+| Invio | Apre la cartella selezionata nell'elenco (`..` = cartella superiore) | 1.3.0 |
+| Shift + Invio | Apre il video selezionato con l'applicazione predefinita di Windows (viBro va in pausa) | 1.3.0 |
 | Canc o R | Elimina il file con conferma (Cestino se locale, definitiva se in rete) | 0.3.0 |
 | F2 | Rinomina il file (solo il nome; l'estensione resta; il cursore parte dall'inizio del nome) | 0.3.0 |
 | W | Sceglie la cartella di destinazione e sposta il file | 0.3.0 |
@@ -73,9 +75,8 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | Doppio clic | Entra in / esce da schermo intero; la riproduzione resta com'era | 0.5.0 |
 | Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W), *Copy...* (C), *Copy to <ultima cartella>* (Shift+C) | 0.5.0 (copia 0.6.0) |
 | Tasto destro tenuto + trascinamento a destra/sinistra | Spostamento nel video: tutta la larghezza del video = tutta la durata; il video segue il mouse, salto esatto al rilascio (nessun menu) | 0.6.0 |
-| Rotella sopra la barra temporale | Su: avanti 3 s; giù: indietro 3 s, a finestra normale e a schermo intero | 0.6.0 |
-| Rotella sopra il video, a finestra normale | Su: avanti 3 s; giù: indietro 3 s | 1.1.0 |
-| Rotella a schermo intero (tranne sopra la barra temporale) | Giù: video successivo; su: video precedente (come D / E) | 0.5.0 |
+| Rotella sopra la barra temporale | Giù: video successivo; su: video precedente (come D / E), a finestra normale e a schermo intero | 1.3.0 |
+| Rotella sopra il video (a schermo intero: ovunque tranne la barra temporale) | Su: avanti 3 s; giù: indietro 3 s | 1.3.0 |
 | Clic sulla barra temporale e trascinamento | Spostamento nel video; l'indicatore segue il mouse | 0.4.0 |
 
 Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come da specifica, le frecce eseguono sempre i salti, anche con lo stato attivo sull'albero o sull'elenco: la navigazione nell'albero avviene con il mouse.

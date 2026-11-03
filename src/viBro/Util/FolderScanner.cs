@@ -7,6 +7,13 @@ using System.Threading;
 
 namespace ViBro.Util;
 
+/// <summary>Kind of a row in the file list. Parent ("..") and folders are listed before the videos.</summary>
+internal enum EntryKind { Parent = 0, Folder = 1, Video = 2 }
+
+/// <summary>
+/// A row of the file list: a video, a subfolder or the parent folder (".."). Only videos are loaded,
+/// counted and touched by file operations; folders open with a double click or Enter.
+/// </summary>
 internal sealed class VideoItem : System.ComponentModel.INotifyPropertyChanged
 {
     // Segoe Fluent Icons: Play and Pause glyphs shown in front of the loaded file.
@@ -31,8 +38,9 @@ internal sealed class VideoItem : System.ComponentModel.INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new(nameof(StateGlyph)));
     }
 
-    public VideoItem(string name, string fullPath, long size, DateTime modified, string storage)
+    public VideoItem(string name, string fullPath, long size, DateTime modified, string storage, EntryKind kind = EntryKind.Video)
     {
+        Kind = kind;
         Name = name;
         FullPath = fullPath;
         Size = size;
@@ -45,9 +53,14 @@ internal sealed class VideoItem : System.ComponentModel.INotifyPropertyChanged
     public long Size { get; }
     public DateTime Modified { get; }
     public string Storage { get; }
+    public EntryKind Kind { get; }
+    public bool IsVideo => Kind == EntryKind.Video;
 
-    public string SizeText => FormatSize(Size);
-    public string ModifiedText => Modified.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture);
+    /// <summary>Folder icon for folders and "..", nothing for videos.</summary>
+    public System.Windows.Media.ImageSource? Icon => IsVideo ? null : TreeIcons.Folder;
+
+    public string SizeText => IsVideo ? FormatSize(Size) : "";
+    public string ModifiedText => Kind == EntryKind.Parent ? "" : Modified.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture);
 
     public static string FormatSize(long bytes)
     {
@@ -69,10 +82,10 @@ internal static class FolderScanner
         new(StringComparer.OrdinalIgnoreCase) { ".mp4", ".mkv", ".mov", ".wmv" };
 
     /// <summary>
-    /// Lists the video files of one folder (no recursion). Size and date come from the
-    /// directory enumeration itself: no file is opened and no media metadata is read.
-    /// Runs on a worker thread; on an unreachable share it may block for a long time,
-    /// so callers must not wait for it on the UI thread.
+    /// Lists the video files and the subfolders of one folder (no recursion), plus ".." when the
+    /// folder has a parent. Size and date come from the directory enumeration itself (one pass):
+    /// no file is opened and no media metadata is read. Runs on a worker thread; on an unreachable
+    /// share it may block for a long time, so callers must not wait for it on the UI thread.
     /// </summary>
     public static List<VideoItem> Scan(string folder, CancellationToken ct)
     {
@@ -85,10 +98,15 @@ internal static class FolderScanner
         };
 
         var list = new List<VideoItem>();
-        foreach (var fi in new DirectoryInfo(folder).EnumerateFiles("*", options))
+        string? parent = Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(folder)); // string only
+        if (!string.IsNullOrEmpty(parent))
+            list.Add(new VideoItem("..", parent, 0, default, storage, EntryKind.Parent));
+        foreach (var entry in new DirectoryInfo(folder).EnumerateFileSystemInfos("*", options))
         {
             ct.ThrowIfCancellationRequested();
-            if (VideoExtensions.Contains(fi.Extension))
+            if (entry is DirectoryInfo di)
+                list.Add(new VideoItem(di.Name, di.FullName, 0, di.LastWriteTime, storage, EntryKind.Folder));
+            else if (entry is FileInfo fi && VideoExtensions.Contains(fi.Extension))
                 list.Add(new VideoItem(fi.Name, fi.FullName, fi.Length, fi.LastWriteTime, storage));
         }
         list.Sort((a, b) => NaturalComparer.Instance.Compare(a.Name, b.Name));

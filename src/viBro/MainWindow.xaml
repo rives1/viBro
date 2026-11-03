@@ -132,6 +132,7 @@
                           VirtualizingPanel.IsVirtualizing="True"
                           VirtualizingPanel.VirtualizationMode="Recycling"
                           SelectionChanged="FileList_SelectionChanged"
+                          MouseDoubleClick="FileList_MouseDoubleClick"
                           GridViewColumnHeader.Click="FileList_HeaderClick">
                     <ListView.View>
                         <GridView>
@@ -140,8 +141,13 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding StateGlyph}" Width="18" FontSize="11" VerticalAlignment="Center"
-                                                       FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" />
+                                            <Grid Width="18">
+                                                <!-- Folder icon for folders and "..", play/pause glyph for the loaded video. -->
+                                                <Image Source="{Binding Icon}" Width="16" Height="16" HorizontalAlignment="Left"
+                                                       VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding StateGlyph}" FontSize="11" VerticalAlignment="Center"
+                                                           FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" />
+                                            </Grid>
                                             <TextBlock x:Name="NameText" Text="{Binding Name}" VerticalAlignment="Center" />
                                         </StackPanel>
                                         <DataTemplate.Triggers>

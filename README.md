@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.2.0 released** (icon buttons, time under the pointer, loaded file marked in the list, on-screen time and file name in fullscreen, Ctrl+F2 commands window; includes 1.1.0). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.3.0 in testing** (subfolders in the list, Shift+Enter opens the video with the default application, wheel: timeline = change video, video = seek); latest release: 1.2.0. Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -12,7 +12,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 
 - A single self-contained EXE: no installation, no administrator rights, no codecs to install.
 - Path bar: local folders, mapped drives and UNC paths (`\\server\share`). Folders open in the background, so an unreachable share never blocks the interface.
-- Lists only the videos of the folder (MP4, MKV, MOV, WMV), non-recursive, in natural name order (the same as File Explorer).
+- Lists the subfolders and the videos of the folder (MP4, MKV, MOV, WMV), non-recursive: `..` (parent folder) first, then the folders, then the videos, each group in the chosen order (names in natural order, the same as File Explorer). A double click or Enter opens a folder; D/E, the wheel and file operations skip folders.
 - **Play/Pause is kept when the file changes**: if the video was paused (or at startup) the new one is loaded paused on its first frame; if it was playing, the new one starts playing.
 - Seeking: ±1 s and ±5 s exact, ±1 min and ±5 min on keyframes (fast, approximate) or exact with *Exact long seeks*. Repeated requests are coalesced, so no queue builds up.
 - Play/Pause, timeline, volume, mute, fullscreen.
@@ -53,6 +53,8 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | M | Mute on/off | ✔ |
 | F11 / Esc | Enter / leave fullscreen | ✔ |
 | Ctrl + L | Focus the path bar (Enter opens, Esc cancels) | ✔ |
+| Enter | Open the selected folder of the list (`..` = parent folder) | 1.3.0 |
+| Shift + Enter | Open the selected video with the Windows default application (viBro pauses) | 1.3.0 |
 | Del or R | Delete the file after confirmation (Recycle Bin if local, permanent if on the network) | 0.3.0 |
 | F2 | Rename the file (name only; the extension is kept; the cursor starts at the beginning of the name) | 0.3.0 |
 | W | Choose a destination folder and move the file | 0.3.0 |
@@ -70,9 +72,8 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | Double click | Enter / leave fullscreen; playback stays as it was | 0.5.0 |
 | Right click | Menu: *Delete* (Del/R), *Move...* (W), *Move to <last folder>* (Shift+W), *Copy...* (C), *Copy to <last folder>* (Shift+C) | 0.5.0 (copy 0.6.0) |
 | Right button held + drag left/right | Seek within the video: the whole video width = the whole duration; the picture follows the mouse, exact seek on release (no menu) | 0.6.0 |
-| Wheel over the timeline | Up: forward 3 s; down: back 3 s, in the normal window and in fullscreen | 0.6.0 |
-| Wheel over the video, normal window | Up: forward 3 s; down: back 3 s | 1.1.0 |
-| Wheel in fullscreen (except over the timeline) | Down: next video; up: previous video (like D / E) | 0.5.0 |
+| Wheel over the timeline | Down: next video; up: previous video (like D / E), in the normal window and in fullscreen | 1.3.0 |
+| Wheel over the video (in fullscreen: anywhere but the timeline) | Up: forward 3 s; down: back 3 s | 1.3.0 |
 | Click on the timeline and drag | Seek within the video; the thumb follows the mouse | 0.4.0 |
 
 Shortcuts are suspended while typing in the path bar (except Ctrl+W). As specified, the arrow keys always seek, even when the tree or the list has the focus: the tree is navigated with the mouse.

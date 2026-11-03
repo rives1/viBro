@@ -31,7 +31,7 @@ Requisiti:
 - Divisori ridimensionabili e posizioni memorizzate.
 - Elenco con colonne Name, Size, Date modified.
 - Ordinamento per ogni colonna, con ordinamento naturale dei nomi.
-- Solo file video della cartella corrente; nessuna scansione ricorsiva.
+- Video e sottocartelle della cartella corrente (dalla 1.3.0; prima solo i video); nessuna scansione ricorsiva. In cima `..` per la cartella superiore, poi le cartelle, poi i video; una cartella si apre con doppio clic o Invio; D/E, rotella e operazioni sui file valgono solo per i video.
 - Accesso alle sottocartelle tramite albero.
 - Barra del percorso modificabile, anche per percorsi UNC di rete.
 - Barra temporale con posizione corrente e durata.
@@ -85,15 +85,16 @@ M	Mute on/off
 F11	Schermo intero
 Esc	Esce dallo schermo intero
 Ctrl + L	Attiva la barra del percorso
+Invio	Apre la cartella selezionata nell’elenco (1.3.0)
+Shift + Invio	Apre il video selezionato con l’applicazione predefinita di Windows; viBro va in pausa (1.3.0)
 
 Mouse sul video (0.5.0, richiesta dell'utente):
 Clic	Play/Pause (non il clic che riattiva la finestra)
 Doppio clic	Schermo intero; a schermo intero, ritorno alla finestra normale (la riproduzione resta com'era)
 Tasto destro	Menu con Delete (come Canc/R), Move... (come W), Move to <ultima destinazione> (come Shift+W), Copy... (come C), Copy to <ultima destinazione di copia> (come Shift+C)
 Tasto destro tenuto + trascinamento orizzontale (0.6.0)	Spostamento nel video: tutta la larghezza del video = tutta la durata; il video segue il mouse, salto esatto al rilascio; nessun menu
-Rotella sopra la barra temporale	Su: avanti 3 s; giù: indietro 3 s (0.6.0; prima 5 s)
-Rotella sopra il video, a finestra normale (1.1.0)	Su: avanti 3 s; giù: indietro 3 s (nella 0.6.0 cambiava video)
-Rotella a schermo intero, tranne sopra la barra temporale	Giù: video successivo; su: video precedente (come D / E)
+Rotella sopra la barra temporale (1.3.0)	Giù: video successivo; su: video precedente (come D / E), a finestra normale e a schermo intero
+Rotella sopra il video (1.3.0; a schermo intero ovunque tranne la barra temporale)	Su: avanti 3 s; giù: indietro 3 s
 
 Interfaccia (1.1.0): barra dei controlli (Play, barra temporale, tempo, Mute, volume) sotto il video e sopra l’elenco dei file a finestra normale; icona della cartella davanti alla barra del percorso; nella rinomina il cursore parte dall’inizio del nome, senza selezione.
 
@@ -177,6 +178,7 @@ Versione	Obiettivo
 0.6.0	Riproduzione conservata al cambio di file, copia, trascinamento col tasto destro, rotella sul video, barra di stato con conteggio, fascia in basso a schermo intero, conferma vicino al puntatore, Ctrl+W
 1.0.0	Prima versione completa e verificata (rilasciata il 2026-11-03)
 1.2.0	Pulsanti a icone, tempo sotto il puntatore, file caricato evidenziato, posizione nella barra di stato, tempo e nome del file sovrapposti a schermo intero, Ctrl+F2 (comprende la 1.1.0) (rilasciata il 2026-11-03)
+1.3.0	Sottocartelle nell’elenco, Shift+Invio con l’applicazione predefinita, rotella: barra = cambio video, video = spostamento nel tempo
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

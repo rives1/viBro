@@ -257,6 +257,8 @@ internal sealed class CommandsDialog : Window
             ("M", "Mute on / off"),
             ("F11 / Esc", "Enter / leave fullscreen"),
             ("Ctrl + L", "Edit the path (Enter opens, Esc cancels)"),
+            ("Enter", "Open the selected folder (\"..\" = parent folder)"),
+            ("Shift + Enter", "Open the video with the Windows default application"),
             ("Del or R", "Delete the file (confirmation)"),
             ("F2", "Rename the file"),
             ("W / Shift + W", "Move to a folder / to the last move folder"),
@@ -264,19 +266,23 @@ internal sealed class CommandsDialog : Window
             ("Ctrl + F2", "This window"),
             ("Ctrl + W", "Close viBro"),
         }),
+        ("File list", new[]
+        {
+            ("Click", "Load the video (play state kept)"),
+            ("Double click on a folder", "Open it (\"..\" = parent folder)"),
+        }),
         ("Mouse on the video", new[]
         {
             ("Click", "Play / Pause"),
             ("Double click", "Enter / leave fullscreen"),
             ("Right click", "Menu: Delete, Move, Copy"),
             ("Right button + drag", "Move in the video (full width = full length)"),
-            ("Wheel, window", "Back / forward 3 s"),
-            ("Wheel, fullscreen", "Next (down) / previous (up) video"),
+            ("Wheel", "Back / forward 3 s"),
         }),
         ("Timeline", new[]
         {
             ("Click and drag", "Move in the video"),
-            ("Wheel", "Back / forward 3 s"),
+            ("Wheel", "Next (down) / previous (up) video"),
             ("Pointer", "Time under the pointer"),
         }),
     };

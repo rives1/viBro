@@ -208,3 +208,18 @@ Il compresso decomprime in memoria gli assembly contenuti nell'EXE a ogni avvio:
 
 ## D-048 — Chiusura della 0.6.0 (2026-11-03)
 L'utente ha confermato tutte le prove di `TEST-PLAN-0.6.0.md` con l'EXE compilato da `647beda` (codice invariato fino al tag). La 0.6.0 viene rilasciata (tag `v0.6.0`). Nessuna prova aperta passa alla versione successiva; il prossimo piano di prova nascerà con la definizione della 0.7.0 (o della 1.0.0).
+
+## D-049 — Prove con 4K e MOV (2026-11-03, EXE 0.6.0)
+Prove dell'utente sull'unità di rete K: (`viBro-metrics.csv`, 39 aperture e cambi, 1131 salti, nessun timeout, `hwdec=d3d11va` su tutti i file). Mediane (p90 / massimo):
+
+| Formato | Aperture | Apertura / cambio | Salto rapido (fotogrammi chiave) | Salto esatto ±1–5 s |
+|---|---|---|---|---|
+| MKV HEVC 1080p | 22 | 92 ms (190 / 258) | 34 ms oltre 5 s, 24 ms fino a 5 s | 52 ms (117 / 148) |
+| MP4 H.264 1080p/720p | 12 | 102 ms (213 / 224) | — | — |
+| MOV H.264 1080p | 2 (un solo file) | 133 ms (171 max) | 41 ms (57 / 72) | 28 ms (37 / 42) |
+| MP4 H.264 4K (3840×2160) | 5 (3 file, fino a 12 GB) | 93 ms (152 / 287) | 54 ms (82 / 162) | 87 ms (151 / 166) |
+
+- **Esito:** 4K H.264 e MOV H.264 funzionano con tempi dello stesso ordine del 1080p; il 4K costa circa +20 ms sui salti rapidi e +35 ms su quelli esatti. Il massimo di 287 ms è la prima apertura del file da 12 GB.
+- **Memoria:** con il 4K la memoria di lavoro arriva a ~550 MB e quella privata a ~790 MB (superfici di decodifica più grandi), contro 260–470 MB misurati nella 0.1.0 con il 1080p. Nel corso della sessione scende e risale con i file aperti (ultimo valore 465 / 686 MB): nessun segno di crescita continua, ma la prova di memoria lunga (50+ cambi) resta da fare.
+- **Registro degli errori:** "Referenced QT chapter track not found" è un avviso di ffmpeg su un MP4 4K con riferimento a una traccia capitoli mancante; il file si riproduce. Alle 09:26:49 un file MP4/MOV della cartella non si è aperto ("error reading header", `avformat_open_input() failed`): intestazione illeggibile, probabilmente file incompleto o danneggiato. viBro non ha scritto "Cannot open", perché nel frattempo era già stato chiesto il file successivo (scorrimento veloce) e l'esito del caricamento superato viene ignorato: soffermandosi su quel file, la barra di stato mostra "Cannot play …".
+- **Copertura limitata:** un solo file MOV; 4K solo H.264. Non provati: 4K HEVC (anche 10 bit/HDR), MOV con codec diversi da H.264 (per esempio ProRes), WMV.

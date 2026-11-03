@@ -3,7 +3,7 @@
 _Aggiornato: 2026-11-03 · branch `main` · ultima versione rilasciata **0.6.0** (tag `v0.6.0`) · **prossima versione: contenuto da definire**_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-048 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-049 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 - Cartella sul PC dell'utente: `C:\Users\ammin\Documents\Claude_vibro\viBro`. Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0`, `v0.5.0` e `v0.6.0` forse non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`. **Variante predefinita: EXE normale** (D-047: avvio 410 ms contro 575, ~70 MB di memoria in meno).
@@ -23,13 +23,14 @@ _Aggiornato: 2026-11-03 · branch `main` · ultima versione rilasciata **0.6.0**
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
 - Cambio video: mediana 140–500 ms sul NAS (MP4 più lenti per la lettura dell'indice; MKV 66–120 ms), ~38 ms in locale. viBro aggiunge pochi ms rispetto a mpv (verificato con il log di mpv).
 - Salti esatti: ±1 s mediana ~20 ms, ±5 s 35–66 ms sul NAS. Salti sui fotogrammi chiave: ±1 min 10–35 ms, con scarto di 2–9 s.
+- 0.6.0 sull'unità di rete K: (D-049): apertura/cambio mediana 92 ms MKV HEVC 1080p, 102 ms MP4 H.264 1080p, 133 ms MOV H.264, 93 ms MP4 H.264 4K; salti rapidi 34 ms (1080p) e 54 ms (4K), esatti 52 ms (1080p) e 87 ms (4K). Avvio EXE 410 ms (D-047).
 - Memoria: 260–470 MB, stabile. I salti sui fotogrammi chiave per ±1/±5 s **non spostavano l'immagine** (GOP di 5–24 s): da qui la modalità mista (D-007).
 
 ## 4. Stato attuale e prossimo passo
 1. **0.6.0 rilasciata il 2026-11-03** (tag `v0.6.0`, D-048): tutte le prove di [docs/TEST-PLAN-0.6.0.md](docs/TEST-PLAN-0.6.0.md) superate. Contenuto: Play/Pause conservato al cambio di file (D-043), copia (D-044), trascinamento col tasto destro (D-045), rotella sul video e ±3 s sulla barra, barra di stato compatta con conteggio, fascia in basso a schermo intero, conferma vicino al puntatore, Ctrl+W (D-046).
 2. EXE distribuito: **normale** (D-047, misure di avvio: 410 ms contro 575 del compresso). D-032 chiusa.
 3. Nessuna prova aperta. Il prossimo piano di prova nasce con la prossima versione (`docs/TEST-PLAN-0.7.0.md` o `1.0.0`).
-4. Prossimo passo: l'utente definisce la prossima versione. Punti aperti verso la 1.0.0: MOV e 4K non ancora provati; sessione di memoria lunga (50+ cambi); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione. Rotella: causa del primo comportamento della 0.5.0 non identificata (D-041), `--trace-input` disponibile.
+4. Prossimo passo: l'utente definisce la prossima versione. Punti aperti verso la 1.0.0: 4K HEVC (10 bit/HDR), MOV non H.264 e WMV non ancora provati (4K H.264 e MOV H.264 provati il 2026-11-03, D-049); sessione di memoria lunga (50+ cambi, con il 4K la memoria arriva a ~550 MB di lavoro / ~790 MB privata); picchi sul NAS (fino a 2 s, non riprodotti); obblighi GPL per libmpv prima di pubblicare binari (THIRD-PARTY-NOTICES); autore dei commit provvisorio (`viBro developer`); README in italiano, da tradurre prima della pubblicazione. Rotella: causa del primo comportamento della 0.5.0 non identificata (D-041), `--trace-input` disponibile.
 
 ## 5. Dipendenze fissate
 | Dipendenza | Versione | Dove |

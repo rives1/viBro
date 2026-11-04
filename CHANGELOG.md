@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.6.0] - non ancora rilasciata
+## [1.6.0] - 2026-11-04
 
 ### Aggiunto
 - **Galleria (F10):** finestra separata con una riga per ogni video della cartella (nell'ordine dell'elenco): nome, durata e 5 immagini prese alle stesse percentuali della durata di ciascun video, predefinite 10, 30, 50, 70, 90 %, con il tempo sotto ogni immagine. Un clic su una riga (o le frecce) seleziona e carica il video nella finestra principale, con Play/Pause conservato; un clic su un'immagine lo carica e va al tempo dell'immagine. Esc chiude la galleria.

@@ -1,9 +1,9 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.5.0** (tag `v1.5.0`) · **in prova: 1.6.0** (codice pronto, piano da eseguire)_
+_Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.6.0** (tag `v1.6.0`) · **prossima versione: da definire** · prova aperta: release su GitHub_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-066 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-067 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 - Cartella sul PC dell'utente: il percorso è nel documento privato del progetto claude.ai, non nel repository pubblico (D-053). Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0`, `v0.5.0` e `v0.6.0` forse non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`. **Variante predefinita: EXE normale** (D-047: avvio 410 ms contro 575, ~70 MB di memoria in meno).
@@ -24,7 +24,7 @@ _Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.5.0**
 | 1.3.0 | Sottocartelle nell'elenco (`..` in cima, doppio clic o Invio per aprire), Shift+Invio con l'applicazione predefinita, rotella: barra = cambio video, video = spostamento di 3 s (D-060) | ✔ tag `v1.3.0` (2026-11-04): tutte le prove superate (D-061) |
 | 1.4.0 | Durate dei salti in `[Seek]` di `viBro.ini` (5 chiavi, valori di prima come predefiniti), finestra Ctrl+F2 con le durate in uso; `MetricsLog` invariato (D-062) | ✔ tag `v1.4.0` (2026-11-04): tutte le prove superate (D-063) |
 | 1.5.0 | Estratto: I/O marker di inizio e fine, F9 salva la parte in `nome-extract-aaMMgg-OOmm.ext` nella stessa cartella, copia dei dati senza ricodifica (inizio sul fotogramma chiave precedente), marker sulla barra temporale, messaggio di conferma a fine estrazione con un `ffmpeg.exe` fornito dall'utente accanto a viBro.exe; senza, funzione disattivata (D-064) | ✔ tag `v1.5.0` (2026-11-04): tutte le prove superate (D-065) |
-| 1.6.0 | Galleria F10: finestra separata, una riga per video con 5 immagini a 10/30/50/70/90 % (`[Gallery]` in `viBro.ini`), fotogrammi chiave con `ffmpeg.exe`, in background e solo in memoria; clic su riga = carica, su immagine = carica a quel tempo. Release GitHub automatiche al tag (solo note e sorgente) (D-066) | in prova: [docs/TEST-PLAN-1.6.0.md](docs/TEST-PLAN-1.6.0.md) |
+| 1.6.0 | Galleria F10: finestra separata, una riga per video con 5 immagini a 10/30/50/70/90 % (`[Gallery]` in `viBro.ini`), fotogrammi chiave con `ffmpeg.exe`, in background e solo in memoria; clic su riga = carica, su immagine = carica a quel tempo. Release GitHub automatiche al tag (solo note e sorgente) (D-066) | ✔ tag `v1.6.0` (2026-11-04): prove superate tranne la release su GitHub, da verificare dopo il push (D-067) |
 
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
 - Cambio video: mediana 140–500 ms sul NAS (MP4 più lenti per la lettura dell'indice; MKV 66–120 ms), ~38 ms in locale. viBro aggiunge pochi ms rispetto a mpv (verificato con il log di mpv).
@@ -34,8 +34,8 @@ _Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.5.0**
 - Memoria: 260–470 MB, stabile. I salti sui fotogrammi chiave per ±1/±5 s **non spostavano l'immagine** (GOP di 5–24 s): da qui la modalità mista (D-007).
 
 ## 4. Stato attuale e prossimo passo
-1. **1.5.0 rilasciata il 2026-11-04** (tag `v1.5.0`, D-065). Tutte le prove di [docs/TEST-PLAN-1.5.0.md](docs/TEST-PLAN-1.5.0.md) superate.
-2. **1.6.0 in prova** (D-066): l'utente esegue `build.cmd` e [docs/TEST-PLAN-1.6.0.md](docs/TEST-PLAN-1.6.0.md) (la parte release si prova solo dopo il push del tag); dopo la conferma: data nel CHANGELOG, D-067 di chiusura, fotografia `docs/handover/CONTEXT-v1.6.0.md`, tag `v1.6.0`. Release: [docs/RELEASE.md](docs/RELEASE.md); i tag fino a `v1.5.0` non hanno release (si possono creare con Run workflow → `release_tag`).
+1. **1.6.0 rilasciata il 2026-11-04** (tag `v1.6.0`, D-067). Prove di [docs/TEST-PLAN-1.6.0.md](docs/TEST-PLAN-1.6.0.md) superate tranne la sezione *Release su GitHub*.
+2. **Prova aperta:** dopo `git push --follow-tags` verificare in Actions i job `build` e `release` del tag `v1.6.0` e la release `viBro 1.6.0` (*Latest*, solo note e sorgente); facoltativo: Run workflow con `release_tag=v1.5.0` (e tag precedenti) per creare le loro release ([docs/RELEASE.md](docs/RELEASE.md)). Un difetto del workflow si corregge in una 1.6.1. Prossimo passo: l'utente definisce eventuali versioni successive.
 3. Distribuzione solo come sorgente (D-052); EXE predefinito normale (D-047); autore `rives1` (D-054). `ffmpeg.exe` non è incluso né distribuito.
 4. Proposte non scelte finora: cursore nascosto a schermo intero dopo 2 s, barra del percorso a "briciole" con Backspace per la cartella superiore, stato vuoto del video.
 5. Da fare dall'utente su GitHub, se non già fatto: cancellare gli artifact delle esecuzioni precedenti e le release in bozza dei tag (D-052); `git push --follow-tags`.
@@ -65,4 +65,4 @@ _Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.5.0**
 - **Flusso per ogni versione:** domande, codice, compilazione e test su Linux, copia sul PC, documentazione (CHANGELOG, DECISIONS, CONTEXT, TEST-PLAN), commit; poi l'utente esegue `build.cmd` e il piano di prova; infine chiusura con data, fotografia `docs/handover/CONTEXT-vX.Y.Z.md` e tag.
 
 ## 8. Messaggio per riprendere in una nuova chat
-> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 1.5.0 è rilasciata (tag `v1.5.0`); la 1.6.0 è in prova (`docs/TEST-PLAN-1.6.0.md`).
+> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 1.6.0 è rilasciata (tag `v1.6.0`); ti descrivo cosa voglio nella prossima versione.

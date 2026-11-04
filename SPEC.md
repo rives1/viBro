@@ -179,6 +179,7 @@ Versione	Obiettivo
 1.0.0	Prima versione completa e verificata (rilasciata il 2026-11-03)
 1.2.0	Pulsanti a icone, tempo sotto il puntatore, file caricato evidenziato, posizione nella barra di stato, tempo e nome del file sovrapposti a schermo intero, Ctrl+F2 (comprende la 1.1.0) (rilasciata il 2026-11-03)
 1.3.0	Sottocartelle nell’elenco, Shift+Invio con l’applicazione predefinita, rotella: barra = cambio video, video = spostamento nel tempo (rilasciata il 2026-11-04)
+1.4.0	Durata dei salti configurabile in viBro.ini (sezione [Seek]), Ctrl+F2 con le durate in uso (rilasciata il 2026-11-04)
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

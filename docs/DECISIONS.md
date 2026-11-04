@@ -286,3 +286,6 @@ Richiesta: spostare nel file `.ini` le durate dei salti su tre livelli (piccolo:
 - **Finestra dei comandi (Ctrl+F2):** mostra le durate in uso (minuti interi in `min`, il resto in `s`).
 - **`viBro-metrics.csv`:** il parametro esisteva già (`[Diagnostics] MetricsLog`, predefinito `true`); con `false` il file non viene né creato né scritto. Scelta dell'utente: lasciarlo com'è, solo documentazione più chiara.
 - Versione 1.4.0 (nuove opzioni compatibili = MINOR).
+
+## D-063 — Chiusura della 1.4.0 (2026-11-04)
+L'utente ha confermato tutte le prove di `TEST-PLAN-1.4.0.md` con l'EXE compilato da `2d3863c` (codice invariato fino al tag). La 1.4.0 viene rilasciata (tag `v1.4.0`). Nessuna prova aperta passa alla versione successiva.

@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.4.0] - non ancora rilasciata
+## [1.4.0] - 2026-11-04
 
 ### Aggiunto
 - Sezione `[Seek]` in `viBro.ini`: durata in secondi di ogni salto, con i valori di prima come predefiniti: `LeftRightSeconds=1` (← / →), `UpDownSeconds=5` (↓ / ↑), `WheelSeconds=3` (rotella sopra il video), `PageSeconds=60` (PgDown / PgUp), `AltPageSeconds=300` (Alt + PgDown / PgUp). Valori ammessi 0,1–3600; un valore non valido torna al predefinito con avviso.

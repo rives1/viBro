@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.5.0 released** (extract of a part of a video with I / O / F9, using a user-supplied `ffmpeg.exe`). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.6.0 in testing** (F10: gallery of the folder's videos). Last release: 1.5.0 (extract of a part of a video with I / O / F9, using a user-supplied `ffmpeg.exe`). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -21,6 +21,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 - Sorting by Name, Size, Date modified; three resizable panes; settings in `viBro.ini`.
 - Delete, rename, move and copy files, with confirmations, progress and cancellation.
 - **Extract a part of a video** (1.5.0): I and O mark start and end, F9 writes the part to a new file in the same folder. It uses an `ffmpeg.exe` that you put next to `viBro.exe` (not included; without it the function is disabled). No re-encoding (fast, original quality): the extract starts at the keyframe at or before the start marker, which can be several seconds earlier; the end is close to the end marker. The markers appear on the timeline (green I, red O, yellow band between them) and a message confirms the extract when it is done.
+- **Gallery** (1.6.0): F10 opens a separate window with one row per video of the folder and 5 images taken at the same percentages of each video's duration (10, 30, 50, 70, 90 % by default). Clicking a row selects and loads that video in the main window; clicking an image loads it at the image's time. It uses the same `ffmpeg.exe` as the extract. The images are the keyframes nearest to those positions (fast, also on a NAS), made in the background starting from the rows on screen, kept in memory only (nothing written to disk) and reused while viBro stays open. The gallery keeps the folder it was opened on; F10 again makes a new one.
 - Light/Dark themes (*Theme* button), control bar (timeline, volume) below the video and above the file list, a timeline band below the video in fullscreen.
 - Folder icon in front of the path bar; icon buttons for Play/Pause, Mute (shows the state), Browse and Theme.
 - Time under the pointer on the timeline; the loaded file is marked in the list (▶ playing, ❚❚ paused, bold name); the status bar shows the position, e.g. `12 / 128 videos · 412.5 GB`.
@@ -43,6 +44,8 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | `[Seek] PageSeconds` | `60` | Step of PgDown / PgUp |
 | `[Seek] AltPageSeconds` | `300` | Step of Alt + PgDown / PgUp |
 | `[Cache] MaxMB` | `0` | 0 = mpv cache disabled; >0 = cache enabled with this limit |
+| `[Gallery] PositionsPercent` | `10,30,50,70,90` | Positions of the gallery images, in % of each video's duration (1 to 10 values) |
+| `[Gallery] Jobs` | `2` | ffmpeg runs at a time for the gallery (1–8; more is faster on an SSD, can be slower on a NAS) |
 | `[Diagnostics] MetricsLog` | `true` | Measurement log `viBro-metrics.csv`; `false` = the file is not created or written |
 | `[Appearance] Theme` | `System` | `Light`, `Dark`, or `System` (follows Windows until a theme is chosen with the *Theme* button) |
 
@@ -71,6 +74,7 @@ Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4
 | Shift + C | Copy to the last copy destination (separate from the move destination) | 0.6.0 |
 | I / O | Set the start / end marker of an extract at the current position (status bar; also over the video in fullscreen) | 1.5.0 |
 | F9 | Save the part between I and O as a new file in the same folder, `name-extract-yyMMdd-HHmm.ext` (e.g. `clip.mp4` → `clip-extract-261104-1445.mp4`; `-2`, `-3` … if it exists). Needs `ffmpeg.exe` next to `viBro.exe` | 1.5.0 |
+| F10 | Gallery of the folder's videos in a separate window (Esc closes it). Needs `ffmpeg.exe` next to `viBro.exe` | 1.6.0 |
 | Ctrl + F2 | Show the commands window (keyboard and mouse) | 1.2.0 |
 | Ctrl + W | Close viBro | 0.6.0 |
 
@@ -104,6 +108,8 @@ On the first start .NET extracts the native libraries, libmpv among them, to the
 ## Getting viBro
 
 No ready-made EXE is published: build it yourself with `build.cmd` (a few minutes, no administrator rights). The reason is the GPL: the EXE embeds a third-party libmpv build whose exact source code cannot be provided, because that build does not record the revisions of the libraries it contains. Building locally downloads libmpv directly from its publisher. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+The [Releases](https://github.com/rives1/viBro/releases) page (from 1.6.0) lists each version with its notes and the source archive to build; it is created automatically when a version tag is pushed ([docs/RELEASE.md](docs/RELEASE.md), in Italian).
 
 ## Building
 

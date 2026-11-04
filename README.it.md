@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.5.0 rilasciata** (estratto di una parte del video con I / O / F9, con un `ffmpeg.exe` fornito dall'utente). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.6.0 in prova** (F10: galleria dei video della cartella). Ultima versione rilasciata: 1.5.0 (estratto di una parte del video con I / O / F9, con un `ffmpeg.exe` fornito dall'utente). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -23,6 +23,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 
 - Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
 - **Estratto di una parte del video** (1.5.0): I e O segnano inizio e fine, F9 scrive la parte in un nuovo file nella stessa cartella. Usa un `ffmpeg.exe` messo dall'utente accanto a `viBro.exe` (non incluso; senza, la funzione è disattivata). Nessuna ricodifica (rapido, qualità originale): l'estratto parte dal fotogramma chiave al marker di inizio o prima, anche diversi secondi prima; la fine è vicina al marker di fine. I marker compaiono sulla barra temporale (I verde, O rosso, fascia gialla tra i due) e un messaggio conferma l'estratto a fine procedura.
+- **Galleria** (1.6.0): F10 apre una finestra separata con una riga per ogni video della cartella e 5 immagini prese alle stesse percentuali della durata di ciascun video (predefinite 10, 30, 50, 70, 90 %). Un clic su una riga seleziona e carica quel video nella finestra principale; un clic su un'immagine lo carica al tempo dell'immagine. Usa lo stesso `ffmpeg.exe` dell'estratto. Le immagini sono i fotogrammi chiave più vicini a quelle posizioni (rapide, anche sul NAS), create in background partendo dalle righe visibili, tenute solo in memoria (nulla su disco) e riusate finché viBro resta aperto. La galleria resta sulla cartella in cui è stata aperta; F10 di nuovo ne crea una nuova.
 
 - Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.
 - Icona della cartella davanti alla barra del percorso; pulsanti a icone per Play/Pause, Mute (indica lo stato), Browse e Theme.
@@ -46,6 +47,8 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | `[Seek] PageSeconds` | `60` | Durata del salto di PgDown / PgUp |
 | `[Seek] AltPageSeconds` | `300` | Durata del salto di Alt + PgDown / PgUp |
 | `[Cache] MaxMB` | `0` | 0 = cache di mpv disattivata; >0 = cache attiva con questo limite |
+| `[Gallery] PositionsPercent` | `10,30,50,70,90` | Posizioni delle immagini della galleria, in % della durata di ogni video (da 1 a 10 valori) |
+| `[Gallery] Jobs` | `2` | Esecuzioni di ffmpeg contemporanee per la galleria (1–8; di più è più rapido su SSD, può essere più lento sul NAS) |
 | `[Diagnostics] MetricsLog` | `true` | Registro delle misure `viBro-metrics.csv`; `false` = il file non viene creato né scritto |
 | `[Appearance] Theme` | `System` | `Light`, `Dark`, oppure `System` (segue Windows finché non si sceglie con il pulsante *Theme*) |
 
@@ -74,6 +77,7 @@ Le durate dei salti sono quelle predefinite; si cambiano in `[Seek]` di `viBro.i
 | Shift + C | Copia nell'ultima destinazione di copia (separata da quella dello spostamento) | 0.6.0 |
 | I / O | Marker di inizio / fine dell'estratto nella posizione corrente (barra di stato; a schermo intero anche sopra il video) | 1.5.0 |
 | F9 | Salva la parte tra I e O come nuovo file nella stessa cartella, `nome-extract-aaMMgg-OOmm.ext` (es. `clip.mp4` → `clip-extract-261104-1445.mp4`; `-2`, `-3` … se esiste già). Richiede `ffmpeg.exe` accanto a `viBro.exe` | 1.5.0 |
+| F10 | Galleria dei video della cartella in una finestra separata (Esc la chiude). Richiede `ffmpeg.exe` accanto a `viBro.exe` | 1.6.0 |
 | Ctrl + F2 | Mostra la finestra dei comandi (tastiera e mouse) | 1.2.0 |
 | Ctrl + W | Chiude viBro | 0.6.0 |
 
@@ -107,6 +111,8 @@ Al primo avvio .NET estrae le librerie native, tra cui libmpv, nella cache per u
 ## Come ottenere viBro
 
 Non viene pubblicato un EXE pronto: si compila con `build.cmd` (pochi minuti, senza privilegi di amministratore). Il motivo è la GPL: l'EXE incorpora una build di libmpv di terzi di cui non si può fornire il sorgente esatto, perché quella build non registra le revisioni delle librerie che contiene. Compilando in locale, libmpv viene scaricata direttamente da chi la pubblica. Vedi [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+La pagina [Releases](https://github.com/rives1/viBro/releases) (dalla 1.6.0) elenca ogni versione con le note e l'archivio del sorgente da compilare; viene creata automaticamente quando si pubblica il tag di una versione ([docs/RELEASE.md](docs/RELEASE.md)).
 
 ## Compilazione
 

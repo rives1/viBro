@@ -2,6 +2,16 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.6.0] - non ancora rilasciata
+
+### Aggiunto
+- **Galleria (F10):** finestra separata con una riga per ogni video della cartella (nell'ordine dell'elenco): nome, durata e 5 immagini prese alle stesse percentuali della durata di ciascun video, predefinite 10, 30, 50, 70, 90 %, con il tempo sotto ogni immagine. Un clic su una riga (o le frecce) seleziona e carica il video nella finestra principale, con Play/Pause conservato; un clic su un'immagine lo carica e va al tempo dell'immagine. Esc chiude la galleria.
+- Le immagini sono i fotogrammi chiave più vicini alle posizioni (rapide anche sul NAS; il tempo indicato è quello reale del fotogramma). Vengono create in background con lo stesso `ffmpeg.exe` dell'estratto, partendo dalle righe visibili; chiudendo la finestra tutto si ferma. Restano solo in memoria (nulla scritto su disco) e vengono riusate finché viBro è aperto, se il file non è cambiato (fino a 64 MB).
+- La galleria resta sulla cartella in cui è stata aperta: se nel frattempo la finestra principale ne mostra un'altra, il clic riapre la cartella della galleria. F10 di nuovo crea una nuova galleria della cartella corrente.
+- `viBro.ini`, sezione `[Gallery]`: `PositionsPercent=10,30,50,70,90` (da 1 a 10 valori tra 0 e 100) e `Jobs=2` (esecuzioni di ffmpeg contemporanee, 1–8).
+- Ctrl+F2 mostra F10, e se `ffmpeg.exe` manca.
+- **Release su GitHub automatiche:** al push di un tag `v*`, dopo la compilazione di verifica, il workflow crea la release con le note della versione prese da questo CHANGELOG. Solo note e archivi del sorgente generati da GitHub: nessun EXE (D-052). Per i tag precedenti si può avviare a mano (Actions → build → Run workflow). Istruzioni in `docs/RELEASE.md`.
+
 ## [1.5.0] - 2026-11-04
 
 ### Aggiunto

@@ -76,6 +76,11 @@ internal sealed class AppSettings
     public double SeekPageSeconds { get; set; } = 60;       // PgDown / PgUp
     public double SeekAltPageSeconds { get; set; } = 300;   // Alt + PgDown / PgUp
 
+    // [Gallery] (F10, 1.6.0): image positions as percentages of each video's duration; ffmpeg runs at a time
+    public static readonly double[] DefaultGalleryPercents = { 10, 30, 50, 70, 90 };
+    public double[] GalleryPercents { get; set; } = (double[])DefaultGalleryPercents.Clone();
+    public int GalleryJobs { get; set; } = 2;
+
     // [Cache]
     public int CacheMaxMB { get; set; } // 0 = mpv cache disabled (only the minimal demuxer read-ahead)
 
@@ -146,6 +151,9 @@ internal sealed class AppSettings
         SeekWheelSeconds = ReadDouble("Seek", "WheelSeconds", SeekWheelSeconds, MinSeekSeconds, MaxSeekSeconds);
         SeekPageSeconds = ReadDouble("Seek", "PageSeconds", SeekPageSeconds, MinSeekSeconds, MaxSeekSeconds);
         SeekAltPageSeconds = ReadDouble("Seek", "AltPageSeconds", SeekAltPageSeconds, MinSeekSeconds, MaxSeekSeconds);
+
+        GalleryPercents = ReadPercentList("Gallery", "PositionsPercent", GalleryPercents);
+        GalleryJobs = ReadInt("Gallery", "Jobs", GalleryJobs, 1, 8);
 
         CacheMaxMB = ReadInt("Cache", "MaxMB", CacheMaxMB, 0, 4096);
 
@@ -238,6 +246,9 @@ internal sealed class AppSettings
         _ini.Set("Seek", "PageSeconds", D(SeekPageSeconds));
         _ini.Set("Seek", "AltPageSeconds", D(SeekAltPageSeconds));
 
+        _ini.Set("Gallery", "PositionsPercent", string.Join(",", Array.ConvertAll(GalleryPercents, D)));
+        _ini.Set("Gallery", "Jobs", GalleryJobs.ToString(c));
+
         _ini.Set("Cache", "MaxMB", CacheMaxMB.ToString(c));
 
         _ini.Set("Diagnostics", "MetricsLog", B(MetricsLog));
@@ -266,6 +277,27 @@ internal sealed class AppSettings
             return d;
         Invalid(section, key, v);
         return null;
+    }
+
+    /// <summary>"10,30,50,70,90": 1 to 10 values from 0 to 100, kept in the given order.</summary>
+    private double[] ReadPercentList(string section, string key, double[] def)
+    {
+        string? v = _ini.Get(section, key);
+        if (string.IsNullOrWhiteSpace(v)) return def;
+        string[] parts = v.Split(',', StringSplitOptions.TrimEntries);
+        var list = new List<double>();
+        foreach (string p in parts)
+        {
+            if (!double.TryParse(p, NumberStyles.Float, CultureInfo.InvariantCulture, out double d) || double.IsNaN(d) || d < 0 || d > 100)
+            {
+                list.Clear();
+                break;
+            }
+            list.Add(d);
+        }
+        if (list.Count is >= 1 and <= 10) return list.ToArray();
+        Invalid(section, key, v);
+        return def;
     }
 
     private int ReadInt(string section, string key, int def, int min, int max)

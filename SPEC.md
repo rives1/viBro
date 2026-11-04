@@ -87,6 +87,11 @@ Esc	Esce dallo schermo intero
 Ctrl + L	Attiva la barra del percorso
 Invio	Apre la cartella selezionata nell’elenco (1.3.0)
 Shift + Invio	Apre il video selezionato con l’applicazione predefinita di Windows; viBro va in pausa (1.3.0)
+I / O	Marker di inizio / fine dell’estratto nella posizione corrente (1.5.0)
+F9	Salva la parte tra I e O in un nuovo file nella stessa cartella, senza ricodifica; richiede ffmpeg.exe accanto a viBro.exe (1.5.0)
+F10	Galleria dei video della cartella in una finestra separata: per ogni video una riga con 5 immagini alle stesse percentuali della durata (predefinite 10/30/50/70/90 %, [Gallery] in viBro.ini); clic su una riga = seleziona e carica il video, clic su un’immagine = lo carica a quel tempo; richiede ffmpeg.exe (1.6.0)
+
+Le durate dei salti indicate sopra sono quelle predefinite: dalla 1.4.0 si cambiano nella sezione [Seek] di viBro.ini.
 
 Mouse sul video (0.5.0, richiesta dell'utente):
 Clic	Play/Pause (non il clic che riattiva la finestra)
@@ -180,6 +185,8 @@ Versione	Obiettivo
 1.2.0	Pulsanti a icone, tempo sotto il puntatore, file caricato evidenziato, posizione nella barra di stato, tempo e nome del file sovrapposti a schermo intero, Ctrl+F2 (comprende la 1.1.0) (rilasciata il 2026-11-03)
 1.3.0	Sottocartelle nell’elenco, Shift+Invio con l’applicazione predefinita, rotella: barra = cambio video, video = spostamento nel tempo (rilasciata il 2026-11-04)
 1.4.0	Durata dei salti configurabile in viBro.ini (sezione [Seek]), Ctrl+F2 con le durate in uso (rilasciata il 2026-11-04)
+1.5.0	Estratto di una parte del video con I / O / F9 e un ffmpeg.exe fornito dall’utente (rilasciata il 2026-11-04)
+1.6.0	Galleria dei video della cartella con F10; release automatiche su GitHub (solo sorgente)
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

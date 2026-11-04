@@ -174,6 +174,7 @@ public partial class MainWindow : Window
     private void Window_Closing(object? sender, CancelEventArgs e)
     {
         if (_isFullscreen) ExitFullscreen();
+        _gallery?.Close(); // stops its ffmpeg runs
         _uiTimer.Stop();
         ComponentDispatcher.ThreadPreprocessMessage -= OnThreadPreprocessMessage;
         _folderCts?.Cancel();
@@ -311,7 +312,7 @@ public partial class MainWindow : Window
 
     // ================================================================ folder
 
-    private async void OpenFolder(string rawPath, bool revealInTree, string? selectAfterOpen = null)
+    private async void OpenFolder(string rawPath, bool revealInTree, string? selectAfterOpen = null, Action? onOpened = null)
     {
         if (string.IsNullOrWhiteSpace(rawPath)) return;
         string path;
@@ -368,6 +369,7 @@ public partial class MainWindow : Window
                 }
             }
             if (revealInTree) RevealInTree(path);
+            onOpened?.Invoke(); // e.g. select the video chosen in the gallery
         }
         catch (OperationCanceledException)
         {
@@ -851,6 +853,11 @@ public partial class MainWindow : Window
 
             case Key.F9 when !alt && !ctrl && !shift:
                 if (!isRepeat) ExtractMarked();
+                return true;
+
+            // Gallery (1.6.0). F10 arrives as a system key: handled here so Windows does not enter menu mode.
+            case Key.F10 when !alt && !ctrl && !shift:
+                if (!isRepeat) Dispatcher.BeginInvoke(new Action(OpenGallery)); // after this key message
                 return true;
         }
         return false;

@@ -269,6 +269,9 @@ internal sealed class CommandsDialog : Window
             ("F9", FfmpegExtractor.IsAvailable
                 ? "Extract the marked part to a new file in the same folder (no re-encoding: starts at the keyframe before I)"
                 : "Extract: not available, " + FfmpegExtractor.ExeName + " not found in the viBro folder"),
+            ("F10", FfmpegExtractor.IsAvailable
+                ? $"Gallery of the folder: {s.GalleryPercents.Length} images per video (click a row: load it; click an image: load it at that time; Esc closes)"
+                : "Gallery: not available, " + FfmpegExtractor.ExeName + " not found in the viBro folder"),
             ("Ctrl + F2", "This window"),
             ("Ctrl + W", "Close viBro"),
         }),

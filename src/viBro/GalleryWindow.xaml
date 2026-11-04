@@ -1,0 +1,60 @@
+<Window x:Class="ViBro.GalleryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ViBro"
+        Title="Gallery" Icon="viBro.ico" Width="1200" Height="800" MinWidth="480" MinHeight="300"
+        WindowStartupLocation="CenterScreen"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Closed="Window_Closed">
+    <!-- Gallery (F10, 1.6.0): one row per video of the folder, images at the same percentages of
+         each video's duration. Click a row: load that video in the main window; click an image:
+         load it at the image's time. -->
+    <Window.Resources>
+        <local:AspectHeightConverter x:Key="AspectHeight" />
+    </Window.Resources>
+    <DockPanel>
+        <TextBlock x:Name="StatusText" DockPanel.Dock="Bottom" Margin="10,4,10,6" TextTrimming="CharacterEllipsis" />
+        <ListBox x:Name="Rows"
+                 HorizontalContentAlignment="Stretch"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 VirtualizingPanel.IsVirtualizing="True"
+                 VirtualizingPanel.VirtualizationMode="Recycling"
+                 VirtualizingPanel.ScrollUnit="Pixel"
+                 SelectionMode="Single"
+                 SelectionChanged="Rows_SelectionChanged"
+                 PreviewMouseLeftButtonUp="Rows_PreviewMouseLeftButtonUp"
+                 ScrollViewer.ScrollChanged="Rows_ScrollChanged">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="0,2,0,6">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding Info}" Opacity="0.7" Margin="12,0,0,0" />
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                        </DockPanel>
+                        <ItemsControl ItemsSource="{Binding Cells}" Margin="0,4,0,0" Focusable="False">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="2,0">
+                                        <!-- 16:9 box whatever the window width: rows keep their height while images arrive. -->
+                                        <Border Background="#30808080" Cursor="Hand"
+                                                Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}, Converter={StaticResource AspectHeight}}"
+                                                ToolTip="Click: load the video at this time"
+                                                MouseLeftButtonDown="Cell_MouseLeftButtonDown">
+                                            <Image Source="{Binding Image}" Stretch="Uniform" />
+                                        </Border>
+                                        <TextBlock Text="{Binding Label}" HorizontalAlignment="Center" Opacity="0.75" FontSize="11" Margin="0,1,0,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

@@ -7,6 +7,7 @@ Compilare con `build.cmd`. Nel titolo deve comparire `viBro 1.6.0 (…)`. Serve 
 ## Galleria (F10)
 - [ ] Senza `ffmpeg.exe`: F10 scrive nella barra di stato che la galleria non è disponibile; Ctrl+F2 lo indica. Con `ffmpeg.exe`: Ctrl+F2 descrive F10.
 - [ ] F10 in una cartella con video (SSD): si apre la finestra *Gallery - <cartella>*, una riga per video, nell'ordine dell'elenco; le cartelle e `..` non compaiono. Nome, durata e 5 immagini per riga, con il tempo sotto ciascuna.
+- [ ] Ordine: lo stesso dell'elenco al momento di F10, con ordinamento per Name, Size e Date modified, in entrambe le direzioni. Cambiando poi l'ordinamento nella finestra principale la galleria non cambia; F10 di nuovo la ricrea nel nuovo ordine.
 - [ ] Le immagini sono vicine al 10, 30, 50, 70 e 90 % della durata (un video di 10 min: circa 1, 3, 5, 7, 9 min, con lo scarto del fotogramma chiave). Il tempo sotto l'immagine è quello del fotogramma mostrato.
 - [ ] Prima compaiono le immagini delle righe visibili; scorrendo in basso, le righe nuove vengono riempite per prime. La finestra resta utilizzabile mentre lavora; in basso lo stato `images 12 / 128 ...`, poi `done in N s`.
 - [ ] Ridimensionando la finestra le 5 immagini occupano sempre la larghezza, in riquadri 16:9 (video verticali con bande ai lati); le righe non cambiano altezza mentre arrivano le immagini.

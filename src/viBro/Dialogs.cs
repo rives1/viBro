@@ -4,6 +4,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using ViBro.Settings;
 using ViBro.Util;
 
 namespace ViBro;
@@ -244,14 +245,15 @@ internal sealed class ProgressDialog : Window
 /// <summary>Ctrl+F2: keyboard and mouse commands in one window. Esc or Enter closes it.</summary>
 internal sealed class CommandsDialog : Window
 {
-    private static readonly (string Section, (string Keys, string Action)[] Rows)[] Commands =
+    /// <summary>The seek rows show the steps read from [Seek] in viBro.ini (1.4.0).</summary>
+    private static (string Section, (string Keys, string Action)[] Rows)[] Commands(AppSettings s) => new[]
     {
         ("Keyboard", new[]
         {
-            ("← / →", "Back / forward 1 s"),
-            ("↓ / ↑", "Back / forward 5 s"),
-            ("PgDown / PgUp", "Back / forward 1 min"),
-            ("Alt + PgDown / PgUp", "Back / forward 5 min"),
+            ("← / →", "Back / forward " + AppSettings.FormatSeconds(s.SeekLeftRightSeconds)),
+            ("↓ / ↑", "Back / forward " + AppSettings.FormatSeconds(s.SeekUpDownSeconds)),
+            ("PgDown / PgUp", "Back / forward " + AppSettings.FormatSeconds(s.SeekPageSeconds)),
+            ("Alt + PgDown / PgUp", "Back / forward " + AppSettings.FormatSeconds(s.SeekAltPageSeconds)),
             ("Space", "Play / Pause"),
             ("E / D", "Previous / next video (play state kept)"),
             ("M", "Mute on / off"),
@@ -277,7 +279,7 @@ internal sealed class CommandsDialog : Window
             ("Double click", "Enter / leave fullscreen"),
             ("Right click", "Menu: Delete, Move, Copy"),
             ("Right button + drag", "Move in the video (full width = full length)"),
-            ("Wheel", "Back / forward 3 s"),
+            ("Wheel", "Back / forward " + AppSettings.FormatSeconds(s.SeekWheelSeconds)),
         }),
         ("Timeline", new[]
         {
@@ -287,7 +289,7 @@ internal sealed class CommandsDialog : Window
         }),
     };
 
-    private CommandsDialog(Window owner)
+    private CommandsDialog(Window owner, AppSettings settings)
     {
         DialogStyle.Apply(this, owner, "Commands");
         Width = 560;
@@ -295,7 +297,7 @@ internal sealed class CommandsDialog : Window
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(170) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         int row = 0;
-        foreach (var (section, rows) in Commands)
+        foreach (var (section, rows) in Commands(settings))
         {
             AddRow(grid, row++, new TextBlock
             {
@@ -335,5 +337,5 @@ internal sealed class CommandsDialog : Window
         grid.Children.Add(element);
     }
 
-    public static void Open(Window owner) => new CommandsDialog(owner).ShowDialog();
+    public static void Open(Window owner, AppSettings settings) => new CommandsDialog(owner, settings).ShowDialog();
 }

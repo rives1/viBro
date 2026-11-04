@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.3.0 released** (subfolders in the list, Shift+Enter opens the video with the default application, wheel: timeline = change video, video = seek). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.4.0 in testing** (seek steps configurable in `viBro.ini`). Last release: 1.3.0 (subfolders in the list, Shift+Enter opens the video with the default application, wheel: timeline = change video, video = seek). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -14,7 +14,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 - Path bar: local folders, mapped drives and UNC paths (`\\server\share`). Folders open in the background, so an unreachable share never blocks the interface.
 - Lists the subfolders and the videos of the folder (MP4, MKV, MOV, WMV), non-recursive: `..` (parent folder) first, then the folders, then the videos, each group in the chosen order (names in natural order, the same as File Explorer). A double click or Enter opens a folder; D/E, the wheel and file operations skip folders.
 - **Play/Pause is kept when the file changes**: if the video was paused (or at startup) the new one is loaded paused on its first frame; if it was playing, the new one starts playing.
-- Seeking: ±1 s and ±5 s exact, ±1 min and ±5 min on keyframes (fast, approximate) or exact with *Exact long seeks*. Repeated requests are coalesced, so no queue builds up.
+- Seeking: by default ±1 s and ±5 s exact, ±1 min and ±5 min on keyframes (fast, approximate) or exact with *Exact long seeks*; every step can be changed in `[Seek]` of `viBro.ini`. Repeated requests are coalesced, so no queue builds up.
 - Play/Pause, timeline, volume, mute, fullscreen.
 - **Automatic measurements** in `viBro-metrics.csv`, next to the EXE: time to first frame, video switch, seek latency, memory, startup time.
 - Folder tree (user folders, local and network drives, open UNC shares), loaded progressively and kept in sync with the open folder.
@@ -34,13 +34,20 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | Section / key | Default | Meaning |
 |---|---|---|
 | `[Playback] HardwareDecoding` | `auto-safe` | Hardware decoding (`no` = software only, or any mpv `hwdec` value) |
-| `[Playback] ExactLongSeeks` | `false` | Makes ±1/±5 min and the timeline exact too |
-| `[Playback] ExactSeekThresholdSeconds` | `30` | Seeks shorter than this are always exact |
+| `[Playback] ExactLongSeeks` | `false` | Makes every seek and the timeline exact, whatever the step |
+| `[Playback] ExactSeekThresholdSeconds` | `30` | Seeks shorter than this are always exact; longer ones go to the nearest keyframe (fast, off by a few seconds) |
+| `[Seek] LeftRightSeconds` | `1` | Step of ← / → |
+| `[Seek] UpDownSeconds` | `5` | Step of ↓ / ↑ |
+| `[Seek] WheelSeconds` | `3` | Step of the wheel over the video |
+| `[Seek] PageSeconds` | `60` | Step of PgDown / PgUp |
+| `[Seek] AltPageSeconds` | `300` | Step of Alt + PgDown / PgUp |
 | `[Cache] MaxMB` | `0` | 0 = mpv cache disabled; >0 = cache enabled with this limit |
-| `[Diagnostics] MetricsLog` | `true` | Measurement log `viBro-metrics.csv` |
+| `[Diagnostics] MetricsLog` | `true` | Measurement log `viBro-metrics.csv`; `false` = the file is not created or written |
 | `[Appearance] Theme` | `System` | `Light`, `Dark`, or `System` (follows Windows until a theme is chosen with the *Theme* button) |
 
 ## Keyboard shortcuts
+
+Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4.0), and Ctrl+F2 shows the values in use.
 
 | Key | Action | Since |
 |---|---|---|
@@ -73,7 +80,7 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | Right click | Menu: *Delete* (Del/R), *Move...* (W), *Move to <last folder>* (Shift+W), *Copy...* (C), *Copy to <last folder>* (Shift+C) | 0.5.0 (copy 0.6.0) |
 | Right button held + drag left/right | Seek within the video: the whole video width = the whole duration; the picture follows the mouse, exact seek on release (no menu) | 0.6.0 |
 | Wheel over the timeline | Down: next video; up: previous video (like D / E), in the normal window and in fullscreen | 1.3.0 |
-| Wheel over the video (in fullscreen: anywhere but the timeline) | Up: forward 3 s; down: back 3 s | 1.3.0 |
+| Wheel over the video (in fullscreen: anywhere but the timeline) | Up: forward 3 s; down: back 3 s (`[Seek] WheelSeconds`) | 1.3.0 |
 | Click on the timeline and drag | Seek within the video; the thumb follows the mouse | 0.4.0 |
 
 Shortcuts are suspended while typing in the path bar (except Ctrl+W). As specified, the arrow keys always seek, even when the tree or the list has the focus: the tree is navigated with the mouse.

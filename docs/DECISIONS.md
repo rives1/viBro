@@ -278,3 +278,11 @@ L'utente ha confermato tutte le prove di `TEST-PLAN-1.2.0.md`, che comprende que
 
 ## D-061 — Chiusura della 1.3.0 (2026-11-04)
 L'utente ha confermato tutte le prove di `TEST-PLAN-1.3.0.md` con l'EXE compilato da `8623c22` (codice invariato fino al tag). La 1.3.0 viene rilasciata (tag `v1.3.0`). Nessuna prova aperta passa alla versione successiva.
+
+## D-062 — Contenuto della 1.4.0 (2026-11-04, richieste dell'utente)
+Richiesta: spostare nel file `.ini` le durate dei salti su tre livelli (piccolo: frecce ←/→ e rotella; medio: PgUp/PgDown; grande: Alt+PgUp/PgDown) e aggiungere un parametro per generare o no `viBro-metrics.csv`.
+- **Cinque chiavi invece di tre** (scelte dell'utente): nel codice i passi erano 5, non 3. ↑/↓ (5 s) hanno una chiave propria; frecce (1 s) e rotella (3 s) restano separate, così nulla cambia finché l'utente non modifica i valori. Sezione `[Seek]`: `LeftRightSeconds`, `UpDownSeconds`, `WheelSeconds`, `PageSeconds`, `AltPageSeconds`, predefiniti 1/5/3/60/300. Limiti 0,1–3600 s (0,1 = precisione con cui l'INI salva i numeri); un valore non valido torna al predefinito con avviso, come gli altri parametri. Nessun vincolo d'ordine tra i livelli. Lo schema resta 1: le chiavi mancanti prendono il predefinito.
+- **Esatto o su fotogramma chiave:** resta la regola di D-007: un passo più corto di `ExactSeekThresholdSeconds` (30) è esatto, gli altri vanno al fotogramma chiave salvo `ExactLongSeeks`. Un passo medio sotto 30 s diventa quindi esatto (più lento); documentato nel README invece di cambiare la regola.
+- **Finestra dei comandi (Ctrl+F2):** mostra le durate in uso (minuti interi in `min`, il resto in `s`).
+- **`viBro-metrics.csv`:** il parametro esisteva già (`[Diagnostics] MetricsLog`, predefinito `true`); con `false` il file non viene né creato né scritto. Scelta dell'utente: lasciarlo com'è, solo documentazione più chiara.
+- Versione 1.4.0 (nuove opzioni compatibili = MINOR).

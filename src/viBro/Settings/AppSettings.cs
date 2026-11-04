@@ -21,6 +21,17 @@ internal sealed class AppSettings
     public const int CurrentSchemaVersion = 1;
     public const string FileName = "viBro.ini";
 
+    /// <summary>Allowed range of the [Seek] steps (0.1 s = the INI precision; 1 h).</summary>
+    public const double MinSeekSeconds = 0.1, MaxSeekSeconds = 3600;
+
+    /// <summary>"1 s", "1.5 s", "1 min", "90 s": a whole number of minutes is shown in minutes.</summary>
+    public static string FormatSeconds(double seconds)
+    {
+        var c = CultureInfo.InvariantCulture;
+        if (seconds >= 60 && seconds % 60 == 0) return (seconds / 60).ToString("0", c) + " min";
+        return seconds.ToString("0.#", c) + " s";
+    }
+
     private IniFile _ini = new();
 
     // [Appearance]
@@ -57,6 +68,13 @@ internal sealed class AppSettings
     public string HardwareDecoding { get; set; } = "auto-safe";
     public bool ExactLongSeeks { get; set; }
     public double ExactSeekThresholdSeconds { get; set; } = 30;
+
+    // [Seek] step of each seek command, in seconds (1.4.0)
+    public double SeekLeftRightSeconds { get; set; } = 1;   // Left / Right arrow
+    public double SeekUpDownSeconds { get; set; } = 5;      // Down / Up arrow
+    public double SeekWheelSeconds { get; set; } = 3;       // wheel over the video
+    public double SeekPageSeconds { get; set; } = 60;       // PgDown / PgUp
+    public double SeekAltPageSeconds { get; set; } = 300;   // Alt + PgDown / PgUp
 
     // [Cache]
     public int CacheMaxMB { get; set; } // 0 = mpv cache disabled (only the minimal demuxer read-ahead)
@@ -122,6 +140,12 @@ internal sealed class AppSettings
         HardwareDecoding = ReadHwdec("Playback", "HardwareDecoding", HardwareDecoding);
         ExactLongSeeks = ReadBool("Playback", "ExactLongSeeks", ExactLongSeeks);
         ExactSeekThresholdSeconds = ReadDouble("Playback", "ExactSeekThresholdSeconds", ExactSeekThresholdSeconds, 0, 3600);
+
+        SeekLeftRightSeconds = ReadDouble("Seek", "LeftRightSeconds", SeekLeftRightSeconds, MinSeekSeconds, MaxSeekSeconds);
+        SeekUpDownSeconds = ReadDouble("Seek", "UpDownSeconds", SeekUpDownSeconds, MinSeekSeconds, MaxSeekSeconds);
+        SeekWheelSeconds = ReadDouble("Seek", "WheelSeconds", SeekWheelSeconds, MinSeekSeconds, MaxSeekSeconds);
+        SeekPageSeconds = ReadDouble("Seek", "PageSeconds", SeekPageSeconds, MinSeekSeconds, MaxSeekSeconds);
+        SeekAltPageSeconds = ReadDouble("Seek", "AltPageSeconds", SeekAltPageSeconds, MinSeekSeconds, MaxSeekSeconds);
 
         CacheMaxMB = ReadInt("Cache", "MaxMB", CacheMaxMB, 0, 4096);
 
@@ -207,6 +231,12 @@ internal sealed class AppSettings
         _ini.Set("Playback", "HardwareDecoding", HardwareDecoding);
         _ini.Set("Playback", "ExactLongSeeks", B(ExactLongSeeks));
         _ini.Set("Playback", "ExactSeekThresholdSeconds", D(ExactSeekThresholdSeconds));
+
+        _ini.Set("Seek", "LeftRightSeconds", D(SeekLeftRightSeconds));
+        _ini.Set("Seek", "UpDownSeconds", D(SeekUpDownSeconds));
+        _ini.Set("Seek", "WheelSeconds", D(SeekWheelSeconds));
+        _ini.Set("Seek", "PageSeconds", D(SeekPageSeconds));
+        _ini.Set("Seek", "AltPageSeconds", D(SeekAltPageSeconds));
 
         _ini.Set("Cache", "MaxMB", CacheMaxMB.ToString(c));
 

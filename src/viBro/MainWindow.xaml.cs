@@ -770,12 +770,13 @@ public partial class MainWindow : Window
 
         switch (key)
         {
-            case Key.Left when !alt && !ctrl: Seek(-1); return true;
-            case Key.Right when !alt && !ctrl: Seek(+1); return true;
-            case Key.Down when !alt && !ctrl: Seek(-5); return true;
-            case Key.Up when !alt && !ctrl: Seek(+5); return true;
-            case Key.PageDown when !ctrl: Seek(alt ? -300 : -60); return true;
-            case Key.PageUp when !ctrl: Seek(alt ? +300 : +60); return true;
+            // Steps from [Seek] in viBro.ini (1.4.0)
+            case Key.Left when !alt && !ctrl: Seek(-_settings.SeekLeftRightSeconds); return true;
+            case Key.Right when !alt && !ctrl: Seek(+_settings.SeekLeftRightSeconds); return true;
+            case Key.Down when !alt && !ctrl: Seek(-_settings.SeekUpDownSeconds); return true;
+            case Key.Up when !alt && !ctrl: Seek(+_settings.SeekUpDownSeconds); return true;
+            case Key.PageDown when !ctrl: Seek(-(alt ? _settings.SeekAltPageSeconds : _settings.SeekPageSeconds)); return true;
+            case Key.PageUp when !ctrl: Seek(+(alt ? _settings.SeekAltPageSeconds : _settings.SeekPageSeconds)); return true;
 
             case Key.Space when !alt && !ctrl:
                 if (!isRepeat) _player?.TogglePause();
@@ -819,7 +820,7 @@ public partial class MainWindow : Window
                 return false;
 
             case Key.F2 when ctrl && !alt:
-                if (!isRepeat) Dispatcher.BeginInvoke(new Action(() => CommandsDialog.Open(this))); // after this key
+                if (!isRepeat) Dispatcher.BeginInvoke(new Action(() => CommandsDialog.Open(this, _settings))); // after this key
                 return true;
 
             case Key.F2 when !alt && !ctrl:

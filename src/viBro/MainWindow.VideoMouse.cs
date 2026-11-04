@@ -29,7 +29,6 @@ public partial class MainWindow
     private uint _activatedTick; // GetTickCount time of the last window activation
     private int _wheelAccumulator;
     private bool _wheelSeeks; // what the accumulated wheel steps are for: seek (true) or change video
-    private const double WheelSeekSeconds = 3;
 
     // Right-button drag (scrubbing).
     private bool _rightDown;      // right button pressed on the video, mouse captured by the window
@@ -190,7 +189,7 @@ public partial class MainWindow
     /// <summary>
     /// One wheel notch (120) = one step; smaller steps (touchpads) are accumulated (1.3.0, user's choice):
     /// over the time bar, change video (down = next); over the video, and in fullscreen anywhere but the
-    /// bar, seek 3 s (up = forward). Elsewhere in the normal window (file list, tree) the wheel scrolls.
+    /// bar, seek by [Seek] WheelSeconds (default 3 s, up = forward). Elsewhere in the normal window (file list, tree) the wheel scrolls.
     /// </summary>
     private bool OnWheel(int delta, int screenX, int screenY)
     {
@@ -207,7 +206,7 @@ public partial class MainWindow
         {
             int up = _wheelAccumulator > 0 ? 1 : -1; // positive = away from the user
             _wheelAccumulator -= up * NativeMethods.WHEEL_DELTA;
-            if (seek) Seek(up * WheelSeekSeconds);
+            if (seek) Seek(up * _settings.SeekWheelSeconds);
             else SelectRelative(-up);
         }
         return true;

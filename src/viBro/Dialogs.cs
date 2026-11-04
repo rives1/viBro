@@ -200,9 +200,9 @@ internal sealed class ProgressDialog : Window
     private readonly CancellationTokenSource _cts;
     private bool _finished;
 
-    public ProgressDialog(Window owner, string fileName, string destFolder, CancellationTokenSource cts, bool copy = false)
+    public ProgressDialog(Window owner, string fileName, string destFolder, CancellationTokenSource cts, bool copy = false, string? verb = null)
     {
-        string verb = copy ? "Copying" : "Moving";
+        verb ??= copy ? "Copying" : "Moving";
         DialogStyle.Apply(this, owner, verb + " file");
         _cts = cts;
         var panel = new StackPanel { Margin = new Thickness(12) };
@@ -265,6 +265,10 @@ internal sealed class CommandsDialog : Window
             ("F2", "Rename the file"),
             ("W / Shift + W", "Move to a folder / to the last move folder"),
             ("C / Shift + C", "Copy to a folder / to the last copy folder"),
+            ("I / O", "Start / end marker for the extract"),
+            ("F9", FfmpegExtractor.IsAvailable
+                ? "Extract the marked part to a new file in the same folder (no re-encoding: starts at the keyframe before I)"
+                : "Extract: not available, " + FfmpegExtractor.ExeName + " not found in the viBro folder"),
             ("Ctrl + F2", "This window"),
             ("Ctrl + W", "Close viBro"),
         }),

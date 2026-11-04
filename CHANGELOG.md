@@ -2,6 +2,15 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.5.0] - non ancora rilasciata (in prova)
+
+### Aggiunto
+- Estratto di una parte del video: **I** segna l'inizio e **O** la fine nella posizione corrente del file caricato (barra di stato `In 00:01:23.4  ·  Out 00:02:10.0`; a schermo intero anche sopra il video); **F9** salva la parte in un nuovo file nella stessa cartella del video, `nome-extract-aaMMgg-OOmm.ext` (es. `clip.mp4` → `clip-extract-261104-1445.mp4`; se il nome esiste già, `-2`, `-3` …). Il nuovo file compare nell'elenco; la selezione e il video caricato non cambiano. I marker valgono solo per il file su cui sono stati messi.
+- Copia dei dati senza ricodifica (rapida, qualità originale): l'estratto parte dal **fotogramma chiave al marker di inizio o prima** (anche diversi secondi prima); la fine è vicina al marker di fine. Tracce video e audio; in MKV anche i sottotitoli.
+- Serve un `ffmpeg.exe` messo dall'utente nella cartella di `viBro.exe` (non incluso): senza, I/O/F9 mostrano un avviso e non fanno nulla. Il controllo avviene a ogni uso: non serve riavviare viBro dopo averlo aggiunto.
+- Finestra di avanzamento con annullamento se l'estrazione dura più di 0,4 s; annullando o in caso di errore il file parziale viene cancellato. Errori di ffmpeg in un messaggio e in `viBro-errors.log`.
+- Ctrl+F2 mostra I / O e F9, e se `ffmpeg.exe` manca.
+
 ## [1.4.0] - 2026-11-04
 
 ### Aggiunto

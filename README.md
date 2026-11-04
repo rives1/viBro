@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.4.0 released** (seek steps configurable in `viBro.ini`). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.5.0 in test** (extract of a part of a video with I / O / F9); 1.4.0 released. Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -20,6 +20,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 - Folder tree (user folders, local and network drives, open UNC shares), loaded progressively and kept in sync with the open folder.
 - Sorting by Name, Size, Date modified; three resizable panes; settings in `viBro.ini`.
 - Delete, rename, move and copy files, with confirmations, progress and cancellation.
+- **Extract a part of a video** (1.5.0): I and O mark start and end, F9 writes the part to a new file in the same folder. It uses an `ffmpeg.exe` that you put next to `viBro.exe` (not included; without it the function is disabled). No re-encoding (fast, original quality): the extract starts at the keyframe at or before the start marker, which can be several seconds earlier; the end is close to the end marker.
 - Light/Dark themes (*Theme* button), control bar (timeline, volume) below the video and above the file list, a timeline band below the video in fullscreen.
 - Folder icon in front of the path bar; icon buttons for Play/Pause, Mute (shows the state), Browse and Theme.
 - Time under the pointer on the timeline; the loaded file is marked in the list (▶ playing, ❚❚ paused, bold name); the status bar shows the position, e.g. `12 / 128 videos · 412.5 GB`.
@@ -68,6 +69,8 @@ Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4
 | Shift + W | Move to the last destination used | 0.3.0 |
 | C | Choose a destination folder and copy the file (same rules as moving; the original stays) | 0.6.0 |
 | Shift + C | Copy to the last copy destination (separate from the move destination) | 0.6.0 |
+| I / O | Set the start / end marker of an extract at the current position (status bar; also over the video in fullscreen) | 1.5.0 |
+| F9 | Save the part between I and O as a new file in the same folder, `name-extract-yyMMdd-HHmm.ext` (e.g. `clip.mp4` → `clip-extract-261104-1445.mp4`; `-2`, `-3` … if it exists). Needs `ffmpeg.exe` next to `viBro.exe` | 1.5.0 |
 | Ctrl + F2 | Show the commands window (keyboard and mouse) | 1.2.0 |
 | Ctrl + W | Close viBro | 0.6.0 |
 

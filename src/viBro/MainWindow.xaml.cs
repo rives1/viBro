@@ -838,6 +838,19 @@ public partial class MainWindow : Window
             case Key.C when !alt && !ctrl:
                 if (!isRepeat) CopySelected(useLastDestination: shift);
                 return true;
+
+            // Extract (1.5.0): markers on the loaded file, F9 writes the part between them.
+            case Key.I when !alt && !ctrl && !shift:
+                if (!isRepeat) SetMarker(start: true);
+                return true;
+
+            case Key.O when !alt && !ctrl && !shift:
+                if (!isRepeat) SetMarker(start: false);
+                return true;
+
+            case Key.F9 when !alt && !ctrl && !shift:
+                if (!isRepeat) ExtractMarked();
+                return true;
         }
         return false;
     }

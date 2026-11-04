@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.4.0 rilasciata** (durata dei salti configurabile in `viBro.ini`). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.5.0 in prova** (estratto di una parte del video con I / O / F9); 1.4.0 rilasciata. La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -22,6 +22,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - Ordinamento per Name, Size, Date modified; tre riquadri ridimensionabili; impostazioni in `viBro.ini`.
 
 - Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
+- **Estratto di una parte del video** (1.5.0): I e O segnano inizio e fine, F9 scrive la parte in un nuovo file nella stessa cartella. Usa un `ffmpeg.exe` messo dall'utente accanto a `viBro.exe` (non incluso; senza, la funzione è disattivata). Nessuna ricodifica (rapido, qualità originale): l'estratto parte dal fotogramma chiave al marker di inizio o prima, anche diversi secondi prima; la fine è vicina al marker di fine.
 
 - Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.
 - Icona della cartella davanti alla barra del percorso; pulsanti a icone per Play/Pause, Mute (indica lo stato), Browse e Theme.
@@ -71,6 +72,8 @@ Le durate dei salti sono quelle predefinite; si cambiano in `[Seek]` di `viBro.i
 | Shift + W | Sposta nell'ultima destinazione usata | 0.3.0 |
 | C | Sceglie la cartella di destinazione e copia il file (stesse regole dello spostamento; l'originale resta) | 0.6.0 |
 | Shift + C | Copia nell'ultima destinazione di copia (separata da quella dello spostamento) | 0.6.0 |
+| I / O | Marker di inizio / fine dell'estratto nella posizione corrente (barra di stato; a schermo intero anche sopra il video) | 1.5.0 |
+| F9 | Salva la parte tra I e O come nuovo file nella stessa cartella, `nome-extract-aaMMgg-OOmm.ext` (es. `clip.mp4` → `clip-extract-261104-1445.mp4`; `-2`, `-3` … se esiste già). Richiede `ffmpeg.exe` accanto a `viBro.exe` | 1.5.0 |
 | Ctrl + F2 | Mostra la finestra dei comandi (tastiera e mouse) | 1.2.0 |
 | Ctrl + W | Chiude viBro | 0.6.0 |
 

@@ -11,6 +11,8 @@ viBro.exe embeds the following components. / viBro.exe incorpora i componenti se
 
 Because libmpv-2.dll is GPL-3.0 (FFmpeg `--enable-version3`), **viBro.exe as distributed is covered by the GPL version 3**; viBro's own code is GPL-3.0-or-later and compatible with it. Apache-2.0 (Vulkan loader, OpenSSL 3) and MIT (.NET) are compatible with GPLv3.
 
+Optional, supplied by the user (not included, not distributed): `ffmpeg.exe` next to `viBro.exe` enables the extract (F9, 1.5.0); viBro only starts it as a separate program. / Facoltativo, fornito dall'utente: `ffmpeg.exe` accanto a `viBro.exe` abilita l'estratto (F9).
+
 Build-only tool (not included in the EXE): 7-Zip `7zr.exe` 26.05 (LGPL-2.1), https://github.com/ip7z/7zip.
 
 ## Distribution policy / Politica di distribuzione

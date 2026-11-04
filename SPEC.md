@@ -178,7 +178,7 @@ Versione	Obiettivo
 0.6.0	Riproduzione conservata al cambio di file, copia, trascinamento col tasto destro, rotella sul video, barra di stato con conteggio, fascia in basso a schermo intero, conferma vicino al puntatore, Ctrl+W
 1.0.0	Prima versione completa e verificata (rilasciata il 2026-11-03)
 1.2.0	Pulsanti a icone, tempo sotto il puntatore, file caricato evidenziato, posizione nella barra di stato, tempo e nome del file sovrapposti a schermo intero, Ctrl+F2 (comprende la 1.1.0) (rilasciata il 2026-11-03)
-1.3.0	Sottocartelle nell’elenco, Shift+Invio con l’applicazione predefinita, rotella: barra = cambio video, video = spostamento nel tempo
+1.3.0	Sottocartelle nell’elenco, Shift+Invio con l’applicazione predefinita, rotella: barra = cambio video, video = spostamento nel tempo (rilasciata il 2026-11-04)
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.5.0] - non ancora rilasciata (in prova)
+## [1.5.0] - 2026-11-04
 
 ### Aggiunto
 - Estratto di una parte del video: **I** segna l'inizio e **O** la fine nella posizione corrente del file caricato (barra di stato `In 00:01:23.4  ·  Out 00:02:10.0`; a schermo intero anche sopra il video); **F9** salva la parte in un nuovo file nella stessa cartella del video, `nome-extract-aaMMgg-OOmm.ext` (es. `clip.mp4` → `clip-extract-261104-1445.mp4`; se il nome esiste già, `-2`, `-3` …). Il nuovo file compare nell'elenco; la selezione e il video caricato non cambiano. I marker valgono solo per il file su cui sono stati messi.

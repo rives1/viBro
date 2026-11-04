@@ -1,9 +1,9 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.4.0** (tag `v1.4.0`) · **in prova: 1.5.0**_
+_Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.5.0** (tag `v1.5.0`) · **prossima versione: da definire**_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-064 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-065 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 - Cartella sul PC dell'utente: il percorso è nel documento privato del progetto claude.ai, non nel repository pubblico (D-053). Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0`, `v0.5.0` e `v0.6.0` forse non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`. **Variante predefinita: EXE normale** (D-047: avvio 410 ms contro 575, ~70 MB di memoria in meno).
@@ -23,7 +23,7 @@ _Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.4.0**
 | 1.2.0 | Pulsanti a icone, tempo sotto il puntatore sulla barra, file caricato evidenziato (▶/❚❚ e grassetto), posizione nella barra di stato, OSD di mpv a schermo intero (tempo dopo i salti, nome del file al cambio), finestra dei comandi Ctrl+F2 (D-058) | ✔ tag `v1.2.0` (2026-11-03): tutte le prove superate, comprese quelle della 1.1.0 (D-059) |
 | 1.3.0 | Sottocartelle nell'elenco (`..` in cima, doppio clic o Invio per aprire), Shift+Invio con l'applicazione predefinita, rotella: barra = cambio video, video = spostamento di 3 s (D-060) | ✔ tag `v1.3.0` (2026-11-04): tutte le prove superate (D-061) |
 | 1.4.0 | Durate dei salti in `[Seek]` di `viBro.ini` (5 chiavi, valori di prima come predefiniti), finestra Ctrl+F2 con le durate in uso; `MetricsLog` invariato (D-062) | ✔ tag `v1.4.0` (2026-11-04): tutte le prove superate (D-063) |
-| 1.5.0 | Estratto: I/O marker di inizio e fine, F9 salva la parte in `nome-extract-aaMMgg-OOmm.ext` nella stessa cartella, copia dei dati senza ricodifica (inizio sul fotogramma chiave precedente), marker sulla barra temporale, messaggio di conferma a fine estrazione con un `ffmpeg.exe` fornito dall'utente accanto a viBro.exe; senza, funzione disattivata (D-064) | in prova: [docs/TEST-PLAN-1.5.0.md](docs/TEST-PLAN-1.5.0.md) |
+| 1.5.0 | Estratto: I/O marker di inizio e fine, F9 salva la parte in `nome-extract-aaMMgg-OOmm.ext` nella stessa cartella, copia dei dati senza ricodifica (inizio sul fotogramma chiave precedente), marker sulla barra temporale, messaggio di conferma a fine estrazione con un `ffmpeg.exe` fornito dall'utente accanto a viBro.exe; senza, funzione disattivata (D-064) | ✔ tag `v1.5.0` (2026-11-04): tutte le prove superate (D-065) |
 
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
 - Cambio video: mediana 140–500 ms sul NAS (MP4 più lenti per la lettura dell'indice; MKV 66–120 ms), ~38 ms in locale. viBro aggiunge pochi ms rispetto a mpv (verificato con il log di mpv).
@@ -33,8 +33,8 @@ _Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.4.0**
 - Memoria: 260–470 MB, stabile. I salti sui fotogrammi chiave per ±1/±5 s **non spostavano l'immagine** (GOP di 5–24 s): da qui la modalità mista (D-007).
 
 ## 4. Stato attuale e prossimo passo
-1. **1.4.0 rilasciata il 2026-11-04** (tag `v1.4.0`, D-063).
-2. **1.5.0 in prova** (D-064): codice compilato sul PC dell'utente senza avvisi; argomenti di ffmpeg provati a mano con ffmpeg 9.0.2 su MP4/MOV/MKV. Prossimo passo: l'utente esegue `build.cmd`, copia `ffmpeg.exe` accanto a `viBro.exe` ed esegue [docs/TEST-PLAN-1.5.0.md](docs/TEST-PLAN-1.5.0.md); poi chiusura con data, `docs/handover/CONTEXT-v1.5.0.md` e tag `v1.5.0`.
+1. **1.5.0 rilasciata il 2026-11-04** (tag `v1.5.0`, D-065). Tutte le prove di [docs/TEST-PLAN-1.5.0.md](docs/TEST-PLAN-1.5.0.md) superate.
+2. Nessuna prova aperta. Prossimo passo: l'utente definisce eventuali versioni successive.
 3. Distribuzione solo come sorgente (D-052); EXE predefinito normale (D-047); autore `rives1` (D-054). `ffmpeg.exe` non è incluso né distribuito.
 4. Proposte non scelte finora: cursore nascosto a schermo intero dopo 2 s, barra del percorso a "briciole" con Backspace per la cartella superiore, stato vuoto del video.
 5. Da fare dall'utente su GitHub, se non già fatto: cancellare gli artifact delle esecuzioni precedenti e le release in bozza dei tag (D-052); `git push --follow-tags`.
@@ -60,7 +60,8 @@ _Aggiornato: 2026-11-04 · branch `main` · ultima versione rilasciata **1.4.0**
 - **Accesso al PC:** shell sul PC tramite device_bash (`$HOME/mnt/Claude_vibro/...`), senza .NET né accesso a NuGet; i file si copiano con device_commit_files. Sul PC dell'utente alcuni moduli PowerShell di script sono bloccati da criteri di sistema (per esempio `Get-FileHash` e `Compress-Archive`), quindi negli script si usa .NET direttamente. Gli stili Fluent di riferimento si leggono da `raw.githubusercontent.com/dotnet/wpf/release/10.0/src/Microsoft.DotNet.Wpf/src/Themes/PresentationFramework.Fluent/Styles/<Controllo>.xaml`. Per copiare file dal PC al container: archivio `.tgz` in `artifacts\tmp` (ignorato da Git) e device_stage_files, poi cancellarlo.
 - **Git:** per i commit serve il permesso di cancellazione nella cartella, perché Git rimuove i propri `.lock` (chiedere con device_request_delete_permission). Senza permesso restano `.lock` da spostare con `mv`. Messaggi di commit con la riga `Co-Authored-By`; tag annotati solo dopo i test dell'utente.
 - **Verifica senza Windows:** nel container cloud si può installare `dotnet-sdk-10.0` (apt) e compilare **l'intero progetto WPF** con `EnableWindowsTargeting`. Servono gli assembly di riferimento `Microsoft.WindowsDesktop.App.Ref/10.0.14` copiati dal `.dotnet\packs` dell'utente in `/usr/lib/dotnet/packs` (cartelle `ref` e `data`). Su una copia del csproj vanno tolti RID, SelfContained, SingleFile e R2R. Il motore si prova con `libmpv2` di Ubuntu, reindirizzando `libmpv-2.dll` verso `libmpv.so.2`.
+- **Claude Code sul PC (dalla 1.5.0):** si lavora anche direttamente nella cartella del progetto con Claude Code (Git Bash/PowerShell); si compila con `.dotnet\dotnet.exe build src/viBro/viBro.csproj -c Release`. Sul PC c'è ffmpeg 9.0.2 (winget, Gyan) per provare gli argomenti dell'estratto.
 - **Flusso per ogni versione:** domande, codice, compilazione e test su Linux, copia sul PC, documentazione (CHANGELOG, DECISIONS, CONTEXT, TEST-PLAN), commit; poi l'utente esegue `build.cmd` e il piano di prova; infine chiusura con data, fotografia `docs/handover/CONTEXT-vX.Y.Z.md` e tag.
 
 ## 8. Messaggio per riprendere in una nuova chat
-> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 1.4.0 è rilasciata (tag `v1.4.0`); la 1.5.0 (estratto con I/O/F9) è in prova con `docs/TEST-PLAN-1.5.0.md`.
+> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 1.5.0 è rilasciata (tag `v1.5.0`); ti descrivo cosa voglio nella prossima versione.

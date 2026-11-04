@@ -682,6 +682,7 @@ public partial class MainWindow : Window
             TimeSlider.Value = Math.Clamp(position, 0, TimeSlider.Maximum);
             _updatingTimeSlider = false;
         }
+        UpdateMarkerVisuals(); // I / O on the timeline (moves only when something changed)
     }
 
     private void PlayButton_Click(object sender, RoutedEventArgs e) => _player?.TogglePause();

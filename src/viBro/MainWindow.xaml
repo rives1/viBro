@@ -114,9 +114,17 @@
                                 </Popup>
                                 <TextBlock x:Name="TimeText" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="10,0,0,0"
                                            FontFamily="Consolas" Text="00:00:00 / 00:00:00" />
-                                <Slider x:Name="TimeSlider" Minimum="0" Maximum="1" Focusable="False" IsMoveToPointEnabled="True"
-                                        VerticalAlignment="Center" Margin="10,0,0,0" ValueChanged="TimeSlider_ValueChanged"
-                                        MouseMove="TimeSlider_MouseMove" MouseLeave="TimeSlider_MouseLeave" />
+                                <Grid Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <Slider x:Name="TimeSlider" Minimum="0" Maximum="1" Focusable="False" IsMoveToPointEnabled="True"
+                                            ValueChanged="TimeSlider_ValueChanged" SizeChanged="TimeSlider_SizeChanged"
+                                            MouseMove="TimeSlider_MouseMove" MouseLeave="TimeSlider_MouseLeave" />
+                                    <!-- Extract markers I / O and the part between them (1.5.0); never takes the mouse. -->
+                                    <Canvas x:Name="MarkerCanvas" IsHitTestVisible="False" ClipToBounds="False">
+                                        <Rectangle x:Name="MarkRange" Height="4" Fill="#FFD000" Opacity="0.55" Visibility="Collapsed" />
+                                        <Rectangle x:Name="MarkInLine" Width="3" Fill="#2EBD59" Visibility="Collapsed" ToolTip="I" />
+                                        <Rectangle x:Name="MarkOutLine" Width="3" Fill="#E5484D" Visibility="Collapsed" ToolTip="O" />
+                                    </Canvas>
+                                </Grid>
                             </DockPanel>
                         </DockPanel>
                     </Border>

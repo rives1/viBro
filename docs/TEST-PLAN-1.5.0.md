@@ -14,9 +14,10 @@ Compilare con `build.cmd`. Nel titolo deve comparire `viBro 1.5.0 (…)`. Per le
 - [ ] Premendo di nuovo I o O il marker si sposta nella nuova posizione.
 - [ ] F9 senza marker, con uno solo, o con O prima di I: avviso, nessun file.
 - [ ] Cambiando video, i marker del video precedente non valgono più (F9 chiede di metterli).
+- [ ] Sulla barra temporale: linea verde in I, rossa in O, fascia gialla tra i due; con il cursore portato al tempo di un marker, il pollice è sopra la linea. Le linee restano al loro posto ridimensionando la finestra e a schermo intero; spariscono cambiando video e ricompaiono tornando sul file solo dopo aver rimesso i marker. Clic e trascinamento sulla barra funzionano anche sopra le linee.
 
 ## Estratto (locale e su NAS, MP4, MKV, MOV)
-- [ ] F9 crea `nome-extract-aaMMgg-OOmm.ext` nella cartella del video, con data e ora correnti; il file compare nell'elenco, la selezione e il video caricato non cambiano, la riproduzione continua.
+- [ ] F9 crea `nome-extract-aaMMgg-OOmm.ext` nella cartella del video, con data e ora correnti; al termine una finestra *Extract* conferma il successo (nome, dimensione, intervallo, cartella); il file compare nell'elenco, la selezione e il video caricato non cambiano, la riproduzione continua.
 - [ ] Un secondo F9 nello stesso minuto crea `…-2.ext`; nessun file viene sovrascritto.
 - [ ] L'estratto si apre in viBro: parte dal fotogramma chiave al marker I o poco prima (anche diversi secondi) e finisce vicino a O; audio presente e sincronizzato.
 - [ ] Estratto lungo su NAS (alcuni minuti di un 4K): compare la finestra di avanzamento; *Cancel* interrompe e non lascia file parziali.

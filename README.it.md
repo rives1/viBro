@@ -22,7 +22,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - Ordinamento per Name, Size, Date modified; tre riquadri ridimensionabili; impostazioni in `viBro.ini`.
 
 - Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
-- **Estratto di una parte del video** (1.5.0): I e O segnano inizio e fine, F9 scrive la parte in un nuovo file nella stessa cartella. Usa un `ffmpeg.exe` messo dall'utente accanto a `viBro.exe` (non incluso; senza, la funzione è disattivata). Nessuna ricodifica (rapido, qualità originale): l'estratto parte dal fotogramma chiave al marker di inizio o prima, anche diversi secondi prima; la fine è vicina al marker di fine.
+- **Estratto di una parte del video** (1.5.0): I e O segnano inizio e fine, F9 scrive la parte in un nuovo file nella stessa cartella. Usa un `ffmpeg.exe` messo dall'utente accanto a `viBro.exe` (non incluso; senza, la funzione è disattivata). Nessuna ricodifica (rapido, qualità originale): l'estratto parte dal fotogramma chiave al marker di inizio o prima, anche diversi secondi prima; la fine è vicina al marker di fine. I marker compaiono sulla barra temporale (I verde, O rosso, fascia gialla tra i due) e un messaggio conferma l'estratto a fine procedura.
 
 - Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.
 - Icona della cartella davanti alla barra del percorso; pulsanti a icone per Play/Pause, Mute (indica lo stato), Browse e Theme.

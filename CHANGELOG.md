@@ -10,6 +10,8 @@ Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il p
 - Serve un `ffmpeg.exe` messo dall'utente nella cartella di `viBro.exe` (non incluso): senza, I/O/F9 mostrano un avviso e non fanno nulla. Il controllo avviene a ogni uso: non serve riavviare viBro dopo averlo aggiunto.
 - Finestra di avanzamento con annullamento se l'estrazione dura più di 0,4 s; annullando o in caso di errore il file parziale viene cancellato. Errori di ffmpeg in un messaggio e in `viBro-errors.log`.
 - Ctrl+F2 mostra I / O e F9, e se `ffmpeg.exe` manca.
+- Marker sulla barra temporale: linea verde in I, rossa in O e fascia gialla tra i due, solo per il file su cui sono stati messi (anche a schermo intero).
+- A estrazione completata, un messaggio conferma il successo con nome, dimensione, intervallo e cartella del nuovo file.
 
 ## [1.4.0] - 2026-11-04
 

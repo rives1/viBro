@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.7.0] - non ancora rilasciata
+## [1.7.0] - 2026-11-05
 
 ### Aggiunto
 - **Selezione multipla nell'elenco** come in Windows: Ctrl + clic aggiunge o toglie un file, Shift + clic seleziona un intervallo, **Ctrl+A** seleziona tutti i video (non le cartelle). Il riquadro video carica il file appena cliccato; un Ctrl + clic che toglie un file non cambia il video caricato. Barra di stato: `3 selected (4.2 GB) · 128 videos · 412.5 GB`.

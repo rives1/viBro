@@ -29,8 +29,10 @@ Compilare con `build.cmd`. Nel titolo deve comparire `viBro 1.6.0 (…)`. Serve 
 
 ## Release su GitHub (dopo il push del tag `v1.6.0`)
 Si può provare solo dopo il tag, che si crea a prove superate: se fallisce si corregge in una 1.6.1.
-- [ ] Actions → build: i job `build` e `release` riusciti; in Releases c'è `viBro 1.6.0` (*Latest*) con le note della 1.6.0 e gli archivi del sorgente, nessun EXE.
-- [ ] Facoltativo: Run workflow con `release_tag=v1.5.0` crea `viBro 1.5.0` con le sue note, senza togliere *Latest* alla 1.6.0.
+- [x] Actions → build: i job `build` e `release` riusciti; in Releases c'è `viBro 1.6.0` (*Latest*) con le note della 1.6.0 e gli archivi del sorgente, nessun EXE.
+- [x] Facoltativo: Run workflow con `release_tag=v1.5.0` crea `viBro 1.5.0` con le sue note, senza togliere *Latest* alla 1.6.0.
+
+Confermate il 2026-11-05 nel piano della 1.7.0 (D-069).
 
 ## Regressione
 - [x] I / O / F9 (estratto), D/E, rotella, trascinamento col tasto destro, elimina/rinomina/sposta/copia, Shift+Invio, Ctrl+W.

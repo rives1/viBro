@@ -332,3 +332,6 @@ Richiesta: nell'elenco selezionare più file come in Windows (Ctrl, Shift per un
 - **Barra di stato:** con più video selezionati `3 selected (4.2 GB) · 128 videos · …`; aggiornata una volta per le selezioni fatte da codice (Ctrl+A, riordino), non per ogni riga.
 - Il riordino per colonna e l'aggiunta dell'estratto conservano l'intera selezione.
 - Versione 1.7.0 (nuova funzione compatibile = MINOR).
+
+## D-069 — Chiusura della 1.7.0 (2026-11-05)
+L'utente ha confermato tutte le prove di `TEST-PLAN-1.7.0.md` con l'EXE compilato da `b69f059` (codice invariato fino al tag), comprese le prove della release su GitHub rimaste aperte dalla 1.6.0: commit e tag `v1.6.0` risultano pubblicati (`git ls-remote`); la release stessa non era verificabile da questa sessione (API di GitHub non disponibile senza credenziali) e si basa sulla conferma dell'utente. La 1.7.0 viene rilasciata (tag `v1.7.0`): al push del tag il job `release` crea `viBro 1.7.0`. Nessuna prova aperta passa alla versione successiva.

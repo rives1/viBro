@@ -215,21 +215,23 @@ public partial class MainWindow
     private void ShowVideoMenu()
     {
         if (!IsActive) return;
-        bool canAct = !_fileOpBusy && SelectedVideo != null;
+        int count = SelectedVideos.Count;
+        bool canAct = !_fileOpBusy && count > 0;
+        string files = count > 1 ? $" {count} files" : ""; // "Delete 3 files" with several selected (1.7.0)
 
         var menu = new ContextMenu
         {
             PlacementTarget = VideoHost,
             Placement = PlacementMode.MousePoint,
         };
-        menu.Items.Add(CreateMenuItem("Delete", "Del / R", canAct, DeleteSelected));
-        menu.Items.Add(CreateMenuItem("Move...", "W", canAct, () => MoveSelected(useLastDestination: false)));
+        menu.Items.Add(CreateMenuItem("Delete" + files, "Del / R", canAct, DeleteSelected));
+        menu.Items.Add(CreateMenuItem("Move" + files + "...", "W", canAct, () => MoveSelected(useLastDestination: false)));
 
-        AddLastDestinationItem(menu, "Move to ", _settings.LastMoveDestination, "Shift+W", canAct,
+        AddLastDestinationItem(menu, "Move" + files + " to ", _settings.LastMoveDestination, "Shift+W", canAct,
             () => MoveSelected(useLastDestination: true));
         menu.Items.Add(new Separator());
-        menu.Items.Add(CreateMenuItem("Copy...", "C", canAct, () => CopySelected(useLastDestination: false)));
-        AddLastDestinationItem(menu, "Copy to ", _settings.LastCopyDestination, "Shift+C", canAct,
+        menu.Items.Add(CreateMenuItem("Copy" + files + "...", "C", canAct, () => CopySelected(useLastDestination: false)));
+        AddLastDestinationItem(menu, "Copy" + files + " to ", _settings.LastCopyDestination, "Shift+C", canAct,
             () => CopySelected(useLastDestination: true));
         menu.IsOpen = true;
     }

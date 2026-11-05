@@ -136,7 +136,9 @@
                 <GridSplitter x:Name="ListSplitter" Grid.Row="1" Height="5" HorizontalAlignment="Stretch"
                               ResizeBehavior="PreviousAndNext" ResizeDirection="Rows" Focusable="False" />
 
-                <ListView x:Name="FileList" Grid.Row="2" SelectionMode="Single"
+                <ListView x:Name="FileList" Grid.Row="2" SelectionMode="Extended"
+                          PreviewMouseLeftButtonDown="FileList_PreviewMouseLeftButtonDown"
+                          PreviewMouseLeftButtonUp="FileList_PreviewMouseLeftButtonUp"
                           VirtualizingPanel.IsVirtualizing="True"
                           VirtualizingPanel.VirtualizationMode="Recycling"
                           SelectionChanged="FileList_SelectionChanged"

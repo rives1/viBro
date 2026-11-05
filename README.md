@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.6.0 released** (F10: gallery of the folder's videos; automatic GitHub releases). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.7.0 in testing** (several files selected at once for delete, move and copy). Last release: 1.6.0 (F10: gallery of the folder's videos; automatic GitHub releases). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -22,6 +22,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 - Delete, rename, move and copy files, with confirmations, progress and cancellation.
 - **Extract a part of a video** (1.5.0): I and O mark start and end, F9 writes the part to a new file in the same folder. It uses an `ffmpeg.exe` that you put next to `viBro.exe` (not included; without it the function is disabled). No re-encoding (fast, original quality): the extract starts at the keyframe at or before the start marker, which can be several seconds earlier; the end is close to the end marker. The markers appear on the timeline (green I, red O, yellow band between them) and a message confirms the extract when it is done.
 - **Gallery** (1.6.0): F10 opens a separate window with one row per video of the folder and 5 images taken at the same percentages of each video's duration (10, 30, 50, 70, 90 % by default). Clicking a row selects and loads that video in the main window; clicking an image loads it at the image's time. It uses the same `ffmpeg.exe` as the extract. The images are the keyframes nearest to those positions (fast, also on a NAS), made in the background starting from the rows on screen, kept in memory only (nothing written to disk) and reused while viBro stays open. The gallery keeps the folder it was opened on; F10 again makes a new one.
+- **Multiple selection** (1.7.0): Ctrl + click adds or removes a file, Shift + click selects a range, Ctrl+A selects all the videos. Delete, move and copy act on all the selected videos: one confirmation, one destination, one progress window; name conflicts are asked file by file, with "do the same for the next conflicts" and *Skip*. The video area loads the file just clicked. Rename (F2), Shift+Enter and the extract (I / O / F9) need a single selected video. The arrow keys keep seeking, so the selection is made with the mouse.
 - Light/Dark themes (*Theme* button), control bar (timeline, volume) below the video and above the file list, a timeline band below the video in fullscreen.
 - Folder icon in front of the path bar; icon buttons for Play/Pause, Mute (shows the state), Browse and Theme.
 - Time under the pointer on the timeline; the loaded file is marked in the list (▶ playing, ❚❚ paused, bold name); the status bar shows the position, e.g. `12 / 128 videos · 412.5 GB`.
@@ -64,13 +65,14 @@ Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4
 | M | Mute on/off | ✔ |
 | F11 / Esc | Enter / leave fullscreen | ✔ |
 | Ctrl + L | Focus the path bar (Enter opens, Esc cancels) | ✔ |
+| Ctrl + A | Select all the videos of the folder (the loaded video does not change) | 1.7.0 |
 | Enter | Open the selected folder of the list (`..` = parent folder) | 1.3.0 |
 | Shift + Enter | Open the selected video with the Windows default application (viBro pauses) | 1.3.0 |
-| Del or R | Delete the file after confirmation (Recycle Bin if local, permanent if on the network) | 0.3.0 |
-| F2 | Rename the file (name only; the extension is kept; the cursor starts at the beginning of the name) | 0.3.0 |
-| W | Choose a destination folder and move the file | 0.3.0 |
+| Del or R | Delete the selected file(s) after one confirmation (Recycle Bin if local, permanent if on the network) | 0.3.0 (several 1.7.0) |
+| F2 | Rename the file (one selected video; name only; the extension is kept; the cursor starts at the beginning of the name) | 0.3.0 |
+| W | Choose a destination folder and move the selected file(s) | 0.3.0 (several 1.7.0) |
 | Shift + W | Move to the last destination used | 0.3.0 |
-| C | Choose a destination folder and copy the file (same rules as moving; the original stays) | 0.6.0 |
+| C | Choose a destination folder and copy the selected file(s) (same rules as moving; the originals stay) | 0.6.0 (several 1.7.0) |
 | Shift + C | Copy to the last copy destination (separate from the move destination) | 0.6.0 |
 | I / O | Set the start / end marker of an extract at the current position (status bar; also over the video in fullscreen) | 1.5.0 |
 | F9 | Save the part between I and O as a new file in the same folder, `name-extract-yyMMdd-HHmm.ext` (e.g. `clip.mp4` → `clip-extract-261104-1445.mp4`; `-2`, `-3` … if it exists). Needs `ffmpeg.exe` next to `viBro.exe` | 1.5.0 |
@@ -84,7 +86,7 @@ Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4
 |---|---|---|
 | Click | Play/Pause (the click that brings viBro to the foreground does not change playback) | 0.5.0 |
 | Double click | Enter / leave fullscreen; playback stays as it was | 0.5.0 |
-| Right click | Menu: *Delete* (Del/R), *Move...* (W), *Move to <last folder>* (Shift+W), *Copy...* (C), *Copy to <last folder>* (Shift+C) | 0.5.0 (copy 0.6.0) |
+| Right click | Menu: *Delete* (Del/R), *Move...* (W), *Move to <last folder>* (Shift+W), *Copy...* (C), *Copy to <last folder>* (Shift+C); with several files selected, e.g. *Delete 3 files* | 0.5.0 (copy 0.6.0, several 1.7.0) |
 | Right button held + drag left/right | Seek within the video: the whole video width = the whole duration; the picture follows the mouse, exact seek on release (no menu) | 0.6.0 |
 | Wheel over the timeline | Down: next video; up: previous video (like D / E), in the normal window and in fullscreen | 1.3.0 |
 | Wheel over the video (in fullscreen: anywhere but the timeline) | Up: forward 3 s; down: back 3 s (`[Seek] WheelSeconds`) | 1.3.0 |

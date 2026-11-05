@@ -30,6 +30,7 @@ Destra, parte inferiore	Elenco video della cartella corrente
 Requisiti:
 - Divisori ridimensionabili e posizioni memorizzate.
 - Elenco con colonne Name, Size, Date modified.
+- Selezione di più file (dalla 1.7.0) come in Windows: Ctrl + clic, Shift + clic per un intervallo, Ctrl+A per tutti i video. Eliminazione, spostamento e copia agiscono su tutti i video selezionati; il riquadro video carica il file cliccato per ultimo; rinomina, Shift+Invio ed estratto richiedono un solo video selezionato.
 - Ordinamento per ogni colonna, con ordinamento naturale dei nomi.
 - Video e sottocartelle della cartella corrente (dalla 1.3.0; prima solo i video); nessuna scansione ricorsiva. In cima `..` per la cartella superiore, poi le cartelle, poi i video; una cartella si apre con doppio clic o Invio; D/E, rotella e operazioni sui file valgono solo per i video.
 - Accesso alle sottocartelle tramite albero.
@@ -73,7 +74,7 @@ Alt + PgDown / Alt + PgUp	Indietro / avanti di circa 5 minuti
 Spazio	Play/Pause
 E	Seleziona e carica il video precedente (Play/Pause conservato)
 D	Seleziona e carica il video successivo (Play/Pause conservato)
-Canc oppure R	Elimina il file con conferma
+Canc oppure R	Elimina i file selezionati con conferma (più file dalla 1.7.0)
 F2	Rinomina il file
 W	Sceglie la cartella di destinazione e sposta il file
 Shift + W	Sposta nella destinazione utilizzata l’ultima volta
@@ -85,6 +86,7 @@ M	Mute on/off
 F11	Schermo intero
 Esc	Esce dallo schermo intero
 Ctrl + L	Attiva la barra del percorso
+Ctrl + A	Seleziona tutti i video della cartella (1.7.0)
 Invio	Apre la cartella selezionata nell’elenco (1.3.0)
 Shift + Invio	Apre il video selezionato con l’applicazione predefinita di Windows; viBro va in pausa (1.3.0)
 I / O	Marker di inizio / fine dell’estratto nella posizione corrente (1.5.0)
@@ -187,6 +189,7 @@ Versione	Obiettivo
 1.4.0	Durata dei salti configurabile in viBro.ini (sezione [Seek]), Ctrl+F2 con le durate in uso (rilasciata il 2026-11-04)
 1.5.0	Estratto di una parte del video con I / O / F9 e un ffmpeg.exe fornito dall’utente (rilasciata il 2026-11-04)
 1.6.0	Galleria dei video della cartella con F10; release automatiche su GitHub (solo sorgente) (rilasciata il 2026-11-04)
+1.7.0	Selezione di più file nell’elenco; elimina, sposta e copia sulla selezione
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

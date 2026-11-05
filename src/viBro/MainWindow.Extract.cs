@@ -26,6 +26,7 @@ public partial class MainWindow
 
     private void SetMarker(bool start)
     {
+        if (RejectMultipleSelection(start ? "I (start marker)" : "O (end marker)")) return;
         if (!FfmpegExtractor.IsAvailable)
         {
             ReportExtractUnavailable();
@@ -123,7 +124,7 @@ public partial class MainWindow
 
     private async void ExtractMarked()
     {
-        if (_fileOpBusy) return;
+        if (_fileOpBusy || RejectMultipleSelection("F9 (extract)")) return;
         if (!FfmpegExtractor.IsAvailable)
         {
             ReportExtractUnavailable();

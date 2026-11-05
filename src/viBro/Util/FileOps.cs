@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ViBro.Util;
 
-internal enum ConflictChoice { Cancel, KeepBoth, Overwrite }
+internal enum ConflictChoice { Cancel, KeepBoth, Overwrite, Skip }
 
 internal enum DeleteOutcome { Deleted, NotDeleted }
 
@@ -194,13 +195,17 @@ internal static class FileOps
     // ------------------------------------------------------------------ move
 
     /// <summary>"name (2).ext", "name (3).ext"... for the first name not used in the folder.</summary>
-    public static string UniqueName(string folder, string fileName)
+    public static string UniqueName(string folder, string fileName) => UniqueName(folder, fileName, null);
+
+    /// <summary>"name (2).ext", "name (3).ext" ...: free on disk and not in <paramref name="reserved"/> (names a multi-file transfer will create).</summary>
+    public static string UniqueName(string folder, string fileName, ICollection<string>? reserved)
     {
         string stem = Path.GetFileNameWithoutExtension(fileName);
         string ext = Path.GetExtension(fileName);
         for (int i = 2; ; i++)
         {
             string candidate = $"{stem} ({i}){ext}";
+            if (reserved != null && reserved.Contains(candidate)) continue;
             if (!File.Exists(Path.Combine(folder, candidate)) && !Directory.Exists(Path.Combine(folder, candidate)))
                 return candidate;
         }

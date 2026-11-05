@@ -2,6 +2,22 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.7.0] - non ancora rilasciata
+
+### Aggiunto
+- **Selezione multipla nell'elenco** come in Windows: Ctrl + clic aggiunge o toglie un file, Shift + clic seleziona un intervallo, **Ctrl+A** seleziona tutti i video (non le cartelle). Il riquadro video carica il file appena cliccato; un Ctrl + clic che toglie un file non cambia il video caricato. Barra di stato: `3 selected (4.2 GB) · 128 videos · 412.5 GB`.
+- **Elimina** (Canc / R), **sposta** (W / Shift+W) e **copia** (C / Shift+C), anche dal menu del tasto destro (`Delete 3 files` …), agiscono su tutti i video selezionati:
+  - elimina: una sola conferma con il numero di file e i primi nomi (Cestino se locale, definitiva in rete);
+  - sposta / copia: una sola destinazione; i conflitti di nome si chiedono prima di iniziare, file per file, con *Skip* e la casella *Do the same for the next conflicts*; una finestra di avanzamento per tutto il trasferimento (`file 3 of 12`, barra per dimensione); annullando, i file già completati restano, quello in corso resta com'era;
+  - un errore su un file non ferma gli altri: alla fine un messaggio elenca i file non riusciti (anche in `viBro-errors.log`);
+  - dopo elimina o sposta viene caricato il video che seguiva l'ultimo rimosso (o il precedente). Se il video caricato non era tra i file, resta caricato e continua.
+  - la copia non interrompe il video in riproduzione.
+- Ctrl+F2 descrive la selezione multipla e Ctrl+A.
+
+### Modificato
+- Con più video selezionati, F2 (rinomina), Shift+Invio e I / O / F9 (estratto) non fanno nulla e lo dicono nella barra di stato: agiscono su un solo file.
+- D / E, la rotella sulla barra temporale e la galleria (F10) partono dal video caricato e lasciano selezionato un solo file.
+
 ## [1.6.0] - 2026-11-04
 
 ### Aggiunto

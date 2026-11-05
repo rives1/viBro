@@ -458,23 +458,22 @@ public partial class MainWindow : Window
 
     private void SetItems(List<VideoItem> items, bool keepSelection)
     {
-        var selected = keepSelection ? FileList.SelectedItem : null;
+        var selected = keepSelection ? FileList.SelectedItems.Cast<object>().ToList() : new List<object>();
         items.Sort(CompareItems);
         _suppressSelectionLoad = true;
         try
         {
             _items = items;
             FileList.ItemsSource = _items;
-            if (selected != null)
-            {
-                FileList.SelectedItem = selected;
-                FileList.ScrollIntoView(selected);
-            }
+            foreach (var s in selected) FileList.SelectedItems.Add(s); // the whole selection (1.7.0)
+            var visible = _currentItem != null && selected.Contains(_currentItem) ? _currentItem : selected.FirstOrDefault();
+            if (visible != null) FileList.ScrollIntoView(visible);
         }
         finally
         {
             _suppressSelectionLoad = false;
         }
+        UpdateFolderSummary();
     }
 
     private int CompareItems(VideoItem a, VideoItem b)
@@ -518,12 +517,59 @@ public partial class MainWindow : Window
         DateColumn.Header = "Date modified" + (_sortColumn == SortColumn.Date ? arrow : "");
     }
 
+    /// <summary>
+    /// Several rows can be selected (1.7.0, Ctrl / Shift + click, Ctrl+A). The video loaded is the one
+    /// just clicked, if it is a selected video (a Ctrl+click that deselects a row loads nothing); for
+    /// a selection changed without the mouse, the last video added. Folders load nothing.
+    /// </summary>
     private void FileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        UpdateFolderSummary(); // "12 / 128 videos"
+        var clicked = _clickedItem;
+        _clickedItem = null; // handled here
+        // Changes made by code (bulk selections included) update the summary once, when they are done.
         if (_suppressSelectionLoad) return;
-        if (FileList.SelectedItem is VideoItem { IsVideo: true } item) // selecting a folder loads nothing
-            LoadItem(item);
+        UpdateFolderSummary(); // "12 / 128 videos" or "3 selected (4.2 GB) · 128 videos"
+        VideoItem? target;
+        if (clicked != null)
+            target = clicked.IsVideo && FileList.SelectedItems.Contains(clicked) ? clicked : null;
+        else
+            target = e.AddedItems.OfType<VideoItem>().LastOrDefault(v => v.IsVideo);
+        if (target != null && !ReferenceEquals(target, _currentItem) && !ReferenceEquals(target, _loadingItem))
+            LoadItem(target);
+    }
+
+    private VideoItem? _clickedItem; // row under the left button, until the selection change it causes
+
+    private void FileList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _clickedItem = ItemsControl.ContainerFromElement(FileList, e.OriginalSource as DependencyObject) is ListViewItem { Content: VideoItem v }
+            ? v : null;
+    }
+
+    /// <summary>A click that did not change the selection (e.g. on a row already selected) still loads that video.</summary>
+    private void FileList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        var clicked = _clickedItem;
+        _clickedItem = null;
+        if (clicked is not { IsVideo: true } || Keyboard.Modifiers != ModifierKeys.None) return;
+        if (!FileList.SelectedItems.Contains(clicked)) return;
+        if (!ReferenceEquals(clicked, _currentItem) && !ReferenceEquals(clicked, _loadingItem)) LoadItem(clicked);
+    }
+
+    /// <summary>Ctrl+A: every video of the folder (not the folders); the loaded video does not change.</summary>
+    private void SelectAllVideos()
+    {
+        _suppressSelectionLoad = true;
+        try
+        {
+            FileList.SelectAll(); // one change for the whole list, then the folders (few) are removed
+            foreach (var v in _items) if (!v.IsVideo) FileList.SelectedItems.Remove(v);
+        }
+        finally
+        {
+            _suppressSelectionLoad = false;
+        }
+        UpdateFolderSummary();
     }
 
     /// <summary>
@@ -548,19 +594,25 @@ public partial class MainWindow : Window
     /// </summary>
     private void UpdateFolderSummary()
     {
-        long total = 0;
-        int videos = 0, folders = 0, position = 0;
-        var selected = FileList.SelectedItem as VideoItem;
+        long total = 0, selectedBytes = 0;
+        int videos = 0, folders = 0, position = 0, selectedCount = 0;
+        var selection = new HashSet<VideoItem>(FileList.SelectedItems.OfType<VideoItem>());
         foreach (var v in _items)
         {
             if (v.Kind == EntryKind.Folder) folders++;
             if (!v.IsVideo) continue;
             videos++;
             total += v.Size;
-            if (ReferenceEquals(v, selected)) position = videos;
+            if (selection.Contains(v))
+            {
+                selectedCount++;
+                selectedBytes += v.Size;
+                position = videos;
+            }
         }
         string count = videos == 1 ? "1 video" : $"{videos} videos";
-        if (position > 0) count = $"{position} / {count}";
+        if (selectedCount == 1) count = $"{position} / {count}";
+        else if (selectedCount > 1) count = $"{selectedCount} selected ({VideoItem.FormatSize(selectedBytes)}) · {count}";
         string folderText = folders == 0 ? "" : folders == 1 ? "1 folder · " : $"{folders} folders · ";
         FolderSummaryText.Text = folderText + count + " · " + VideoItem.FormatSize(total);
     }
@@ -569,12 +621,14 @@ public partial class MainWindow : Window
     private void SelectRelative(int direction)
     {
         if (_items.Count == 0) return;
-        int index = FileList.SelectedIndex;
+        // From the loaded video (with several rows selected, the selection collapses to the new one).
+        var from = _loadingItem ?? _currentItem;
+        int index = from != null ? _items.IndexOf(from) : -1;
+        if (index < 0) index = FileList.SelectedIndex;
         int next = index < 0 ? (direction > 0 ? 0 : _items.Count - 1) : index + direction;
         while (next >= 0 && next < _items.Count && !_items[next].IsVideo) next += direction;
         if (next < 0 || next >= _items.Count) return;
-        FileList.SelectedIndex = next;
-        FileList.ScrollIntoView(_items[next]);
+        SelectAndLoad(_items[next]);
     }
 
     /// <summary>Double click on a folder or "..": opens it (videos: nothing, the single click already loaded them).</summary>
@@ -600,7 +654,7 @@ public partial class MainWindow : Window
     /// <summary>Shift+Enter: opens the selected video with the Windows default application; viBro pauses.</summary>
     private void OpenWithDefaultApp()
     {
-        if (SelectedVideo is not VideoItem item) return;
+        if (RejectMultipleSelection("Shift+Enter") || SelectedVideo is not VideoItem item) return;
         if (_player != null && !_player.IsPaused) _player.TogglePause(); // no two audio tracks at once
         string path = item.FullPath;
         SetStatus("Opening " + item.Name + " with the default application ...");
@@ -804,6 +858,10 @@ public partial class MainWindow : Window
                 FocusPathBox();
                 return true;
 
+            case Key.A when ctrl && !alt && !shift:
+                SelectAllVideos();
+                return true;
+
             // File operations: never on key auto-repeat (one key press = at most one operation).
             case Key.Delete when !alt && !ctrl:
             case Key.R when !alt && !ctrl:
@@ -815,7 +873,7 @@ public partial class MainWindow : Window
                 return true;
 
             case Key.Enter when !shift && !ctrl && !alt:
-                if (FileList.SelectedItem is VideoItem { IsVideo: false } entry)
+                if (FileList.SelectedItems.Count == 1 && FileList.SelectedItem is VideoItem { IsVideo: false } entry)
                 {
                     if (!isRepeat) OpenListEntry(entry);
                     return true;

@@ -163,7 +163,10 @@ internal sealed class ConflictDialog : Window
 {
     private ConflictChoice _choice = ConflictChoice.Cancel;
 
-    private ConflictDialog(Window owner, string fileName, string destFolder, string keepBothName, bool copy)
+    private readonly CheckBox? _applyToAll;
+
+    private ConflictDialog(Window owner, string fileName, string destFolder, string keepBothName, bool copy,
+        bool multiple = false, int remaining = 0)
     {
         DialogStyle.Apply(this, owner, "File already exists");
         var panel = new StackPanel { Margin = new Thickness(12) };
@@ -172,23 +175,44 @@ internal sealed class ConflictDialog : Window
             TextWrapping = TextWrapping.Wrap,
             Text = $"A file named \"{fileName}\" already exists in:\n{destFolder}\n\n" +
                    $"Keep both: the {(copy ? "copied" : "moved")} file is saved as \"{keepBothName}\".\n" +
-                   "Overwrite: the existing file in the destination is replaced and cannot be recovered.",
+                   "Overwrite: the existing file in the destination is replaced and cannot be recovered." +
+                   (multiple ? "\nSkip: this file is left where it is; the others go on.\nCancel: nothing is " +
+                               (copy ? "copied." : "moved.") : ""),
         });
+        // Several files (1.7.0): the same choice can be used for the next conflicts.
+        if (multiple && remaining > 0)
+        {
+            _applyToAll = new CheckBox
+            {
+                Content = $"Do the same for the next {(remaining == 1 ? "conflict" : remaining + " conflicts")}",
+                Margin = new Thickness(0, 10, 0, 0),
+            };
+            panel.Children.Add(_applyToAll);
+        }
 
         var keep = new Button { Content = "Keep both", IsDefault = true };
         var overwrite = new Button { Content = "Overwrite" };
+        var skip = new Button { Content = "Skip" };
         var cancel = new Button { Content = "Cancel", IsCancel = true };
         keep.Click += (_, _) => { _choice = ConflictChoice.KeepBoth; DialogResult = true; };
         overwrite.Click += (_, _) => { _choice = ConflictChoice.Overwrite; DialogResult = true; };
-        panel.Children.Add(DialogStyle.Buttons(keep, overwrite, cancel));
+        skip.Click += (_, _) => { _choice = ConflictChoice.Skip; DialogResult = true; };
+        panel.Children.Add(multiple ? DialogStyle.Buttons(keep, overwrite, skip, cancel) : DialogStyle.Buttons(keep, overwrite, cancel));
         Content = panel;
         Loaded += (_, _) => keep.Focus();
     }
 
     public static ConflictChoice Ask(Window owner, string fileName, string destFolder, string keepBothName, bool copy = false)
+        => Ask(owner, fileName, destFolder, keepBothName, copy, false, 0, out _);
+
+    /// <summary>Several files: adds Skip and, if more conflicts follow, "Do the same for the next ones".</summary>
+    public static ConflictChoice Ask(Window owner, string fileName, string destFolder, string keepBothName, bool copy,
+        bool multiple, int remaining, out bool applyToAll)
     {
-        var d = new ConflictDialog(owner, fileName, destFolder, keepBothName, copy);
-        return d.ShowDialog() == true ? d._choice : ConflictChoice.Cancel;
+        var d = new ConflictDialog(owner, fileName, destFolder, keepBothName, copy, multiple, remaining);
+        bool ok = d.ShowDialog() == true;
+        applyToAll = ok && d._applyToAll?.IsChecked == true;
+        return ok ? d._choice : ConflictChoice.Cancel;
     }
 }
 
@@ -197,16 +221,22 @@ internal sealed class ProgressDialog : Window
 {
     private readonly ProgressBar _bar;
     private readonly TextBlock _percent;
+    private readonly TextBlock _text;
+    private readonly string _verb, _destFolder;
     private readonly CancellationTokenSource _cts;
     private bool _finished;
 
-    public ProgressDialog(Window owner, string fileName, string destFolder, CancellationTokenSource cts, bool copy = false, string? verb = null)
+    public ProgressDialog(Window owner, string fileName, string destFolder, CancellationTokenSource cts, bool copy = false,
+        string? verb = null, int files = 1)
     {
         verb ??= copy ? "Copying" : "Moving";
-        DialogStyle.Apply(this, owner, verb + " file");
+        _verb = verb;
+        _destFolder = destFolder;
+        DialogStyle.Apply(this, owner, verb + (files > 1 ? $" {files} files" : " file"));
         _cts = cts;
         var panel = new StackPanel { Margin = new Thickness(12) };
-        panel.Children.Add(new TextBlock { TextWrapping = TextWrapping.Wrap, Text = $"{verb} \"{fileName}\"\nto {destFolder}" });
+        _text = new TextBlock { TextWrapping = TextWrapping.Wrap, Text = $"{verb} \"{fileName}\"\nto {destFolder}" };
+        panel.Children.Add(_text);
         _bar = new ProgressBar { Minimum = 0, Maximum = 1, Height = 18, Margin = new Thickness(0, 10, 0, 4) };
         panel.Children.Add(_bar);
         _percent = new TextBlock { Text = "0 %" };
@@ -222,6 +252,9 @@ internal sealed class ProgressDialog : Window
             RequestCancel();
         };
     }
+
+    /// <summary>Several files: "file 3 of 12: \"name\"". The bar shows the whole transfer.</summary>
+    public void SetFile(string fileLine) => _text.Text = $"{_verb} {fileLine}\nto {_destFolder}";
 
     public void Report(double fraction)
     {
@@ -260,12 +293,13 @@ internal sealed class CommandsDialog : Window
             ("F11 / Esc", "Enter / leave fullscreen"),
             ("Ctrl + L", "Edit the path (Enter opens, Esc cancels)"),
             ("Enter", "Open the selected folder (\"..\" = parent folder)"),
-            ("Shift + Enter", "Open the video with the Windows default application"),
-            ("Del or R", "Delete the file (confirmation)"),
-            ("F2", "Rename the file"),
-            ("W / Shift + W", "Move to a folder / to the last move folder"),
-            ("C / Shift + C", "Copy to a folder / to the last copy folder"),
-            ("I / O", "Start / end marker for the extract"),
+            ("Shift + Enter", "Open the video with the Windows default application (one file selected)"),
+            ("Del or R", "Delete the selected file(s) (confirmation)"),
+            ("F2", "Rename the file (one file selected)"),
+            ("W / Shift + W", "Move the selected file(s) to a folder / to the last move folder"),
+            ("C / Shift + C", "Copy the selected file(s) to a folder / to the last copy folder"),
+            ("Ctrl + A", "Select all the videos of the folder"),
+            ("I / O", "Start / end marker for the extract (one file selected)"),
             ("F9", FfmpegExtractor.IsAvailable
                 ? "Extract the marked part to a new file in the same folder (no re-encoding: starts at the keyframe before I)"
                 : "Extract: not available, " + FfmpegExtractor.ExeName + " not found in the viBro folder"),
@@ -278,6 +312,7 @@ internal sealed class CommandsDialog : Window
         ("File list", new[]
         {
             ("Click", "Load the video (play state kept)"),
+            ("Ctrl + click / Shift + click", "Add or remove a file / select a range; the clicked video is loaded"),
             ("Double click on a folder", "Open it (\"..\" = parent folder)"),
         }),
         ("Mouse on the video", new[]

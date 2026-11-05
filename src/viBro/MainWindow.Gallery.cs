@@ -71,12 +71,7 @@ public partial class MainWindow
         bool loadedOrLoading = ReferenceEquals(item, _currentItem) || ReferenceEquals(item, _loadingItem);
         if (loadedOrLoading)
         {
-            if (!ReferenceEquals(FileList.SelectedItem, item))
-            {
-                _suppressSelectionLoad = true; // already loaded: select only
-                try { FileList.SelectedItem = item; }
-                finally { _suppressSelectionLoad = false; }
-            }
+            SelectOnly(item); // already loaded: select only (one row, also after a multiple selection)
             if (seconds is double s)
             {
                 if (ReferenceEquals(item, _currentItem)) _player?.SeekAbsolute(s, exact: true);
@@ -94,7 +89,6 @@ public partial class MainWindow
             _pendingStartItem = item;
             _pendingStartPosition = t;
         }
-        if (ReferenceEquals(FileList.SelectedItem, item)) LoadItem(item); // selected but another file is loaded
-        else FileList.SelectedItem = item; // loads it
+        SelectAndLoad(item); // one row selected, the video loaded (play/pause kept)
     }
 }

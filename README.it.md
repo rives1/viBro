@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.6.0 rilasciata** (F10: galleria dei video della cartella; release automatiche su GitHub). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.7.0 in prova** (più file selezionati insieme per elimina, sposta e copia). Ultima versione rilasciata: 1.6.0 (F10: galleria dei video della cartella; release automatiche su GitHub). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -24,6 +24,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - Eliminazione, rinomina e spostamento dei file, con conferme, avanzamento e annullamento.
 - **Estratto di una parte del video** (1.5.0): I e O segnano inizio e fine, F9 scrive la parte in un nuovo file nella stessa cartella. Usa un `ffmpeg.exe` messo dall'utente accanto a `viBro.exe` (non incluso; senza, la funzione è disattivata). Nessuna ricodifica (rapido, qualità originale): l'estratto parte dal fotogramma chiave al marker di inizio o prima, anche diversi secondi prima; la fine è vicina al marker di fine. I marker compaiono sulla barra temporale (I verde, O rosso, fascia gialla tra i due) e un messaggio conferma l'estratto a fine procedura.
 - **Galleria** (1.6.0): F10 apre una finestra separata con una riga per ogni video della cartella e 5 immagini prese alle stesse percentuali della durata di ciascun video (predefinite 10, 30, 50, 70, 90 %). Un clic su una riga seleziona e carica quel video nella finestra principale; un clic su un'immagine lo carica al tempo dell'immagine. Usa lo stesso `ffmpeg.exe` dell'estratto. Le immagini sono i fotogrammi chiave più vicini a quelle posizioni (rapide, anche sul NAS), create in background partendo dalle righe visibili, tenute solo in memoria (nulla su disco) e riusate finché viBro resta aperto. La galleria resta sulla cartella in cui è stata aperta; F10 di nuovo ne crea una nuova.
+- **Selezione multipla** (1.7.0): Ctrl + clic aggiunge o toglie un file, Shift + clic seleziona un intervallo, Ctrl+A seleziona tutti i video. Elimina, sposta e copia agiscono su tutti i video selezionati: una conferma, una destinazione, una finestra di avanzamento; i conflitti di nome si chiedono file per file, con "fai lo stesso per i conflitti successivi" e *Skip*. Il riquadro video carica il file appena cliccato. Rinomina (F2), Shift+Invio e l'estratto (I / O / F9) richiedono un solo video selezionato. Le frecce continuano a spostare il tempo, quindi la selezione si fa col mouse.
 
 - Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.
 - Icona della cartella davanti alla barra del percorso; pulsanti a icone per Play/Pause, Mute (indica lo stato), Browse e Theme.
@@ -67,13 +68,14 @@ Le durate dei salti sono quelle predefinite; si cambiano in `[Seek]` di `viBro.i
 | M | Mute on/off | ✔ |
 | F11 / Esc | Entra in / esce da schermo intero | ✔ |
 | Ctrl + L | Attiva la barra del percorso (Invio apre, Esc annulla) | ✔ |
+| Ctrl + A | Seleziona tutti i video della cartella (il video caricato non cambia) | 1.7.0 |
 | Invio | Apre la cartella selezionata nell'elenco (`..` = cartella superiore) | 1.3.0 |
 | Shift + Invio | Apre il video selezionato con l'applicazione predefinita di Windows (viBro va in pausa) | 1.3.0 |
-| Canc o R | Elimina il file con conferma (Cestino se locale, definitiva se in rete) | 0.3.0 |
-| F2 | Rinomina il file (solo il nome; l'estensione resta; il cursore parte dall'inizio del nome) | 0.3.0 |
-| W | Sceglie la cartella di destinazione e sposta il file | 0.3.0 |
+| Canc o R | Elimina i file selezionati con una sola conferma (Cestino se locale, definitiva se in rete) | 0.3.0 (più file 1.7.0) |
+| F2 | Rinomina il file (un solo video selezionato; solo il nome; l'estensione resta; il cursore parte dall'inizio del nome) | 0.3.0 |
+| W | Sceglie la cartella di destinazione e sposta i file selezionati | 0.3.0 (più file 1.7.0) |
 | Shift + W | Sposta nell'ultima destinazione usata | 0.3.0 |
-| C | Sceglie la cartella di destinazione e copia il file (stesse regole dello spostamento; l'originale resta) | 0.6.0 |
+| C | Sceglie la cartella di destinazione e copia i file selezionati (stesse regole dello spostamento; gli originali restano) | 0.6.0 (più file 1.7.0) |
 | Shift + C | Copia nell'ultima destinazione di copia (separata da quella dello spostamento) | 0.6.0 |
 | I / O | Marker di inizio / fine dell'estratto nella posizione corrente (barra di stato; a schermo intero anche sopra il video) | 1.5.0 |
 | F9 | Salva la parte tra I e O come nuovo file nella stessa cartella, `nome-extract-aaMMgg-OOmm.ext` (es. `clip.mp4` → `clip-extract-261104-1445.mp4`; `-2`, `-3` … se esiste già). Richiede `ffmpeg.exe` accanto a `viBro.exe` | 1.5.0 |
@@ -87,7 +89,7 @@ Le durate dei salti sono quelle predefinite; si cambiano in `[Seek]` di `viBro.i
 |---|---|---|
 | Clic | Play/Pause (il clic che riporta viBro in primo piano non cambia la riproduzione) | 0.5.0 |
 | Doppio clic | Entra in / esce da schermo intero; la riproduzione resta com'era | 0.5.0 |
-| Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W), *Copy...* (C), *Copy to <ultima cartella>* (Shift+C) | 0.5.0 (copia 0.6.0) |
+| Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W), *Copy...* (C), *Copy to <ultima cartella>* (Shift+C); con più file selezionati, es. *Delete 3 files* | 0.5.0 (copia 0.6.0, più file 1.7.0) |
 | Tasto destro tenuto + trascinamento a destra/sinistra | Spostamento nel video: tutta la larghezza del video = tutta la durata; il video segue il mouse, salto esatto al rilascio (nessun menu) | 0.6.0 |
 | Rotella sopra la barra temporale | Giù: video successivo; su: video precedente (come D / E), a finestra normale e a schermo intero | 1.3.0 |
 | Rotella sopra il video (a schermo intero: ovunque tranne la barra temporale) | Su: avanti 3 s; giù: indietro 3 s (`[Seek] WheelSeconds`) | 1.3.0 |

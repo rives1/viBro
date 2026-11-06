@@ -555,6 +555,7 @@ public partial class MainWindow
 
         if (gone.Count > 0)
         {
+            _gallery?.RemoveVideos(removed.Select(i => i.FullPath)); // 1.8.0: their rows leave the gallery too
             _suppressSelectionLoad = true;
             try
             {

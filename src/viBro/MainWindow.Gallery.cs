@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using ViBro.Util;
 
 namespace ViBro;
@@ -56,6 +57,40 @@ public partial class MainWindow
             return;
         }
         OpenFolder(folder, revealInTree: true, onOpened: () => SelectFromGallery(path, seconds));
+    }
+
+    /// <summary>
+    /// Right click in the gallery (1.8.0): the same menu as on the video, for that video (already
+    /// selected and loaded by the gallery). Each action first makes sure that video, and only it, is
+    /// selected here (the main window may show another folder or selection by then).
+    /// </summary>
+    internal void ShowGalleryFileMenu(string path, UIElement target)
+    {
+        var menu = BuildFileMenu(1, action => RunOnGalleryFile(path, action));
+        menu.PlacementTarget = target;
+        menu.IsOpen = true;
+    }
+
+    private void RunOnGalleryFile(string path, Action action)
+    {
+        string? folder = Path.GetDirectoryName(path);
+        if (folder == null) return;
+        void Run()
+        {
+            var item = _items.Find(i => i.IsVideo && string.Equals(i.FullPath, path, StringComparison.OrdinalIgnoreCase));
+            if (item == null)
+            {
+                SetStatus(Path.GetFileName(path) + " is no longer in the folder.");
+                return;
+            }
+            SelectOnly(item);
+            action();
+        }
+        if (_currentFolder != null && string.Equals(Path.TrimEndingDirectorySeparator(folder),
+                Path.TrimEndingDirectorySeparator(_currentFolder), StringComparison.OrdinalIgnoreCase))
+            Run();
+        else
+            OpenFolder(folder, revealInTree: true, onOpened: Run);
     }
 
     private void SelectFromGallery(string path, double? seconds)

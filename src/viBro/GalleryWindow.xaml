@@ -23,6 +23,7 @@
                  SelectionMode="Single"
                  SelectionChanged="Rows_SelectionChanged"
                  PreviewMouseLeftButtonUp="Rows_PreviewMouseLeftButtonUp"
+                 PreviewMouseRightButtonUp="Rows_PreviewMouseRightButtonUp"
                  ScrollViewer.ScrollChanged="Rows_ScrollChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -43,7 +44,7 @@
                                         <!-- 16:9 box whatever the window width: rows keep their height while images arrive. -->
                                         <Border Background="#30808080" Cursor="Hand"
                                                 Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}, Converter={StaticResource AspectHeight}}"
-                                                ToolTip="Click: load the video at this time"
+                                                ToolTip="Click: load the video at this time. Right click: delete, move, copy"
                                                 MouseLeftButtonDown="Cell_MouseLeftButtonDown">
                                             <Image Source="{Binding Image}" Stretch="Uniform" />
                                         </Border>

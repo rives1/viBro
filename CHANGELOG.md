@@ -6,6 +6,8 @@ Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il p
 
 ### Aggiunto
 - **F5:** aggiorna dal disco l'albero delle cartelle e l'elenco dei file. Nell'elenco compaiono file e cartelle nuovi, spariscono quelli eliminati, dimensioni e date si aggiornano; restano selezione, video caricato, marker dell'estratto, ordinamento e posizione di scorrimento. Se il video caricato non c'è più, viene scaricato. Nell'albero si aggiornano le cartelle già aperte (le altre si leggono comunque all'apertura), compaiono le unità nuove (es. chiavetta USB) e spariscono quelle scollegate; i rami aperti restano aperti. Una condivisione che non risponde entro 10 s resta com'era. Barra di stato: `Refreshed <cartella>: 2 new, 1 removed`.
+- **Tasto destro nella galleria (F10):** su una riga o un'immagine seleziona e carica il video, come il clic sinistro, e apre lo stesso menu del tasto destro sul video: *Delete*, *Move...*, *Move to <ultima cartella>*, *Copy...*, *Copy to <ultima cartella>*. *Delete* segue la stessa regola del menu del video (nessuna conferma per un file, `[Delete] ConfirmFromVideoMenu`). Se la finestra principale mostra un'altra cartella, viene riaperta quella della galleria.
+- Le righe della galleria dei file eliminati o spostati da viBro (da qualunque comando) o spariti con F5 escono dalla galleria; con la copia non cambia nulla.
 - **File AVI** (`.avi`) nell'elenco: riproduzione, salti, elimina, rinomina, sposta, copia, estratto (F9) e galleria (F10). Su AVI vecchi con indice incompleto i salti possono essere più lenti o meno precisi.
 
 ### Modificato

@@ -216,25 +216,31 @@ public partial class MainWindow
     {
         if (!IsActive) return;
         int count = SelectedVideos.Count;
+        var menu = BuildFileMenu(count, run => run());
+        menu.PlacementTarget = VideoHost;
+        menu.IsOpen = true;
+    }
+
+    /// <summary>
+    /// Delete, Move..., Move to &lt;last&gt;, Copy..., Copy to &lt;last&gt; for <paramref name="count"/> selected
+    /// videos. <paramref name="runner"/> runs the chosen action: directly for the video menu, after
+    /// selecting the right file for the gallery (1.8.0). Delete: one file without confirmation
+    /// ([Delete] ConfirmFromVideoMenu=false), several files confirmed.
+    /// </summary>
+    private ContextMenu BuildFileMenu(int count, Action<Action> runner)
+    {
         bool canAct = !_fileOpBusy && count > 0;
         string files = count > 1 ? $" {count} files" : ""; // "Delete 3 files" with several selected (1.7.0)
-
-        var menu = new ContextMenu
-        {
-            PlacementTarget = VideoHost,
-            Placement = PlacementMode.MousePoint,
-        };
-        // 1.8.0: from this menu one file is deleted without confirmation ([Delete] ConfirmFromVideoMenu=false).
-        menu.Items.Add(CreateMenuItem("Delete" + files, "Del / R", canAct, () => DeleteSelected(fromVideoMenu: true)));
-        menu.Items.Add(CreateMenuItem("Move" + files + "...", "W", canAct, () => MoveSelected(useLastDestination: false)));
-
+        var menu = new ContextMenu { Placement = PlacementMode.MousePoint };
+        menu.Items.Add(CreateMenuItem("Delete" + files, "Del / R", canAct, () => runner(() => DeleteSelected(fromVideoMenu: true))));
+        menu.Items.Add(CreateMenuItem("Move" + files + "...", "W", canAct, () => runner(() => MoveSelected(useLastDestination: false))));
         AddLastDestinationItem(menu, "Move" + files + " to ", _settings.LastMoveDestination, "Shift+W", canAct,
-            () => MoveSelected(useLastDestination: true));
+            () => runner(() => MoveSelected(useLastDestination: true)));
         menu.Items.Add(new Separator());
-        menu.Items.Add(CreateMenuItem("Copy" + files + "...", "C", canAct, () => CopySelected(useLastDestination: false)));
+        menu.Items.Add(CreateMenuItem("Copy" + files + "...", "C", canAct, () => runner(() => CopySelected(useLastDestination: false))));
         AddLastDestinationItem(menu, "Copy" + files + " to ", _settings.LastCopyDestination, "Shift+C", canAct,
-            () => CopySelected(useLastDestination: true));
-        menu.IsOpen = true;
+            () => runner(() => CopySelected(useLastDestination: true)));
+        return menu;
     }
 
     /// <summary>"Move to / Copy to &lt;folder&gt;", only when a previous destination exists (full path in the tooltip).</summary>

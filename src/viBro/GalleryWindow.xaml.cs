@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -27,12 +28,13 @@ public partial class GalleryWindow : Window
     private readonly MainWindow _main;
     private readonly double[] _percents;
     private readonly int _jobs;
-    private readonly List<GalleryRow> _rows;
+    private readonly List<GalleryRow> _rows; // work list (guarded by _gate)
+    private readonly ObservableCollection<GalleryRow> _view; // what the window shows
     private readonly CancellationTokenSource _cts = new();
     private readonly object _gate = new();
     private readonly Stopwatch _watch = Stopwatch.StartNew();
     private volatile int _priorityIndex; // first row on screen: work starts there
-    private int _done, _failed, _running;
+    private int _running;
     private bool _suppressSelection;
     private ScrollViewer? _scroller;
     private VirtualizingStackPanel? _panel;
@@ -45,8 +47,9 @@ public partial class GalleryWindow : Window
         _percents = percents;
         _jobs = Math.Max(1, jobs);
         _rows = videos.Select((v, i) => new GalleryRow(v, i, percents.Length)).ToList();
+        _view = new ObservableCollection<GalleryRow>(_rows);
         Title = "Gallery - " + folder;
-        Rows.ItemsSource = _rows;
+        Rows.ItemsSource = _view;
         UpdateStatus();
         Loaded += (_, _) => Start();
     }
@@ -71,7 +74,7 @@ public partial class GalleryWindow : Window
             for (int k = 0; k < _rows.Count; k++)
             {
                 var row = _rows[(start + k) % _rows.Count]; // from the first row on screen, then the rest
-                if (row.State != RowState.Pending) continue;
+                if (row.State != RowState.Pending || row.Removed) continue;
                 row.State = RowState.Running;
                 return row;
             }
@@ -86,10 +89,9 @@ public partial class GalleryWindow : Window
             while (!ct.IsCancellationRequested && NextRow() is GalleryRow row)
             {
                 bool ok = await MakeRowAsync(row, ct);
+                row.Failed = !ok && !row.Removed; // a file deleted or moved meanwhile is not an error
                 row.State = RowState.Done;
                 if (ct.IsCancellationRequested) return;
-                Interlocked.Increment(ref _done);
-                if (!ok) Interlocked.Increment(ref _failed);
                 Ui(UpdateStatus);
             }
         }
@@ -164,11 +166,12 @@ public partial class GalleryWindow : Window
 
     private void UpdateStatus()
     {
-        int total = _rows.Count, done = Math.Min(_done, total);
-        string errors = _failed > 0 ? $"  ·  {_failed} with errors (see viBro-errors.log)" : "";
+        int total = _view.Count, done = _view.Count(r => r.State == RowState.Done);
+        int failed = _view.Count(r => r.Failed);
+        string errors = failed > 0 ? $"  ·  {failed} with errors (see viBro-errors.log)" : "";
         StatusText.Text = done < total && _running > 0
-            ? $"{total} videos  ·  images {done} / {total} ...{errors}  ·  click a row to load the video, an image to load it at that time"
-            : $"{total} videos  ·  done in {_watch.Elapsed.TotalSeconds:0} s{errors}  ·  click a row to load the video, an image to load it at that time";
+            ? $"{total} videos  ·  images {done} / {total} ...{errors}  ·  click: load  ·  right click: delete, move, copy"
+            : $"{total} videos  ·  done in {_watch.Elapsed.TotalSeconds:0} s{errors}  ·  click: load  ·  right click: delete, move, copy";
     }
 
     // ------------------------------------------------------------------ input
@@ -219,6 +222,42 @@ public partial class GalleryWindow : Window
         }
         (Rows.ItemContainerGenerator.ContainerFromItem(cell.Row) as ListBoxItem)?.Focus();
         _main.ShowFromGallery(cell.Row.Item.FullPath, cell.HasImage ? cell.Seconds : null);
+    }
+
+    /// <summary>
+    /// Right click on a row or an image (1.8.0): selects and loads that video in the main window, like
+    /// a left click on the row, then opens the same menu as on the video (Delete, Move, Copy).
+    /// </summary>
+    private void Rows_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (ItemsControl.ContainerFromElement(Rows, e.OriginalSource as DependencyObject) is not ListBoxItem { DataContext: GalleryRow row } container)
+            return;
+        e.Handled = true;
+        _suppressSelection = true;
+        try
+        {
+            Rows.SelectedItem = row;
+        }
+        finally
+        {
+            _suppressSelection = false;
+        }
+        container.Focus();
+        _main.ShowFromGallery(row.Item.FullPath, null);
+        _main.ShowGalleryFileMenu(row.Item.FullPath, container);
+    }
+
+    /// <summary>Rows of files deleted or moved by viBro (or gone at F5) leave the gallery (1.8.0).</summary>
+    internal void RemoveVideos(IEnumerable<string> paths)
+    {
+        var set = new HashSet<string>(paths, StringComparer.OrdinalIgnoreCase);
+        if (set.Count == 0) return;
+        foreach (var row in _view.Where(r => set.Contains(r.Item.FullPath)).ToList())
+        {
+            lock (_gate) row.Removed = true; // a pending row is no longer picked; a running one finishes unseen
+            _view.Remove(row);
+        }
+        UpdateStatus();
     }
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -274,6 +313,8 @@ internal sealed class GalleryRow : INotifyPropertyChanged
     public string Name => Item.Name;
     public GalleryCell[] Cells { get; }
     public RowState State { get; set; } // guarded by the window's lock
+    public bool Removed { get; set; }   // file deleted or moved: row taken out of the window
+    public bool Failed { get; set; }    // duration or an image could not be read
 
     /// <summary>Duration, or the reason the file could not be read.</summary>
     public string Info

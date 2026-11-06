@@ -33,5 +33,14 @@ Compilare con `build.cmd`. Nel titolo deve comparire `viBro 1.8.0 (…)`. Usare 
 - [ ] Canc / R con un file: la conferma compare come prima.
 - [ ] Con `[Delete] ConfirmFromVideoMenu=true` in `viBro.ini` (viBro chiuso, poi riaperto): *Delete* dal menu chiede conferma; Ctrl+F2 non indica più "no confirmation". Alla chiusura il file contiene `[Delete]` con il valore impostato.
 
+## Tasto destro nella galleria (F10)
+- [ ] Tasto destro su una riga: il video viene selezionato e caricato nella finestra principale e si apre il menu *Delete*, *Move...*, *Move to <cartella>*, *Copy...*, *Copy to <cartella>*. Lo stesso con il tasto destro su un'immagine.
+- [ ] *Delete* (file locale): eliminato subito senza conferma (Cestino); la riga sparisce dalla galleria e dall'elenco; viene caricato il video successivo. Con `[Delete] ConfirmFromVideoMenu=true` la conferma compare.
+- [ ] *Move...* e *Move to <cartella>*: il file viene spostato, la riga sparisce dalla galleria. *Copy...* / *Copy to*: il file viene copiato, la galleria non cambia.
+- [ ] Nella finestra principale aprire un'altra cartella, poi tasto destro su una riga della galleria → *Delete*: viene riaperta la cartella della galleria e viene eliminato quel video (non un altro).
+- [ ] Con più file selezionati nell'elenco, tasto destro in galleria → *Delete*: viene eliminato solo il video della riga, senza conferma.
+- [ ] *Delete* subito dopo F10, mentre la riga sta ancora creando le immagini: il file viene eliminato (al massimo dopo qualche secondo di attesa), la riga sparisce e lo stato della galleria non segnala errori.
+- [ ] Eliminando o spostando dall'elenco (Canc, W) un video presente nella galleria aperta, la sua riga sparisce dalla galleria; con F5 spariscono le righe dei file eliminati fuori da viBro.
+
 ## Regressione
 - [ ] Selezione multipla con sposta e copia, galleria, estratto, D/E, Shift+Invio, Ctrl+W.

@@ -84,6 +84,7 @@ public partial class MainWindow
             _ = Dispatcher.BeginInvoke(() => scroller.ScrollToVerticalOffset(offset), DispatcherPriority.Loaded);
 
         var gone = new HashSet<VideoItem>(old.Values);
+        _gallery?.RemoveVideos(gone.Where(i => i.IsVideo).Select(i => i.FullPath));
         if (_markItem != null && gone.Contains(_markItem))
         {
             _markItem = null;

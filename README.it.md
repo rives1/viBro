@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.8.0 in prova** (F5 aggiorna, file AVI, elimina dal menu del video senza conferma). Ultima versione rilasciata: 1.7.0 (più file selezionati insieme per elimina, sposta e copia). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.8.0 rilasciata** (F5 aggiorna, file AVI, elimina dal menu del video senza conferma, menu del tasto destro nella galleria). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 

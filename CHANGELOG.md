@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.8.0] - non ancora rilasciata
+## [1.8.0] - 2026-11-06
 
 ### Aggiunto
 - **F5:** aggiorna dal disco l'albero delle cartelle e l'elenco dei file. Nell'elenco compaiono file e cartelle nuovi, spariscono quelli eliminati, dimensioni e date si aggiornano; restano selezione, video caricato, marker dell'estratto, ordinamento e posizione di scorrimento. Se il video caricato non c'è più, viene scaricato. Nell'albero si aggiornano le cartelle già aperte (le altre si leggono comunque all'apertura), compaiono le unità nuove (es. chiavetta USB) e spariscono quelle scollegate; i rami aperti restano aperti. Una condivisione che non risponde entro 10 s resta com'era. Barra di stato: `Refreshed <cartella>: 2 new, 1 removed`.

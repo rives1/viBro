@@ -224,7 +224,8 @@ public partial class MainWindow
             PlacementTarget = VideoHost,
             Placement = PlacementMode.MousePoint,
         };
-        menu.Items.Add(CreateMenuItem("Delete" + files, "Del / R", canAct, DeleteSelected));
+        // 1.8.0: from this menu one file is deleted without confirmation ([Delete] ConfirmFromVideoMenu=false).
+        menu.Items.Add(CreateMenuItem("Delete" + files, "Del / R", canAct, () => DeleteSelected(fromVideoMenu: true)));
         menu.Items.Add(CreateMenuItem("Move" + files + "...", "W", canAct, () => MoveSelected(useLastDestination: false)));
 
         AddLastDestinationItem(menu, "Move" + files + " to ", _settings.LastMoveDestination, "Shift+W", canAct,

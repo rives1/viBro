@@ -77,11 +77,17 @@ public partial class MainWindow
 
     // ================================================================ delete
 
-    private async void DeleteSelected()
+    /// <summary>
+    /// Canc / R and the video menu. From the video menu (1.8.0) a single file is deleted without the
+    /// confirmation, local or on the network, unless [Delete] ConfirmFromVideoMenu=true; several files
+    /// are always confirmed.
+    /// </summary>
+    private async void DeleteSelected(bool fromVideoMenu)
     {
         var items = SelectedVideos;
         if (_fileOpBusy || items.Count == 0) return;
         int n = items.Count;
+        bool confirm = !(fromVideoMenu && n == 1 && !_settings.ConfirmDeleteFromVideoMenu);
 
         bool network = FileOps.IsNetworkPath(items[0].FullPath); // all in the current folder
         string text = n == 1
@@ -97,7 +103,7 @@ public partial class MainWindow
             ? (network ? "Delete permanently" : "Delete file")
             : (network ? $"Delete {n} files permanently" : $"Delete {n} files");
         // viBro's own dialog, opened next to the mouse pointer (a MessageBox cannot be positioned).
-        if (!DeleteConfirmDialog.Ask(this, title, text, warning: network)) return;
+        if (confirm && !DeleteConfirmDialog.Ask(this, title, text, warning: network)) return;
 
         _fileOpBusy = true;
         try

@@ -2,6 +2,16 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.8.0] - non ancora rilasciata
+
+### Aggiunto
+- **F5:** aggiorna dal disco l'albero delle cartelle e l'elenco dei file. Nell'elenco compaiono file e cartelle nuovi, spariscono quelli eliminati, dimensioni e date si aggiornano; restano selezione, video caricato, marker dell'estratto, ordinamento e posizione di scorrimento. Se il video caricato non c'è più, viene scaricato. Nell'albero si aggiornano le cartelle già aperte (le altre si leggono comunque all'apertura), compaiono le unità nuove (es. chiavetta USB) e spariscono quelle scollegate; i rami aperti restano aperti. Una condivisione che non risponde entro 10 s resta com'era. Barra di stato: `Refreshed <cartella>: 2 new, 1 removed`.
+- **File AVI** (`.avi`) nell'elenco: riproduzione, salti, elimina, rinomina, sposta, copia, estratto (F9) e galleria (F10). Su AVI vecchi con indice incompleto i salti possono essere più lenti o meno precisi.
+
+### Modificato
+- *Delete* nel menu del tasto destro sul video elimina **un solo file senza conferma**, anche in rete (eliminazione definitiva). Con più file selezionati la conferma resta. Canc / R chiedono sempre conferma. Nuova impostazione `[Delete] ConfirmFromVideoMenu` (predefinita `false`; `true` = conferma sempre).
+- Ctrl+F2 mostra F5 e la regola del menu.
+
 ## [1.7.0] - 2026-11-05
 
 ### Aggiunto

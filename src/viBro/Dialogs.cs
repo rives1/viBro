@@ -295,6 +295,7 @@ internal sealed class CommandsDialog : Window
             ("Enter", "Open the selected folder (\"..\" = parent folder)"),
             ("Shift + Enter", "Open the video with the Windows default application (one file selected)"),
             ("Del or R", "Delete the selected file(s) (confirmation)"),
+            ("F5", "Refresh the folder tree and the file list"),
             ("F2", "Rename the file (one file selected)"),
             ("W / Shift + W", "Move the selected file(s) to a folder / to the last move folder"),
             ("C / Shift + C", "Copy the selected file(s) to a folder / to the last copy folder"),
@@ -319,7 +320,9 @@ internal sealed class CommandsDialog : Window
         {
             ("Click", "Play / Pause"),
             ("Double click", "Enter / leave fullscreen"),
-            ("Right click", "Menu: Delete, Move, Copy"),
+            ("Right click", s.ConfirmDeleteFromVideoMenu
+                ? "Menu: Delete, Move, Copy"
+                : "Menu: Delete (one file: no confirmation), Move, Copy"),
             ("Right button + drag", "Move in the video (full width = full length)"),
             ("Wheel", "Back / forward " + AppSettings.FormatSeconds(s.SeekWheelSeconds)),
         }),

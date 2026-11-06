@@ -460,6 +460,11 @@ public partial class MainWindow : Window
     {
         var selected = keepSelection ? FileList.SelectedItems.Cast<object>().ToList() : new List<object>();
         items.Sort(CompareItems);
+        if (selected.Count > 0)
+        {
+            var present = new HashSet<VideoItem>(items);
+            selected.RemoveAll(o => o is not VideoItem v || !present.Contains(v)); // rows gone after F5
+        }
         _suppressSelectionLoad = true;
         try
         {
@@ -862,10 +867,14 @@ public partial class MainWindow : Window
                 SelectAllVideos();
                 return true;
 
+            case Key.F5 when !alt && !ctrl && !shift:
+                if (!isRepeat) RefreshAll();
+                return true;
+
             // File operations: never on key auto-repeat (one key press = at most one operation).
             case Key.Delete when !alt && !ctrl:
             case Key.R when !alt && !ctrl:
-                if (!isRepeat) DeleteSelected();
+                if (!isRepeat) DeleteSelected(fromVideoMenu: false);
                 return true;
 
             case Key.Enter when shift && !ctrl && !alt:

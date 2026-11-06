@@ -50,8 +50,8 @@ internal sealed class VideoItem : System.ComponentModel.INotifyPropertyChanged
 
     public string Name { get; }
     public string FullPath { get; }
-    public long Size { get; }
-    public DateTime Modified { get; }
+    public long Size { get; private set; }
+    public DateTime Modified { get; private set; }
     public string Storage { get; }
     public EntryKind Kind { get; }
     public bool IsVideo => Kind == EntryKind.Video;
@@ -61,6 +61,18 @@ internal sealed class VideoItem : System.ComponentModel.INotifyPropertyChanged
 
     public string SizeText => IsVideo ? FormatSize(Size) : "";
     public string ModifiedText => Kind == EntryKind.Parent ? "" : Modified.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture);
+
+    /// <summary>F5 (1.8.0): the same file with a new size or date keeps its row (selection, loaded file, markers).</summary>
+    public void UpdateInfo(long size, DateTime modified)
+    {
+        if (Size == size && Modified == modified) return;
+        Size = size;
+        Modified = modified;
+        PropertyChanged?.Invoke(this, new(nameof(Size)));
+        PropertyChanged?.Invoke(this, new(nameof(SizeText)));
+        PropertyChanged?.Invoke(this, new(nameof(Modified)));
+        PropertyChanged?.Invoke(this, new(nameof(ModifiedText)));
+    }
 
     public static string FormatSize(long bytes)
     {
@@ -79,7 +91,7 @@ internal sealed class VideoItem : System.ComponentModel.INotifyPropertyChanged
 internal static class FolderScanner
 {
     public static readonly HashSet<string> VideoExtensions =
-        new(StringComparer.OrdinalIgnoreCase) { ".mp4", ".mkv", ".mov", ".wmv" };
+        new(StringComparer.OrdinalIgnoreCase) { ".mp4", ".mkv", ".mov", ".wmv", ".avi" }; // .avi since 1.8.0
 
     /// <summary>
     /// Lists the video files and the subfolders of one folder (no recursion), plus ".." when the

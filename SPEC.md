@@ -42,7 +42,7 @@ Requisiti:
 - Nessuna miniatura nell’elenco nella prima versione.
 Le unità mappate e i percorsi NAS devono essere utilizzabili senza bloccare l’interfaccia quando non sono raggiungibili.
 Caricamento e riproduzione
-Formati richiesti: MP4, MKV, MOV e WMV. La compatibilità effettiva va verificata anche sui codec contenuti nei file campione.
+Formati richiesti: MP4, MKV, MOV, WMV e AVI (dalla 1.8.0). La compatibilità effettiva va verificata anche sui codec contenuti nei file campione.
 - Caricare il video selezionato e mostrare il primo fotogramma disponibile, senza avviare la riproduzione se il video precedente era in pausa (o se non c'era un video).
 - Dalla 0.6.0 (richiesta dell'utente) lo stato Play/Pause si conserva al cambio di file: se il video corrente è in riproduzione, il nuovo parte in riproduzione. Vale per ogni cambio (E/D, rotella, clic nell'elenco, file proposto dopo elimina, rinomina o sposta).
 - Un salto temporale effettuato in pausa deve mostrare il fotogramma raggiunto e mantenere la pausa.
@@ -87,6 +87,7 @@ F11	Schermo intero
 Esc	Esce dallo schermo intero
 Ctrl + L	Attiva la barra del percorso
 Ctrl + A	Seleziona tutti i video della cartella (1.7.0)
+F5	Aggiorna l’albero delle cartelle e l’elenco dei file dal disco, conservando cartelle aperte, selezione e video caricato (1.8.0)
 Invio	Apre la cartella selezionata nell’elenco (1.3.0)
 Shift + Invio	Apre il video selezionato con l’applicazione predefinita di Windows; viBro va in pausa (1.3.0)
 I / O	Marker di inizio / fine dell’estratto nella posizione corrente (1.5.0)
@@ -121,7 +122,7 @@ Prima di rinominare, eliminare o spostare, il player deve rilasciare il file. L�
 Eliminazione
 - File locali: invio al Cestino.
 - File di rete, comprese unità di rete mappate: eliminazione definitiva.
-- Conferma sempre richiesta, con nome del file e tipo di eliminazione chiaramente indicati.
+- Conferma sempre richiesta, con nome del file e tipo di eliminazione chiaramente indicati. Eccezione (1.8.0, scelta dell’utente): Delete nel menu del tasto destro sul video elimina un solo file senza conferma, anche in rete; con più file la conferma resta; configurabile ([Delete] ConfirmFromVideoMenu).
 - Se un file locale non può essere cestinato, non eliminarlo definitivamente senza una nuova conferma esplicita.
 - Dopo il successo: selezionare e caricare il file successivo, oppure il precedente se era l’ultimo (Play/Pause conservato dalla 0.6.0).
 - Se la lista diventa vuota, svuotare il riquadro video.
@@ -190,6 +191,7 @@ Versione	Obiettivo
 1.5.0	Estratto di una parte del video con I / O / F9 e un ffmpeg.exe fornito dall’utente (rilasciata il 2026-11-04)
 1.6.0	Galleria dei video della cartella con F10; release automatiche su GitHub (solo sorgente) (rilasciata il 2026-11-04)
 1.7.0	Selezione di più file nell’elenco; elimina, sposta e copia sulla selezione (rilasciata il 2026-11-05)
+1.8.0	F5 aggiorna albero ed elenco; file AVI; elimina dal menu del video senza conferma
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

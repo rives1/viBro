@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.7.0 released** (several files selected at once for delete, move and copy). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.8.0 in testing** (F5 refresh, AVI files, delete from the video menu without confirmation). Last release: 1.7.0 (several files selected at once for delete, move and copy). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -12,7 +12,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 
 - A single self-contained EXE: no installation, no administrator rights, no codecs to install.
 - Path bar: local folders, mapped drives and UNC paths (`\\server\share`). Folders open in the background, so an unreachable share never blocks the interface.
-- Lists the subfolders and the videos of the folder (MP4, MKV, MOV, WMV), non-recursive: `..` (parent folder) first, then the folders, then the videos, each group in the chosen order (names in natural order, the same as File Explorer). A double click or Enter opens a folder; D/E, the wheel and file operations skip folders.
+- Lists the subfolders and the videos of the folder (MP4, MKV, MOV, WMV, AVI since 1.8.0), non-recursive: `..` (parent folder) first, then the folders, then the videos, each group in the chosen order (names in natural order, the same as File Explorer). A double click or Enter opens a folder; D/E, the wheel and file operations skip folders.
 - **Play/Pause is kept when the file changes**: if the video was paused (or at startup) the new one is loaded paused on its first frame; if it was playing, the new one starts playing.
 - Seeking: by default ±1 s and ±5 s exact, ±1 min and ±5 min on keyframes (fast, approximate) or exact with *Exact long seeks*; every step can be changed in `[Seek]` of `viBro.ini`. Repeated requests are coalesced, so no queue builds up.
 - Play/Pause, timeline, volume, mute, fullscreen.
@@ -48,6 +48,7 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | `[Gallery] PositionsPercent` | `10,30,50,70,90` | Positions of the gallery images, in % of each video's duration (1 to 10 values) |
 | `[Gallery] Jobs` | `2` | ffmpeg runs at a time for the gallery (1–8; more is faster on an SSD, can be slower on a NAS) |
 | `[Diagnostics] MetricsLog` | `true` | Measurement log `viBro-metrics.csv`; `false` = the file is not created or written |
+| `[Delete] ConfirmFromVideoMenu` | `false` | `false` = *Delete* in the video's right-click menu deletes one file without confirmation (also on the network, where it is permanent); several files are always confirmed. `true` = always confirm |
 | `[Appearance] Theme` | `System` | `Light`, `Dark`, or `System` (follows Windows until a theme is chosen with the *Theme* button) |
 
 ## Keyboard shortcuts
@@ -66,6 +67,7 @@ Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4
 | F11 / Esc | Enter / leave fullscreen | ✔ |
 | Ctrl + L | Focus the path bar (Enter opens, Esc cancels) | ✔ |
 | Ctrl + A | Select all the videos of the folder (the loaded video does not change) | 1.7.0 |
+| F5 | Refresh the folder tree and the file list from the disk (new and removed files and folders, sizes and dates), keeping expanded folders, selection, loaded video and scroll position | 1.8.0 |
 | Enter | Open the selected folder of the list (`..` = parent folder) | 1.3.0 |
 | Shift + Enter | Open the selected video with the Windows default application (viBro pauses) | 1.3.0 |
 | Del or R | Delete the selected file(s) after one confirmation (Recycle Bin if local, permanent if on the network) | 0.3.0 (several 1.7.0) |
@@ -86,7 +88,7 @@ Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4
 |---|---|---|
 | Click | Play/Pause (the click that brings viBro to the foreground does not change playback) | 0.5.0 |
 | Double click | Enter / leave fullscreen; playback stays as it was | 0.5.0 |
-| Right click | Menu: *Delete* (Del/R), *Move...* (W), *Move to <last folder>* (Shift+W), *Copy...* (C), *Copy to <last folder>* (Shift+C); with several files selected, e.g. *Delete 3 files* | 0.5.0 (copy 0.6.0, several 1.7.0) |
+| Right click | Menu: *Delete* (Del/R), *Move...* (W), *Move to <last folder>* (Shift+W), *Copy...* (C), *Copy to <last folder>* (Shift+C); with several files selected, e.g. *Delete 3 files*. Since 1.8.0 *Delete* on one file does not ask for confirmation (`[Delete] ConfirmFromVideoMenu`) | 0.5.0 (copy 0.6.0, several 1.7.0) |
 | Right button held + drag left/right | Seek within the video: the whole video width = the whole duration; the picture follows the mouse, exact seek on release (no menu) | 0.6.0 |
 | Wheel over the timeline | Down: next video; up: previous video (like D / E), in the normal window and in fullscreen | 1.3.0 |
 | Wheel over the video (in fullscreen: anywhere but the timeline) | Up: forward 3 s; down: back 3 s (`[Seek] WheelSeconds`) | 1.3.0 |

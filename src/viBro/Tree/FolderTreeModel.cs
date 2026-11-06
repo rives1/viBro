@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -40,23 +41,25 @@ internal sealed class FolderTreeModel
         try { drives = DriveInfo.GetDrives(); } // GetLogicalDrives: no access to the drives themselves
         catch { return; }
 
-        foreach (var d in drives)
+        foreach (var d in drives) AddDrive(d);
+    }
+
+    private void AddDrive(DriveInfo d)
+    {
+        DriveType type;
+        try { type = d.DriveType; } catch { type = DriveType.Unknown; }
+        var kind = type switch
         {
-            DriveType type;
-            try { type = d.DriveType; } catch { type = DriveType.Unknown; }
-            var kind = type switch
-            {
-                DriveType.Network => FolderNodeKind.NetworkDrive,
-                DriveType.Removable => FolderNodeKind.RemovableDrive,
-                DriveType.CDRom => FolderNodeKind.OpticalDrive,
-                _ => FolderNodeKind.Drive,
-            };
-            string letter = d.Name.TrimEnd('\\'); // "C:"
-            var node = new FolderNode(DefaultDriveLabel(kind, letter), d.Name, kind);
-            Roots.Add(node);
-            if (kind != FolderNodeKind.OpticalDrive)
-                _ = LoadDriveLabelAsync(node, d, letter);
-        }
+            DriveType.Network => FolderNodeKind.NetworkDrive,
+            DriveType.Removable => FolderNodeKind.RemovableDrive,
+            DriveType.CDRom => FolderNodeKind.OpticalDrive,
+            _ => FolderNodeKind.Drive,
+        };
+        string letter = d.Name.TrimEnd('\\'); // "C:"
+        var node = new FolderNode(DefaultDriveLabel(kind, letter), d.Name, kind);
+        Roots.Add(node);
+        if (kind != FolderNodeKind.OpticalDrive)
+            _ = LoadDriveLabelAsync(node, d, letter);
     }
 
     private static string DefaultDriveLabel(FolderNodeKind kind, string letter) => kind switch
@@ -79,6 +82,31 @@ internal sealed class FolderTreeModel
         {
             // keep the default label
         }
+    }
+
+    /// <summary>
+    /// F5 (1.8.0): drives that appeared (e.g. a USB stick) are added after the others, drives that
+    /// disappeared are removed; then every listed node is refreshed (FolderNode.RefreshAsync).
+    /// </summary>
+    public async Task RefreshAsync(TimeSpan timeout)
+    {
+        DriveInfo[] drives;
+        try { drives = DriveInfo.GetDrives(); }
+        catch { drives = Array.Empty<DriveInfo>(); }
+        if (drives.Length > 0)
+        {
+            var present = new HashSet<string>(drives.Select(d => d.Name), StringComparer.OrdinalIgnoreCase);
+            for (int i = Roots.Count - 1; i >= 0; i--)
+            {
+                var r = Roots[i];
+                bool isDrive = r.Kind is FolderNodeKind.Drive or FolderNodeKind.NetworkDrive or FolderNodeKind.RemovableDrive or FolderNodeKind.OpticalDrive;
+                if (isDrive && !present.Contains(r.Path)) Roots.RemoveAt(i);
+            }
+            var known = new HashSet<string>(Roots.Select(r => r.Path), StringComparer.OrdinalIgnoreCase);
+            foreach (var d in drives)
+                if (!known.Contains(d.Name)) AddDrive(d);
+        }
+        await Task.WhenAll(Roots.ToList().Select(r => r.RefreshAsync(timeout)));
     }
 
     /// <summary>Best root for a path: the deepest root that contains it. UNC shares get a root on demand.</summary>

@@ -84,6 +84,9 @@ internal sealed class AppSettings
     // [Cache]
     public int CacheMaxMB { get; set; } // 0 = mpv cache disabled (only the minimal demuxer read-ahead)
 
+    // [Delete] (1.8.0): false = "Delete" in the video's right-click menu deletes one file without confirmation
+    public bool ConfirmDeleteFromVideoMenu { get; set; }
+
     // [Diagnostics]
     public bool MetricsLog { get; set; } = true;
 
@@ -156,6 +159,8 @@ internal sealed class AppSettings
         GalleryJobs = ReadInt("Gallery", "Jobs", GalleryJobs, 1, 8);
 
         CacheMaxMB = ReadInt("Cache", "MaxMB", CacheMaxMB, 0, 4096);
+
+        ConfirmDeleteFromVideoMenu = ReadBool("Delete", "ConfirmFromVideoMenu", ConfirmDeleteFromVideoMenu);
 
         MetricsLog = ReadBool("Diagnostics", "MetricsLog", MetricsLog);
     }
@@ -250,6 +255,8 @@ internal sealed class AppSettings
         _ini.Set("Gallery", "Jobs", GalleryJobs.ToString(c));
 
         _ini.Set("Cache", "MaxMB", CacheMaxMB.ToString(c));
+
+        _ini.Set("Delete", "ConfirmFromVideoMenu", B(ConfirmDeleteFromVideoMenu));
 
         _ini.Set("Diagnostics", "MetricsLog", B(MetricsLog));
     }

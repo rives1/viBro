@@ -18,7 +18,9 @@ namespace ViBro;
 //  - right click: menu with Delete, Move..., Move to <last folder>, Copy..., Copy to <last folder>
 //  - right button held + horizontal drag: moves in the video; the whole video width = the whole
 //    duration, keyframe seeks while dragging and an exact seek on release (no menu then)
-//  - wheel over the time bar (both modes): down = next video, up = previous (folders skipped)
+//  - wheel over the time bar (both modes): up = next video, down = previous (folders skipped; inverted in 1.9.0)
+//  - right button held + wheel on the video (1.9.0): change video like the wheel on the time bar; no menu on release
+//  - the wheel works also when viBro is not the foreground window (1.9.0)
 //  - wheel over the video (both modes; in fullscreen anywhere but the bar): up = forward 3 s, down = back 3 s
 public partial class MainWindow
 {
@@ -33,6 +35,7 @@ public partial class MainWindow
     // Right-button drag (scrubbing).
     private bool _rightDown;      // right button pressed on the video, mouse captured by the window
     private bool _scrubbing;      // the drag went past the threshold: no menu on release
+    private bool _rightWheelUsed; // the wheel changed video while the right button was held: no menu, no scrub
     private int _rightDownX, _rightDownY;
     private double _scrubStartTime, _scrubDuration, _scrubTarget;
     private const double ScrubThresholdDip = 6; // smaller movements are still a right click
@@ -79,6 +82,7 @@ public partial class MainWindow
     {
         _rightDown = true;
         _scrubbing = false;
+        _rightWheelUsed = false;
         _rightDownX = x;
         _rightDownY = y;
         _scrubStartTime = _player?.TimePos ?? 0;
@@ -91,7 +95,7 @@ public partial class MainWindow
 
     private void OnRightDrag(int x, int y)
     {
-        if (_player == null || _scrubDuration <= 0 || VideoHost.ActualWidth <= 0) return;
+        if (_rightWheelUsed || _player == null || _scrubDuration <= 0 || VideoHost.ActualWidth <= 0) return;
         // Distances in DIPs, relative to the video, so the scale follows the video's width.
         double dx = VideoHost.PointFromScreen(new Point(x, y)).X - VideoHost.PointFromScreen(new Point(_rightDownX, _rightDownY)).X;
         if (!_scrubbing)
@@ -108,10 +112,12 @@ public partial class MainWindow
 
     private void EndRightDrag(bool showMenu)
     {
-        bool wasScrubbing = _scrubbing;
+        bool wasScrubbing = _scrubbing, wheelUsed = _rightWheelUsed;
         _rightDown = false;
         _scrubbing = false;
+        _rightWheelUsed = false;
         NativeMethods.ReleaseCapture();
+        if (wheelUsed) return; // right button + wheel changed video: neither menu nor seek
         if (wasScrubbing)
             _player?.SeekAbsolute(_scrubTarget, exact: true); // land exactly where the drag ended
         else if (showMenu)
@@ -193,12 +199,38 @@ public partial class MainWindow
     /// </summary>
     private bool OnWheel(int delta, int screenX, int screenY)
     {
-        if (!IsActive || delta == 0) return false;
+        // 1.9.0: not only when viBro is the foreground window. Windows sends the wheel to the window
+        // under the pointer when "Scroll inactive windows when I hover over them" is on (the default).
+        // Never while one of viBro's modal windows is open or a transfer has disabled the window.
+        if (delta == 0 || !IsEnabled || ComponentDispatcher.IsThreadModal
+            || !NativeMethods.IsWindowEnabled(new WindowInteropHelper(this).Handle)) return false;
+
+        // Right button held on the video + wheel (1.9.0): change video, as on the time bar.
+        if (_rightDown)
+        {
+            if (!_rightWheelUsed)
+            {
+                _rightWheelUsed = true;
+                _scrubbing = false; // a drag on the previous file stops here; nothing is sought on release
+                _wheelAccumulator = 0;
+            }
+            AccumulateWheel(delta, seek: false);
+            return true;
+        }
+
         bool onTimeBar = IsPointOver(TimeSlider, screenX, screenY);
         if (!onTimeBar && !_isFullscreen && !IsPointOverVideo(screenX, screenY)) return false;
-        bool seek = !onTimeBar;
+        AccumulateWheel(delta, seek: !onTimeBar);
+        return true;
+    }
 
-        // Restart counting when the direction or the target (bar / video) changes.
+    /// <summary>
+    /// Whole notches only (touchpads send smaller steps). Seek: up = forward. Change video (time bar,
+    /// or right button held): up = next, down = previous (1.9.0; before, down was next).
+    /// </summary>
+    private void AccumulateWheel(int delta, bool seek)
+    {
+        // Restart counting when the direction or the target (seek / change video) changes.
         if (Math.Sign(delta) != Math.Sign(_wheelAccumulator) || seek != _wheelSeeks) _wheelAccumulator = 0;
         _wheelSeeks = seek;
         _wheelAccumulator += delta;
@@ -207,9 +239,8 @@ public partial class MainWindow
             int up = _wheelAccumulator > 0 ? 1 : -1; // positive = away from the user
             _wheelAccumulator -= up * NativeMethods.WHEEL_DELTA;
             if (seek) Seek(up * _settings.SeekWheelSeconds);
-            else SelectRelative(-up);
+            else SelectRelative(up);
         }
-        return true;
     }
 
     private void ShowVideoMenu()

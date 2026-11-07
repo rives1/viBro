@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.8.0 rilasciata** (F5 aggiorna, file AVI, elimina dal menu del video senza conferma, menu del tasto destro nella galleria). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.9.0 in prova** (rotella anche con viBro non in primo piano, rotella sulla barra invertita, tasto destro + rotella cambia video, file M4V). Ultima versione rilasciata: 1.8.0 (F5 aggiorna, file AVI, elimina dal menu del video senza conferma, menu del tasto destro nella galleria). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -12,7 +12,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 
 - Un unico EXE autonomo: nessuna installazione, nessun privilegio di amministratore, nessun codec da installare.
 - Barra del percorso: cartelle locali, unità mappate e percorsi UNC (`\\server\share`). L'apertura avviene in background, quindi una condivisione irraggiungibile non blocca l'interfaccia.
-- Elenco delle sottocartelle e dei video della cartella (MP4, MKV, MOV, WMV, AVI dalla 1.8.0), senza ricorsione: prima `..` (cartella superiore), poi le cartelle, poi i video, ogni gruppo nell'ordine scelto (nomi in ordine naturale, lo stesso di Esplora risorse). Doppio clic o Invio aprono una cartella; D/E, la rotella e le operazioni sui file saltano le cartelle.
+- Elenco delle sottocartelle e dei video della cartella (MP4, MKV, MOV, WMV, AVI dalla 1.8.0, M4V dalla 1.9.0), senza ricorsione: prima `..` (cartella superiore), poi le cartelle, poi i video, ogni gruppo nell'ordine scelto (nomi in ordine naturale, lo stesso di Esplora risorse). Doppio clic o Invio aprono una cartella; D/E, la rotella e le operazioni sui file saltano le cartelle.
 - Al cambio di file lo stato **Play/Pause si conserva**: se il video era in pausa (o all'avvio) il nuovo si carica in pausa sul primo fotogramma; se era in riproduzione, il nuovo parte.
 - Salti: per impostazione predefinita ±1 s e ±5 s esatti, ±1 min e ±5 min su fotogrammi chiave (rapidi, approssimati) oppure esatti con *Exact long seeks*; ogni durata si cambia in `[Seek]` di `viBro.ini`. Le richieste ripetute vengono accorpate, quindi non si accumula una coda.
 - Play/Pause, barra temporale, volume, mute, schermo intero.
@@ -93,8 +93,11 @@ Le durate dei salti sono quelle predefinite; si cambiano in `[Seek]` di `viBro.i
 | Doppio clic | Entra in / esce da schermo intero; la riproduzione resta com'era | 0.5.0 |
 | Tasto destro | Menu: *Delete* (Canc/R), *Move...* (W), *Move to <ultima cartella>* (Shift+W), *Copy...* (C), *Copy to <ultima cartella>* (Shift+C); con più file selezionati, es. *Delete 3 files*. Dalla 1.8.0 *Delete* su un solo file non chiede conferma (`[Delete] ConfirmFromVideoMenu`) | 0.5.0 (copia 0.6.0, più file 1.7.0) |
 | Tasto destro tenuto + trascinamento a destra/sinistra | Spostamento nel video: tutta la larghezza del video = tutta la durata; il video segue il mouse, salto esatto al rilascio (nessun menu) | 0.6.0 |
-| Rotella sopra la barra temporale | Giù: video successivo; su: video precedente (come D / E), a finestra normale e a schermo intero | 1.3.0 |
+| Rotella sopra la barra temporale | Su: video successivo; giù: video precedente (come D / E), a finestra normale e a schermo intero | 1.3.0 (invertita 1.9.0) |
+| Tasto destro tenuto + rotella sul video | Su: video successivo; giù: video precedente, come sulla barra; al rilascio del tasto il menu non compare | 1.9.0 |
 | Rotella sopra il video (a schermo intero: ovunque tranne la barra temporale) | Su: avanti 3 s; giù: indietro 3 s (`[Seek] WheelSeconds`) | 1.3.0 |
+
+Dalla 1.9.0 la rotella su video e barra temporale funziona anche quando viBro non è la finestra in primo piano, se Windows manda la rotella alla finestra sotto il puntatore (Impostazioni → Bluetooth e dispositivi → Mouse → *Scorri le finestre inattive al passaggio del mouse*, attiva per impostazione predefinita). Non fa nulla mentre è aperta una finestra di dialogo di viBro.
 | Clic sulla barra temporale e trascinamento | Spostamento nel video; l'indicatore segue il mouse | 0.4.0 |
 
 Le scorciatoie restano sospese mentre si scrive nella barra del percorso. Come da specifica, le frecce eseguono sempre i salti, anche con lo stato attivo sull'albero o sull'elenco: la navigazione nell'albero avviene con il mouse.

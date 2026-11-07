@@ -51,6 +51,9 @@ internal static class FfmpegExtractor
         };
         // Subtitles only in MKV (any codec fits); MP4/MOV may hold subtitle or data tracks that cannot be copied.
         if (mkv) a.AddRange(new[] { "-map", "0:s?" });
+        // .m4v: MP4 container, said explicitly (ffmpeg also has a raw "m4v" muxer for that extension).
+        if (string.Equals(Path.GetExtension(target), ".m4v", StringComparison.OrdinalIgnoreCase))
+            a.AddRange(new[] { "-f", "mp4" });
         a.AddRange(new[]
         {
             "-c", "copy",

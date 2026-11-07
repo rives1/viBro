@@ -324,12 +324,13 @@ internal sealed class CommandsDialog : Window
                 ? "Menu: Delete, Move, Copy"
                 : "Menu: Delete (one file: no confirmation), Move, Copy"),
             ("Right button + drag", "Move in the video (full width = full length)"),
-            ("Wheel", "Back / forward " + AppSettings.FormatSeconds(s.SeekWheelSeconds)),
+            ("Wheel", "Back / forward " + AppSettings.FormatSeconds(s.SeekWheelSeconds) + " (also when viBro is not in front)"),
+            ("Right button + wheel", "Next (up) / previous (down) video, no menu"),
         }),
         ("Timeline", new[]
         {
             ("Click and drag", "Move in the video"),
-            ("Wheel", "Next (down) / previous (up) video"),
+            ("Wheel", "Next (up) / previous (down) video"),
             ("Pointer", "Time under the pointer"),
         }),
     };

@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.8.0 released** (F5 refresh, AVI files, delete from the video menu without confirmation, right-click menu in the gallery). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.9.0 in testing** (wheel also when viBro is not in front, wheel on the timeline inverted, right button + wheel changes video, M4V files). Last release: 1.8.0 (F5 refresh, AVI files, delete from the video menu without confirmation, right-click menu in the gallery). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -12,7 +12,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 
 - A single self-contained EXE: no installation, no administrator rights, no codecs to install.
 - Path bar: local folders, mapped drives and UNC paths (`\\server\share`). Folders open in the background, so an unreachable share never blocks the interface.
-- Lists the subfolders and the videos of the folder (MP4, MKV, MOV, WMV, AVI since 1.8.0), non-recursive: `..` (parent folder) first, then the folders, then the videos, each group in the chosen order (names in natural order, the same as File Explorer). A double click or Enter opens a folder; D/E, the wheel and file operations skip folders.
+- Lists the subfolders and the videos of the folder (MP4, MKV, MOV, WMV, AVI since 1.8.0, M4V since 1.9.0), non-recursive: `..` (parent folder) first, then the folders, then the videos, each group in the chosen order (names in natural order, the same as File Explorer). A double click or Enter opens a folder; D/E, the wheel and file operations skip folders.
 - **Play/Pause is kept when the file changes**: if the video was paused (or at startup) the new one is loaded paused on its first frame; if it was playing, the new one starts playing.
 - Seeking: by default ±1 s and ±5 s exact, ±1 min and ±5 min on keyframes (fast, approximate) or exact with *Exact long seeks*; every step can be changed in `[Seek]` of `viBro.ini`. Repeated requests are coalesced, so no queue builds up.
 - Play/Pause, timeline, volume, mute, fullscreen.
@@ -90,8 +90,11 @@ Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4
 | Double click | Enter / leave fullscreen; playback stays as it was | 0.5.0 |
 | Right click | Menu: *Delete* (Del/R), *Move...* (W), *Move to <last folder>* (Shift+W), *Copy...* (C), *Copy to <last folder>* (Shift+C); with several files selected, e.g. *Delete 3 files*. Since 1.8.0 *Delete* on one file does not ask for confirmation (`[Delete] ConfirmFromVideoMenu`) | 0.5.0 (copy 0.6.0, several 1.7.0) |
 | Right button held + drag left/right | Seek within the video: the whole video width = the whole duration; the picture follows the mouse, exact seek on release (no menu) | 0.6.0 |
-| Wheel over the timeline | Down: next video; up: previous video (like D / E), in the normal window and in fullscreen | 1.3.0 |
+| Wheel over the timeline | Up: next video; down: previous video (like D / E), in the normal window and in fullscreen | 1.3.0 (inverted 1.9.0) |
+| Right button held + wheel on the video | Up: next video; down: previous video, as on the timeline; releasing the button opens no menu | 1.9.0 |
 | Wheel over the video (in fullscreen: anywhere but the timeline) | Up: forward 3 s; down: back 3 s (`[Seek] WheelSeconds`) | 1.3.0 |
+
+Since 1.9.0 the wheel on the video and on the timeline works also when viBro is not the window in front, if Windows sends the wheel to the window under the pointer (Settings → Bluetooth & devices → Mouse → *Scroll inactive windows when hovering over them*, on by default). It does nothing while a viBro dialog is open.
 | Click on the timeline and drag | Seek within the video; the thumb follows the mouse | 0.4.0 |
 
 Shortcuts are suspended while typing in the path bar (except Ctrl+W). As specified, the arrow keys always seek, even when the tree or the list has the focus: the tree is navigated with the mouse.

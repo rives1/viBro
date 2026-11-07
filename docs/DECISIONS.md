@@ -347,3 +347,10 @@ Richieste: F5 aggiorna albero ed elenco; file .avi visibili e gestiti; eliminazi
 
 ## D-071 — Chiusura della 1.8.0 (2026-11-06)
 L'utente ha confermato tutte le prove di `TEST-PLAN-1.8.0.md` con l'EXE compilato da `dcb4559` (codice di `0d25047`, invariato fino al tag), comprese quelle del tasto destro nella galleria. La 1.8.0 viene rilasciata (tag `v1.8.0`): al push del tag il job `release` crea `viBro 1.8.0`. Nessuna prova aperta passa alla versione successiva.
+
+## D-072 — Contenuto della 1.9.0 (2026-11-07, richieste dell'utente)
+- **Rotella con viBro non in primo piano:** la rotella arrivava già a viBro (Windows 10/11 la manda alla finestra sotto il puntatore se *Scorri le finestre inattive al passaggio del mouse* è attiva, predefinito), ma `OnWheel` la ignorava se la finestra principale non era attiva (`IsActive`). Ora il controllo è: nessuna finestra di dialogo modale di viBro (`ComponentDispatcher.IsThreadModal` per le finestre WPF, `IsWindowEnabled` per le finestre Win32 come i messaggi e la scelta della cartella) e finestra non disattivata da un trasferimento. Vale anche con la galleria in primo piano. Con l'impostazione di Windows disattivata la rotella va alla finestra attiva e viBro non può riceverla.
+- **Rotella sulla barra invertita** (annulla in parte D-060): su = video successivo, giù = precedente.
+- **Tasto destro tenuto + rotella:** durante la pressione del tasto destro sul video (già catturata dalla finestra per il trascinamento, 0.6.0) ogni scatto cambia video come sulla barra (stesso verso, stesso conteggio degli scatti). Dal primo scatto il trascinamento di quella pressione si interrompe e al rilascio non si apre il menu né si salta (il salto sarebbe stato sul file precedente).
+- **.m4v:** aggiunta l'estensione; `.mov` c'era già dalla 0.1.0 (confronto senza maiuscole), confermato dall'utente. Per l'estratto ffmpeg riconosce `.m4v` sia come MP4 (muxer `ipod`) sia come flusso MPEG-4 grezzo (muxer `m4v`); ffmpeg 6.1 sceglie MP4, ma per non dipendere dalla versione viBro passa `-f mp4` (provato: estratto MP4 corretto). Galleria e riproduzione invariate.
+- Versione 1.9.0 (nuove funzioni compatibili = MINOR).

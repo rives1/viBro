@@ -2,6 +2,17 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.9.0] - non ancora rilasciata
+
+### Aggiunto
+- **Tasto destro tenuto + rotella sul video:** cambia video come la rotella sulla barra temporale (su = successivo, giù = precedente). Al rilascio del tasto il menu non compare e non avviene il salto del trascinamento.
+- **File M4V** (`.m4v`) nell'elenco, con tutte le funzioni. L'estratto di un `.m4v` viene scritto in contenitore MP4 (`-f mp4`).
+
+### Modificato
+- La rotella su video e barra temporale funziona **anche quando viBro non è la finestra in primo piano** (se Windows manda la rotella alla finestra sotto il puntatore, impostazione predefinita di Windows 11), non con una finestra di dialogo di viBro aperta.
+- **Rotella sulla barra temporale invertita:** su = video successivo, giù = video precedente.
+- Ctrl+F2 aggiornato.
+
 ## [1.8.0] - 2026-11-06
 
 ### Aggiunto

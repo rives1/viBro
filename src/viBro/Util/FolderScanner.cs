@@ -91,7 +91,7 @@ internal sealed class VideoItem : System.ComponentModel.INotifyPropertyChanged
 internal static class FolderScanner
 {
     public static readonly HashSet<string> VideoExtensions =
-        new(StringComparer.OrdinalIgnoreCase) { ".mp4", ".mkv", ".mov", ".wmv", ".avi" }; // .avi since 1.8.0
+        new(StringComparer.OrdinalIgnoreCase) { ".mp4", ".mkv", ".mov", ".wmv", ".avi", ".m4v" }; // .avi since 1.8.0, .m4v since 1.9.0
 
     /// <summary>
     /// Lists the video files and the subfolders of one folder (no recursion), plus ".." when the

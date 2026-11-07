@@ -45,6 +45,11 @@ internal static class NativeMethods
     [DllImport("user32.dll")]
     public static extern IntPtr SetCapture(IntPtr hwnd);
 
+    /// <summary>False while a Win32 modal (MessageBox, folder picker) has disabled the window.</summary>
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool IsWindowEnabled(IntPtr hwnd);
+
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool ReleaseCapture();

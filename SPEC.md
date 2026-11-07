@@ -42,7 +42,7 @@ Requisiti:
 - Nessuna miniatura nell’elenco nella prima versione.
 Le unità mappate e i percorsi NAS devono essere utilizzabili senza bloccare l’interfaccia quando non sono raggiungibili.
 Caricamento e riproduzione
-Formati richiesti: MP4, MKV, MOV, WMV e AVI (dalla 1.8.0). La compatibilità effettiva va verificata anche sui codec contenuti nei file campione.
+Formati richiesti: MP4, MKV, MOV, WMV, AVI (dalla 1.8.0) e M4V (dalla 1.9.0). La compatibilità effettiva va verificata anche sui codec contenuti nei file campione.
 - Caricare il video selezionato e mostrare il primo fotogramma disponibile, senza avviare la riproduzione se il video precedente era in pausa (o se non c'era un video).
 - Dalla 0.6.0 (richiesta dell'utente) lo stato Play/Pause si conserva al cambio di file: se il video corrente è in riproduzione, il nuovo parte in riproduzione. Vale per ogni cambio (E/D, rotella, clic nell'elenco, file proposto dopo elimina, rinomina o sposta).
 - Un salto temporale effettuato in pausa deve mostrare il fotogramma raggiunto e mantenere la pausa.
@@ -101,8 +101,10 @@ Clic	Play/Pause (non il clic che riattiva la finestra)
 Doppio clic	Schermo intero; a schermo intero, ritorno alla finestra normale (la riproduzione resta com'era)
 Tasto destro	Menu con Delete (come Canc/R), Move... (come W), Move to <ultima destinazione> (come Shift+W), Copy... (come C), Copy to <ultima destinazione di copia> (come Shift+C)
 Tasto destro tenuto + trascinamento orizzontale (0.6.0)	Spostamento nel video: tutta la larghezza del video = tutta la durata; il video segue il mouse, salto esatto al rilascio; nessun menu
-Rotella sopra la barra temporale (1.3.0)	Giù: video successivo; su: video precedente (come D / E), a finestra normale e a schermo intero
+Rotella sopra la barra temporale (1.3.0; invertita nella 1.9.0)	Su: video successivo; giù: video precedente (come D / E), a finestra normale e a schermo intero
+Tasto destro tenuto + rotella sul video (1.9.0)	Su: video successivo; giù: video precedente; al rilascio del tasto nessun menu
 Rotella sopra il video (1.3.0; a schermo intero ovunque tranne la barra temporale)	Su: avanti 3 s; giù: indietro 3 s
+Dalla 1.9.0 la rotella su video e barra temporale funziona anche quando viBro non è in primo piano (finestra sotto il puntatore), tranne con una finestra di dialogo aperta.
 
 Interfaccia (1.1.0): barra dei controlli (Play, barra temporale, tempo, Mute, volume) sotto il video e sopra l’elenco dei file a finestra normale; icona della cartella davanti alla barra del percorso; nella rinomina il cursore parte dall’inizio del nome, senza selezione.
 
@@ -192,6 +194,7 @@ Versione	Obiettivo
 1.6.0	Galleria dei video della cartella con F10; release automatiche su GitHub (solo sorgente) (rilasciata il 2026-11-04)
 1.7.0	Selezione di più file nell’elenco; elimina, sposta e copia sulla selezione (rilasciata il 2026-11-05)
 1.8.0	F5 aggiorna albero ed elenco; file AVI; elimina dal menu del video senza conferma; menu del tasto destro nella galleria (rilasciata il 2026-11-06)
+1.9.0	Rotella anche con viBro non in primo piano; rotella sulla barra invertita; tasto destro + rotella cambia video; file M4V
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

@@ -194,7 +194,7 @@ Versione	Obiettivo
 1.6.0	Galleria dei video della cartella con F10; release automatiche su GitHub (solo sorgente) (rilasciata il 2026-11-04)
 1.7.0	Selezione di più file nell’elenco; elimina, sposta e copia sulla selezione (rilasciata il 2026-11-05)
 1.8.0	F5 aggiorna albero ed elenco; file AVI; elimina dal menu del video senza conferma; menu del tasto destro nella galleria (rilasciata il 2026-11-06)
-1.9.0	Rotella anche con viBro non in primo piano; rotella sulla barra invertita; tasto destro + rotella cambia video; file M4V
+1.9.0	Rotella anche con viBro non in primo piano; rotella sulla barra invertita; tasto destro + rotella cambia video; file M4V (rilasciata il 2026-11-07)
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

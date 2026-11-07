@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.9.0] - non ancora rilasciata
+## [1.9.0] - 2026-11-07
 
 ### Aggiunto
 - **Tasto destro tenuto + rotella sul video:** cambia video come la rotella sulla barra temporale (su = successivo, giù = precedente). Al rilascio del tasto il menu non compare e non avviene il salto del trascinamento.

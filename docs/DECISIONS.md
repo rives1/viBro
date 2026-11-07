@@ -354,3 +354,6 @@ L'utente ha confermato tutte le prove di `TEST-PLAN-1.8.0.md` con l'EXE compilat
 - **Tasto destro tenuto + rotella:** durante la pressione del tasto destro sul video (già catturata dalla finestra per il trascinamento, 0.6.0) ogni scatto cambia video come sulla barra (stesso verso, stesso conteggio degli scatti). Dal primo scatto il trascinamento di quella pressione si interrompe e al rilascio non si apre il menu né si salta (il salto sarebbe stato sul file precedente).
 - **.m4v:** aggiunta l'estensione; `.mov` c'era già dalla 0.1.0 (confronto senza maiuscole), confermato dall'utente. Per l'estratto ffmpeg riconosce `.m4v` sia come MP4 (muxer `ipod`) sia come flusso MPEG-4 grezzo (muxer `m4v`); ffmpeg 6.1 sceglie MP4, ma per non dipendere dalla versione viBro passa `-f mp4` (provato: estratto MP4 corretto). Galleria e riproduzione invariate.
 - Versione 1.9.0 (nuove funzioni compatibili = MINOR).
+
+## D-073 — Chiusura della 1.9.0 (2026-11-07)
+L'utente ha confermato tutte le prove di `TEST-PLAN-1.9.0.md` con l'EXE compilato da `2e71b16` (codice invariato fino al tag). La 1.9.0 viene rilasciata (tag `v1.9.0`): al push del tag il job `release` crea `viBro 1.9.0`. Nessuna prova aperta passa alla versione successiva.

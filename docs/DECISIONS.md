@@ -370,3 +370,6 @@ Richiesta: mettere nel file .ini le mappature di tutti i tasti.
 - I nomi delle chiavi `[Seek]` (`LeftRightSeconds` …) restano quelli della 1.4.0 per compatibilità: sono le durate dei comandi `SeekBackShort/SeekForwardShort` … qualunque sia il tasto.
 - Provato su Linux con un'enumerazione ridotta degli stessi nomi: predefiniti, alias, modificatori esatti, valori non validi, `none`, conflitti, rilettura del file scritto.
 - Versione **1.10.0** (dopo la 1.9.0 secondo SemVer; nuova funzione compatibile = MINOR).
+
+## D-075 — Chiusura della 1.10.0 (2026-11-09)
+L'utente ha confermato tutte le prove di `TEST-PLAN-1.10.0.md` con l'EXE compilato da `f73ab7b` (codice invariato fino al tag). La 1.10.0 viene rilasciata (tag `v1.10.0`): al push del tag il job `release` crea `viBro 1.10.0`, che diventa *Latest* (ordinamento per versione: 1.10.0 > 1.9.0). Nessuna prova aperta passa alla versione successiva.

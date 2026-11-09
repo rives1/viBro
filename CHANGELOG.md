@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.10.0] - non ancora rilasciata
+## [1.10.0] - 2026-11-09
 
 ### Aggiunto
 - **Scorciatoie da tastiera configurabili** nella sezione `[Keys]` di `viBro.ini`: una riga per ognuno dei 31 comandi della finestra principale (es. `Delete=Delete,R`, `MoveToLast=Shift+W`, `SeekForwardVeryLong=Alt+PageUp`), più tasti separati da virgole, `none` per nessun tasto. Alla chiusura viBro scrive tutte le righe con i tasti in uso. Valore non valido: avviso e predefinito; tasto assegnato a due comandi: avviso, resta al comando che viene prima nell'elenco. Ctrl+F2 mostra i tasti configurati. Mouse e rotella non cambiano.

@@ -197,7 +197,7 @@ Versione	Obiettivo
 1.7.0	Selezione di più file nell’elenco; elimina, sposta e copia sulla selezione (rilasciata il 2026-11-05)
 1.8.0	F5 aggiorna albero ed elenco; file AVI; elimina dal menu del video senza conferma; menu del tasto destro nella galleria (rilasciata il 2026-11-06)
 1.9.0	Rotella anche con viBro non in primo piano; rotella sulla barra invertita; tasto destro + rotella cambia video; file M4V (rilasciata il 2026-11-07)
-1.10.0	Scorciatoie da tastiera configurabili in viBro.ini ([Keys])
+1.10.0	Scorciatoie da tastiera configurabili in viBro.ini ([Keys]) (rilasciata il 2026-11-09)
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

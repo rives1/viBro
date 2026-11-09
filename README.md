@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.9.0 released** (wheel also when viBro is not in front, wheel on the timeline inverted, right button + wheel changes video, M4V files). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.10.0 in testing** (keyboard shortcuts configurable in `viBro.ini`). Last release: 1.9.0 (wheel also when viBro is not in front, wheel on the timeline inverted, right button + wheel changes video, M4V files). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -55,6 +55,34 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 
 Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4.0), and Ctrl+F2 shows the values in use.
 
+The keys below are the defaults. Since 1.10.0 every keyboard shortcut of the main window can be changed in `[Keys]` of `viBro.ini` (edit it while viBro is closed): one line per command, `Command=Key`, several keys separated by commas, modifiers `Ctrl+`, `Alt+`, `Shift+` (they must match exactly: `Left` does not react to Shift+Left), `none` for no key. Key names are those of Windows/WPF (`Left`, `PageUp`, `Enter`, `Escape`, `Space`, `F5`, letters, digits `0`–`9`; also `Del`, `Esc`, `PgUp`, `PgDn`). An invalid value gives a warning in the status bar and the default; a key given to two commands stays with the one listed first and the other loses it, with a warning. Ctrl+F2 shows the keys in use. Mouse and wheel are not configurable.
+
+| Command | Default | Note |
+|---|---|---|
+| `SeekBackShort / SeekForwardShort` | `Left / Right` | [Seek] LeftRightSeconds |
+| `SeekBackMedium / SeekForwardMedium` | `Down / Up` | [Seek] UpDownSeconds |
+| `SeekBackLong / SeekForwardLong` | `PageDown / PageUp` | [Seek] PageSeconds |
+| `SeekBackVeryLong / SeekForwardVeryLong` | `Alt+PageDown / Alt+PageUp` | [Seek] AltPageSeconds |
+| `PlayPause` | `Space` |  |
+| `PreviousVideo / NextVideo` | `E / D` |  |
+| `Mute` | `M` |  |
+| `Fullscreen / ExitFullscreen` | `F11 / Escape` | ExitFullscreen only in fullscreen |
+| `FocusPath` | `Ctrl+L` |  |
+| `SelectAll` | `Ctrl+A` |  |
+| `Refresh` | `F5` |  |
+| `OpenFolder` | `Enter` | only with a folder selected |
+| `OpenWithDefaultApp` | `Shift+Enter` |  |
+| `Delete` | `Delete,R` |  |
+| `Rename` | `F2` |  |
+| `Move / MoveToLast` | `W / Shift+W` |  |
+| `Copy / CopyToLast` | `C / Shift+C` |  |
+| `MarkIn / MarkOut` | `I / O` |  |
+| `Extract` | `F9` |  |
+| `Gallery` | `F10` |  |
+| `Commands` | `Ctrl+F2` |  |
+| `Close` | `Ctrl+W` | also while editing a text |
+
+
 | Key | Action | Since |
 |---|---|---|
 | ← / → | Back / forward about 1 s | ✔ |
@@ -97,7 +125,7 @@ Seek steps are the defaults; they can be changed in `[Seek]` of `viBro.ini` (1.4
 Since 1.9.0 the wheel on the video and on the timeline works also when viBro is not the window in front, if Windows sends the wheel to the window under the pointer (Settings → Bluetooth & devices → Mouse → *Scroll inactive windows when hovering over them*, on by default). It does nothing while a viBro dialog is open.
 | Click on the timeline and drag | Seek within the video; the thumb follows the mouse | 0.4.0 |
 
-Shortcuts are suspended while typing in the path bar (except Ctrl+W). As specified, the arrow keys always seek, even when the tree or the list has the focus: the tree is navigated with the mouse.
+Shortcuts are suspended while typing in the path bar (except Close, Ctrl+W by default). As specified, the arrow keys always seek, even when the tree or the list has the focus: the tree is navigated with the mouse.
 
 ## Usage
 

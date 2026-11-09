@@ -760,8 +760,9 @@ public partial class MainWindow : Window
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        // Ctrl+W closes viBro even while a text field is being edited.
-        if (e.Key == Key.W && Keyboard.Modifiers == ModifierKeys.Control && IsActive)
+        // Close (Ctrl+W by default) works even while a text field is being edited.
+        Key pressed = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (IsActive && _settings.Keys.TryGet(pressed, Keyboard.Modifiers, out Command c) && c == Command.Close)
         {
             e.Handled = true;
             Dispatcher.BeginInvoke(new Action(Close));
@@ -822,112 +823,65 @@ public partial class MainWindow : Window
             handled = true;
     }
 
+    /// <summary>
+    /// Keyboard shortcuts of the main window, from [Keys] in viBro.ini (1.10.0; modifiers must match
+    /// exactly). Auto-repeat runs only seeks, previous / next video and other harmless commands; file
+    /// operations and toggles run once per key press. Returns false for keys that do nothing here.
+    /// </summary>
     private bool HandleShortcut(Key key, ModifierKeys mods, bool isRepeat)
     {
         if (!IsActive) return false; // e.g. a modal dialog is open
+        if (!_settings.Keys.TryGet(key, mods, out Command command)) return false;
 
-        bool alt = (mods & ModifierKeys.Alt) != 0;
-        bool ctrl = (mods & ModifierKeys.Control) != 0;
-        bool shift = (mods & ModifierKeys.Shift) != 0;
+        // Commands that only apply in some states: otherwise the key keeps its normal meaning.
+        VideoItem? folderEntry = FileList.SelectedItems.Count == 1 && FileList.SelectedItem is VideoItem { IsVideo: false } entry ? entry : null;
+        if (command == Command.OpenFolder && folderEntry == null) return false;
+        if (command == Command.ExitFullscreen && !_isFullscreen) return false;
 
-        switch (key)
+        if (isRepeat && !KeyBindings.AllowsRepeat(command)) return true; // one key press = at most one operation
+
+        switch (command)
         {
             // Steps from [Seek] in viBro.ini (1.4.0)
-            case Key.Left when !alt && !ctrl: Seek(-_settings.SeekLeftRightSeconds); return true;
-            case Key.Right when !alt && !ctrl: Seek(+_settings.SeekLeftRightSeconds); return true;
-            case Key.Down when !alt && !ctrl: Seek(-_settings.SeekUpDownSeconds); return true;
-            case Key.Up when !alt && !ctrl: Seek(+_settings.SeekUpDownSeconds); return true;
-            case Key.PageDown when !ctrl: Seek(-(alt ? _settings.SeekAltPageSeconds : _settings.SeekPageSeconds)); return true;
-            case Key.PageUp when !ctrl: Seek(+(alt ? _settings.SeekAltPageSeconds : _settings.SeekPageSeconds)); return true;
+            case Command.SeekBackShort: Seek(-_settings.SeekLeftRightSeconds); break;
+            case Command.SeekForwardShort: Seek(+_settings.SeekLeftRightSeconds); break;
+            case Command.SeekBackMedium: Seek(-_settings.SeekUpDownSeconds); break;
+            case Command.SeekForwardMedium: Seek(+_settings.SeekUpDownSeconds); break;
+            case Command.SeekBackLong: Seek(-_settings.SeekPageSeconds); break;
+            case Command.SeekForwardLong: Seek(+_settings.SeekPageSeconds); break;
+            case Command.SeekBackVeryLong: Seek(-_settings.SeekAltPageSeconds); break;
+            case Command.SeekForwardVeryLong: Seek(+_settings.SeekAltPageSeconds); break;
 
-            case Key.Space when !alt && !ctrl:
-                if (!isRepeat) _player?.TogglePause();
-                return true;
+            case Command.PlayPause: _player?.TogglePause(); break;
+            case Command.PreviousVideo: SelectRelative(-1); break;
+            case Command.NextVideo: SelectRelative(+1); break;
+            case Command.Mute: _player?.ToggleMute(); break;
+            case Command.Fullscreen: ToggleFullscreen(); break;
+            case Command.ExitFullscreen: ExitFullscreen(); break;
+            case Command.FocusPath: FocusPathBox(); break;
+            case Command.SelectAll: SelectAllVideos(); break;
+            case Command.Refresh: RefreshAll(); break;
+            case Command.OpenFolder: OpenListEntry(folderEntry!); break;
+            case Command.OpenWithDefaultApp: OpenWithDefaultApp(); break;
 
-            case Key.E when !alt && !ctrl: SelectRelative(-1); return true;
-            case Key.D when !alt && !ctrl: SelectRelative(+1); return true;
+            case Command.Delete: DeleteSelected(fromVideoMenu: false); break;
+            case Command.Rename: RenameSelected(); break;
+            case Command.Move: MoveSelected(useLastDestination: false); break;
+            case Command.MoveToLast: MoveSelected(useLastDestination: true); break;
+            case Command.Copy: CopySelected(useLastDestination: false); break;
+            case Command.CopyToLast: CopySelected(useLastDestination: true); break;
 
-            case Key.M when !alt && !ctrl:
-                if (!isRepeat) _player?.ToggleMute();
-                return true;
+            // Extract (1.5.0): markers on the loaded file, then the part between them.
+            case Command.MarkIn: SetMarker(start: true); break;
+            case Command.MarkOut: SetMarker(start: false); break;
+            case Command.Extract: ExtractMarked(); break;
 
-            case Key.F11 when !alt && !ctrl:
-                if (!isRepeat) ToggleFullscreen();
-                return true;
-
-            case Key.Escape when _isFullscreen:
-                ExitFullscreen();
-                return true;
-
-            case Key.L when ctrl && !alt:
-                FocusPathBox();
-                return true;
-
-            case Key.A when ctrl && !alt && !shift:
-                SelectAllVideos();
-                return true;
-
-            case Key.F5 when !alt && !ctrl && !shift:
-                if (!isRepeat) RefreshAll();
-                return true;
-
-            // File operations: never on key auto-repeat (one key press = at most one operation).
-            case Key.Delete when !alt && !ctrl:
-            case Key.R when !alt && !ctrl:
-                if (!isRepeat) DeleteSelected(fromVideoMenu: false);
-                return true;
-
-            case Key.Enter when shift && !ctrl && !alt:
-                if (!isRepeat) OpenWithDefaultApp();
-                return true;
-
-            case Key.Enter when !shift && !ctrl && !alt:
-                if (FileList.SelectedItems.Count == 1 && FileList.SelectedItem is VideoItem { IsVideo: false } entry)
-                {
-                    if (!isRepeat) OpenListEntry(entry);
-                    return true;
-                }
-                return false;
-
-            case Key.F2 when ctrl && !alt:
-                if (!isRepeat) Dispatcher.BeginInvoke(new Action(() => CommandsDialog.Open(this, _settings))); // after this key
-                return true;
-
-            case Key.F2 when !alt && !ctrl:
-                if (!isRepeat) RenameSelected();
-                return true;
-
-            case Key.W when ctrl && !alt && !shift:
-                if (!isRepeat) Dispatcher.BeginInvoke(new Action(Close)); // after this key message
-                return true;
-
-            case Key.W when !alt && !ctrl:
-                if (!isRepeat) MoveSelected(useLastDestination: shift);
-                return true;
-
-            case Key.C when !alt && !ctrl:
-                if (!isRepeat) CopySelected(useLastDestination: shift);
-                return true;
-
-            // Extract (1.5.0): markers on the loaded file, F9 writes the part between them.
-            case Key.I when !alt && !ctrl && !shift:
-                if (!isRepeat) SetMarker(start: true);
-                return true;
-
-            case Key.O when !alt && !ctrl && !shift:
-                if (!isRepeat) SetMarker(start: false);
-                return true;
-
-            case Key.F9 when !alt && !ctrl && !shift:
-                if (!isRepeat) ExtractMarked();
-                return true;
-
-            // Gallery (1.6.0). F10 arrives as a system key: handled here so Windows does not enter menu mode.
-            case Key.F10 when !alt && !ctrl && !shift:
-                if (!isRepeat) Dispatcher.BeginInvoke(new Action(OpenGallery)); // after this key message
-                return true;
+            // F10 by default, a system key: handled here so Windows does not enter menu mode.
+            case Command.Gallery: Dispatcher.BeginInvoke(new Action(OpenGallery)); break; // after this key message
+            case Command.Commands: Dispatcher.BeginInvoke(new Action(() => CommandsDialog.Open(this, _settings))); break;
+            case Command.Close: Dispatcher.BeginInvoke(new Action(Close)); break;
         }
-        return false;
+        return true;
     }
 
     // ================================================================ fullscreen

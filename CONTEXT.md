@@ -1,13 +1,13 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-07 · branch `main` · ultima versione rilasciata **1.9.0** (tag `v1.9.0`) · **prossima versione: da definire**_
+_Aggiornato: 2026-11-09 · branch `main` · ultima versione rilasciata **1.9.0** (tag `v1.9.0`) · **in prova: 1.10.0** (codice pronto, piano da eseguire)_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-073 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-074 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 - Cartella sul PC dell'utente: il percorso è nel documento privato del progetto claude.ai, non nel repository pubblico (D-053). Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0`, `v0.5.0` e `v0.6.0` forse non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`. **Variante predefinita: EXE normale** (D-047: avvio 410 ms contro 575, ~70 MB di memoria in meno).
-- Versione: in un solo punto, `Directory.Build.props` (ora `1.9.0`). Appare nel titolo e nelle proprietà dell'EXE come `1.9.0+<commit>`. Autore e copyright: `rives1` (D-054).
+- Versione: in un solo punto, `Directory.Build.props` (ora `1.10.0`). Appare nel titolo e nelle proprietà dell'EXE come `1.10.0+<commit>`. Autore e copyright: `rives1` (D-054).
 
 ## 2. Versioni
 | Versione | Contenuto | Stato |
@@ -28,6 +28,7 @@ _Aggiornato: 2026-11-07 · branch `main` · ultima versione rilasciata **1.9.0**
 | 1.7.0 | Selezione multipla nell'elenco (Ctrl / Shift + clic, Ctrl+A); elimina, sposta e copia sulla selezione (una conferma, una destinazione, conflitti per file con Skip e "fai lo stesso", un avanzamento complessivo); il video carica l'ultimo cliccato; F2, Shift+Invio, I/O/F9 disattivati con più video (D-068) | ✔ tag `v1.7.0` (2026-11-05): tutte le prove superate, comprese quelle della release della 1.6.0 (D-069) |
 | 1.8.0 | F5 aggiorna albero (nodi già letti, unità nuove/scollegate) ed elenco (stesse righe per i file rimasti); file `.avi`; *Delete* dal menu del video senza conferma per un file, anche in rete (`[Delete] ConfirmFromVideoMenu`); tasto destro nella galleria con lo stesso menu, righe di file eliminati/spostati tolte (D-070) | ✔ tag `v1.8.0` (2026-11-06): tutte le prove superate (D-071) |
 | 1.9.0 | Rotella anche con viBro non in primo piano (non con dialoghi aperti); rotella sulla barra invertita (su = successivo); tasto destro + rotella sul video cambia video senza menu; `.m4v` (estratto con `-f mp4`) (D-072) | ✔ tag `v1.9.0` (2026-11-07): tutte le prove superate (D-073) |
+| 1.10.0 | Scorciatoie da tastiera configurabili in `[Keys]` di `viBro.ini` (31 comandi, modificatori esatti, conflitti: vince il primo), Ctrl+F2 con i tasti in uso (D-074) | in prova: [docs/TEST-PLAN-1.10.0.md](docs/TEST-PLAN-1.10.0.md) |
 
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
 - Cambio video: mediana 140–500 ms sul NAS (MP4 più lenti per la lettura dell'indice; MKV 66–120 ms), ~38 ms in locale. viBro aggiunge pochi ms rispetto a mpv (verificato con il log di mpv).
@@ -38,7 +39,7 @@ _Aggiornato: 2026-11-07 · branch `main` · ultima versione rilasciata **1.9.0**
 
 ## 4. Stato attuale e prossimo passo
 1. **1.9.0 rilasciata il 2026-11-07** (tag `v1.9.0`, D-073). Tutte le prove di [docs/TEST-PLAN-1.9.0.md](docs/TEST-PLAN-1.9.0.md) superate.
-2. Nessuna prova aperta. Da fare dall'utente: `git push --follow-tags` per pubblicare la 1.9.0 (il job `release` crea la release). Prossimo passo: l'utente definisce eventuali versioni successive. Nella cartella c'è un file dell'utente non versionato, `vibro Version features request.md`: non va aggiunto ai commit (usare `git add -u` più i file nuovi esplicitamente).
+2. **1.10.0 in prova** (D-074): l'utente esegue `build.cmd` e [docs/TEST-PLAN-1.10.0.md](docs/TEST-PLAN-1.10.0.md); dopo la conferma: data nel CHANGELOG, D-075 di chiusura, fotografia `docs/handover/CONTEXT-v1.10.0.md`, tag `v1.10.0`. Nella cartella c'è un file dell'utente non versionato, `vibro Version features request.md`: non va aggiunto ai commit (usare `git add -u` più i file nuovi esplicitamente).
 3. Distribuzione solo come sorgente (D-052); EXE predefinito normale (D-047); autore `rives1` (D-054). `ffmpeg.exe` non è incluso né distribuito.
 4. Proposte non scelte finora: coda di copia/spostamento con pannello di avanzamento in basso (ritirata dall'utente il 2026-11-05; analisi in D-070), cursore nascosto a schermo intero dopo 2 s, barra del percorso a "briciole" con Backspace per la cartella superiore, stato vuoto del video.
 5. Da fare dall'utente su GitHub, se non già fatto: cancellare gli artifact delle esecuzioni precedenti e le release in bozza dei tag (D-052); `git push --follow-tags`.
@@ -55,7 +56,7 @@ _Aggiornato: 2026-11-07 · branch `main` · ultima versione rilasciata **1.9.0**
 ## 6. Mappa del codice (`src/viBro`)
 - `Mpv/MpvNative.cs` (P/Invoke, verificato su `client.h`); `Mpv/MpvPlayer.cs` (comandi asincroni, caricamenti tracciati per `playlist_entry_id`, salti accorpati, `ReleaseFileAsync`, messaggi di errore); `Mpv/MpvHost.cs` (finestra nativa figlia).
 - `MainWindow.xaml(.cs)` (layout, albero, elenco, tastiera con hook `ThreadPreprocessMessage` per tasti e mouse sul video, schermo intero, temi, misure); `MainWindow.VideoMouse.cs` (clic, doppio clic, menu del tasto destro, trascinamento col tasto destro, rotella); `MainWindow.Ui.cs` (icone, tempo sotto il puntatore, file caricato, OSD); `MainWindow.FileOps.cs` (elimina, rinomina, sposta, copia; dalla 1.7.0 su più file: `SelectedVideos`, `PlanTransferAsync`, `TransferAsync`, `AfterRemoval`, `SelectOnly`/`SelectAndLoad`); `MainWindow.Extract.cs` (marker I/O, F9); `MainWindow.Gallery.cs` (F10, `ShowFromGallery`); `MainWindow.Refresh.cs` (F5); `GalleryWindow.xaml(.cs)` (galleria, lavoro in background, `GalleryCache` in memoria); `Dialogs.cs` (conferma di eliminazione posizionata, rinomina, conflitto, avanzamento, finestra dei comandi).
-- `Settings/IniFile.cs`, `Settings/AppSettings.cs` (`viBro.ini`, schema 1; `[Seek]` dalla 1.4.0, `FormatSeconds` per Ctrl+F2, `[Gallery]` dalla 1.6.0, `[Delete]` dalla 1.8.0); `Tree/FolderNode.cs`, `Tree/FolderTreeModel.cs` (`RefreshAsync` per F5 dalla 1.8.0). Elenco: `Util/FolderScanner.cs` (`VideoItem` con `EntryKind` per video, cartelle e `..`).
+- `Settings/IniFile.cs`, `Settings/AppSettings.cs` (`viBro.ini`, schema 1; `[Seek]` dalla 1.4.0, `FormatSeconds` per Ctrl+F2, `[Gallery]` dalla 1.6.0, `[Delete]` dalla 1.8.0, `[Keys]` dalla 1.10.0); `Settings/KeyBindings.cs` (comandi, tasti predefiniti, lettura e scrittura di `[Keys]`); `Tree/FolderNode.cs`, `Tree/FolderTreeModel.cs` (`RefreshAsync` per F5 dalla 1.8.0). Elenco: `Util/FolderScanner.cs` (`VideoItem` con `EntryKind` per video, cartelle e `..`).
 - `Util/`: `FileOps` (operazioni sicure, Cestino tramite `SHFileOperation` / `IFileOperation`), `FolderScanner`, `NaturalComparer`, `ThemeManager`, `ErrorLog`, `NativePreload` (Vulkan), `MetricsLog`, `AppInfo`, `StartupOptions`, `NativeMethods`, `TreeIcons` (icone dell'albero + convertitore), `SliderDrag` (clic e trascinamento sui cursori), `FfmpegExtractor` (nome dell'estratto, argomenti e avvio di `ffmpeg.exe`, avanzamento, pulizia), `ThumbnailExtractor` (durata e immagini della galleria con `ffmpeg.exe`).
 
 ## 7. Note operative per l'assistente (come si è lavorato)
@@ -68,4 +69,4 @@ _Aggiornato: 2026-11-07 · branch `main` · ultima versione rilasciata **1.9.0**
 - **Flusso per ogni versione:** domande, codice, compilazione e test su Linux, copia sul PC, documentazione (CHANGELOG, DECISIONS, CONTEXT, TEST-PLAN), commit; poi l'utente esegue `build.cmd` e il piano di prova; infine chiusura con data, fotografia `docs/handover/CONTEXT-vX.Y.Z.md` e tag.
 
 ## 8. Messaggio per riprendere in una nuova chat
-> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 1.9.0 è rilasciata (tag `v1.9.0`); ti descrivo cosa voglio nella prossima versione.
+> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 1.9.0 è rilasciata (tag `v1.9.0`); la 1.10.0 è in prova (`docs/TEST-PLAN-1.10.0.md`).

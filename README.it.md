@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.9.0 rilasciata** (rotella anche con viBro non in primo piano, rotella sulla barra invertita, tasto destro + rotella cambia video, file M4V). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.10.0 in prova** (scorciatoie da tastiera configurabili in `viBro.ini`). Ultima versione rilasciata: 1.9.0 (rotella anche con viBro non in primo piano, rotella sulla barra invertita, tasto destro + rotella cambia video, file M4V). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -57,6 +57,34 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 ## Scorciatoie da tastiera
 
 Le durate dei salti sono quelle predefinite; si cambiano in `[Seek]` di `viBro.ini` (1.4.0) e Ctrl+F2 mostra i valori in uso.
+
+I tasti qui sotto sono quelli predefiniti. Dalla 1.10.0 ogni scorciatoia da tastiera della finestra principale si cambia in `[Keys]` di `viBro.ini` (a viBro chiuso): una riga per comando, `Comando=Tasto`, più tasti separati da virgole, modificatori `Ctrl+`, `Alt+`, `Shift+` (devono corrispondere esattamente: `Left` non reagisce a Shift+←), `none` per nessun tasto. I nomi dei tasti sono quelli di Windows/WPF (`Left`, `PageUp`, `Enter`, `Escape`, `Space`, `F5`, lettere, cifre `0`–`9`; anche `Del`, `Esc`, `PgUp`, `PgDn`). Un valore non valido dà un avviso nella barra di stato e il predefinito; un tasto dato a due comandi resta a quello che viene prima nell'elenco e l'altro lo perde, con un avviso. Ctrl+F2 mostra i tasti in uso. Mouse e rotella non sono configurabili.
+
+| Comando | Predefinito | Nota |
+|---|---|---|
+| `SeekBackShort / SeekForwardShort` | `Left / Right` | [Seek] LeftRightSeconds |
+| `SeekBackMedium / SeekForwardMedium` | `Down / Up` | [Seek] UpDownSeconds |
+| `SeekBackLong / SeekForwardLong` | `PageDown / PageUp` | [Seek] PageSeconds |
+| `SeekBackVeryLong / SeekForwardVeryLong` | `Alt+PageDown / Alt+PageUp` | [Seek] AltPageSeconds |
+| `PlayPause` | `Space` |  |
+| `PreviousVideo / NextVideo` | `E / D` |  |
+| `Mute` | `M` |  |
+| `Fullscreen / ExitFullscreen` | `F11 / Escape` | ExitFullscreen solo a schermo intero |
+| `FocusPath` | `Ctrl+L` |  |
+| `SelectAll` | `Ctrl+A` |  |
+| `Refresh` | `F5` |  |
+| `OpenFolder` | `Enter` | solo con una cartella selezionata |
+| `OpenWithDefaultApp` | `Shift+Enter` |  |
+| `Delete` | `Delete,R` |  |
+| `Rename` | `F2` |  |
+| `Move / MoveToLast` | `W / Shift+W` |  |
+| `Copy / CopyToLast` | `C / Shift+C` |  |
+| `MarkIn / MarkOut` | `I / O` |  |
+| `Extract` | `F9` |  |
+| `Gallery` | `F10` |  |
+| `Commands` | `Ctrl+F2` |  |
+| `Close` | `Ctrl+W` | anche mentre si scrive un testo |
+
 
 | Tasto | Azione | Da |
 |---|---|---|

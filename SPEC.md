@@ -113,6 +113,8 @@ Interfaccia (1.2.0): pulsanti Play/Pause, Mute, Browse e Theme a icone (Segoe Fl
 Interfaccia (0.6.0): barra di stato compatta con numero di video della cartella e spazio totale; a schermo intero la fascia con la barra temporale è sotto il video; la conferma di eliminazione si apre vicino al puntatore del mouse.
 
 
+Dalla 1.10.0 (richiesta dell'utente) i tasti della tabella sono quelli predefiniti: ogni scorciatoia da tastiera della finestra principale si può cambiare nella sezione [Keys] di viBro.ini (modificatori esatti; conflitti segnalati, vince il comando che viene prima nell'elenco). Mouse e rotella restano fissi.
+
 Regole:
 - Le scorciatoie sono sospese durante la modifica di nomi, percorsi o altri campi di testo e quando è aperta una finestra modale.
 - Ai limiti della lista, E/D non ricominciano dall’estremità opposta.
@@ -195,6 +197,7 @@ Versione	Obiettivo
 1.7.0	Selezione di più file nell’elenco; elimina, sposta e copia sulla selezione (rilasciata il 2026-11-05)
 1.8.0	F5 aggiorna albero ed elenco; file AVI; elimina dal menu del video senza conferma; menu del tasto destro nella galleria (rilasciata il 2026-11-06)
 1.9.0	Rotella anche con viBro non in primo piano; rotella sulla barra invertita; tasto destro + rotella cambia video; file M4V (rilasciata il 2026-11-07)
+1.10.0	Scorciatoie da tastiera configurabili in viBro.ini ([Keys])
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

@@ -357,3 +357,16 @@ L'utente ha confermato tutte le prove di `TEST-PLAN-1.8.0.md` con l'EXE compilat
 
 ## D-073 — Chiusura della 1.9.0 (2026-11-07)
 L'utente ha confermato tutte le prove di `TEST-PLAN-1.9.0.md` con l'EXE compilato da `2e71b16` (codice invariato fino al tag). La 1.9.0 viene rilasciata (tag `v1.9.0`): al push del tag il job `release` crea `viBro 1.9.0`. Nessuna prova aperta passa alla versione successiva.
+
+## D-074 — Contenuto della 1.10.0 (2026-11-09, richieste dell'utente)
+Richiesta: mettere nel file .ini le mappature di tutti i tasti.
+- **Ambito** (scelta dell'utente): tutte le scorciatoie da tastiera della finestra principale (31 comandi, `Settings/KeyBindings.cs`); mouse e rotella restano fissi. Non fanno parte della tabella i tasti che non sono scorciatoie: Invio / Esc nella barra del percorso e nelle finestre di dialogo, Esc nella galleria.
+- **Formato** `[Keys]`: `Comando=Tasto[,Tasto…]`, modificatori `Ctrl+`/`Alt+`/`Shift+` (il tasto Windows non si usa), nomi dell'enumerazione `System.Windows.Input.Key` senza maiuscole/minuscole più alcuni alias (`Del`, `Esc`, `Return`, `Ins`, `PgUp`, `PgDn`, `PgDown`, cifre `0`–`9`); numeri non ammessi come nome (eviterebbero il controllo dei nomi), tasti modificatori da soli non ammessi; `none` = nessun tasto; valore vuoto o mancante = predefinito. In scrittura nomi canonici (`Enter`, `PageUp`, `PageDown`, che in WPF condividono il valore con `Return`, `Prior`, `Next`). Schema invariato (1): le righe mancanti prendono il predefinito.
+- **Conflitti** (scelta dell'utente): avviso, il tasto resta al comando che viene prima nell'elenco (lo stesso ordine con cui viBro scrive il file), l'altro lo perde. Un valore non leggibile dà avviso e predefinito, come le altre impostazioni.
+- **Modificatori esatti** (scelta dell'utente): prima molti comandi ignoravano Shift (frecce, PgUp/PgDn, E/D, Spazio, M, F11, Canc/R, F2); ora `Left` vale solo senza modificatori. Il tasto Windows viene ignorato nel confronto.
+- **Ripetizione automatica:** come prima, la ripetizione esegue solo salti, video precedente/successivo, uscita dallo schermo intero, barra del percorso e seleziona tutto; le operazioni sui file e gli interruttori una volta per pressione. OpenFolder agisce solo con una cartella selezionata e ExitFullscreen solo a schermo intero: altrimenti il tasto non viene consumato (Invio ed Esc mantengono il loro significato normale).
+- **Close** funziona anche durante la scrittura nella barra del percorso, con il tasto configurato (prima Ctrl+W fisso).
+- **Ctrl+F2** mostra i tasti configurati (`←`, `PgUp`, `Del`, `Ctrl + F2`, "(no key)").
+- I nomi delle chiavi `[Seek]` (`LeftRightSeconds` …) restano quelli della 1.4.0 per compatibilità: sono le durate dei comandi `SeekBackShort/SeekForwardShort` … qualunque sia il tasto.
+- Provato su Linux con un'enumerazione ridotta degli stessi nomi: predefiniti, alias, modificatori esatti, valori non validi, `none`, conflitti, rilettura del file scritto.
+- Versione **1.10.0** (dopo la 1.9.0 secondo SemVer; nuova funzione compatibile = MINOR).

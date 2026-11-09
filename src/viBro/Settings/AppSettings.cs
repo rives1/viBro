@@ -87,6 +87,9 @@ internal sealed class AppSettings
     // [Delete] (1.8.0): false = "Delete" in the video's right-click menu deletes one file without confirmation
     public bool ConfirmDeleteFromVideoMenu { get; set; }
 
+    // [Keys] (1.10.0): keyboard shortcuts of the main window
+    public KeyBindings Keys { get; private set; } = KeyBindings.Defaults();
+
     // [Diagnostics]
     public bool MetricsLog { get; set; } = true;
 
@@ -163,6 +166,8 @@ internal sealed class AppSettings
         ConfirmDeleteFromVideoMenu = ReadBool("Delete", "ConfirmFromVideoMenu", ConfirmDeleteFromVideoMenu);
 
         MetricsLog = ReadBool("Diagnostics", "MetricsLog", MetricsLog);
+
+        Keys = KeyBindings.Read(k => _ini.Get(KeyBindings.Section, k), Warnings, FileName);
     }
 
     // ------------------------------------------------------------------ save
@@ -259,6 +264,8 @@ internal sealed class AppSettings
         _ini.Set("Delete", "ConfirmFromVideoMenu", B(ConfirmDeleteFromVideoMenu));
 
         _ini.Set("Diagnostics", "MetricsLog", B(MetricsLog));
+
+        foreach (var (key, value) in Keys.Lines()) _ini.Set(KeyBindings.Section, key, value);
     }
 
     // ------------------------------------------------------------------ typed readers

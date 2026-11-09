@@ -283,32 +283,33 @@ internal sealed class CommandsDialog : Window
     {
         ("Keyboard", new[]
         {
-            ("← / →", "Back / forward " + AppSettings.FormatSeconds(s.SeekLeftRightSeconds)),
-            ("↓ / ↑", "Back / forward " + AppSettings.FormatSeconds(s.SeekUpDownSeconds)),
-            ("PgDown / PgUp", "Back / forward " + AppSettings.FormatSeconds(s.SeekPageSeconds)),
-            ("Alt + PgDown / PgUp", "Back / forward " + AppSettings.FormatSeconds(s.SeekAltPageSeconds)),
-            ("Space", "Play / Pause"),
-            ("E / D", "Previous / next video (play state kept)"),
-            ("M", "Mute on / off"),
-            ("F11 / Esc", "Enter / leave fullscreen"),
-            ("Ctrl + L", "Edit the path (Enter opens, Esc cancels)"),
-            ("Enter", "Open the selected folder (\"..\" = parent folder)"),
-            ("Shift + Enter", "Open the video with the Windows default application (one file selected)"),
-            ("Del or R", "Delete the selected file(s) (confirmation)"),
-            ("F5", "Refresh the folder tree and the file list"),
-            ("F2", "Rename the file (one file selected)"),
-            ("W / Shift + W", "Move the selected file(s) to a folder / to the last move folder"),
-            ("C / Shift + C", "Copy the selected file(s) to a folder / to the last copy folder"),
-            ("Ctrl + A", "Select all the videos of the folder"),
-            ("I / O", "Start / end marker for the extract (one file selected)"),
-            ("F9", FfmpegExtractor.IsAvailable
+            // Keys from [Keys] in viBro.ini (1.10.0).
+            (s.Keys.DisplayPair(Command.SeekBackShort, Command.SeekForwardShort), "Back / forward " + AppSettings.FormatSeconds(s.SeekLeftRightSeconds)),
+            (s.Keys.DisplayPair(Command.SeekBackMedium, Command.SeekForwardMedium), "Back / forward " + AppSettings.FormatSeconds(s.SeekUpDownSeconds)),
+            (s.Keys.DisplayPair(Command.SeekBackLong, Command.SeekForwardLong), "Back / forward " + AppSettings.FormatSeconds(s.SeekPageSeconds)),
+            (s.Keys.DisplayPair(Command.SeekBackVeryLong, Command.SeekForwardVeryLong), "Back / forward " + AppSettings.FormatSeconds(s.SeekAltPageSeconds)),
+            (s.Keys.Display(Command.PlayPause), "Play / Pause"),
+            (s.Keys.DisplayPair(Command.PreviousVideo, Command.NextVideo), "Previous / next video (play state kept)"),
+            (s.Keys.Display(Command.Mute), "Mute on / off"),
+            (s.Keys.DisplayPair(Command.Fullscreen, Command.ExitFullscreen), "Enter / leave fullscreen"),
+            (s.Keys.Display(Command.FocusPath), "Edit the path (Enter opens, Esc cancels)"),
+            (s.Keys.Display(Command.OpenFolder), "Open the selected folder (\"..\" = parent folder)"),
+            (s.Keys.Display(Command.OpenWithDefaultApp), "Open the video with the Windows default application (one file selected)"),
+            (s.Keys.Display(Command.Delete), "Delete the selected file(s) (confirmation)"),
+            (s.Keys.Display(Command.Refresh), "Refresh the folder tree and the file list"),
+            (s.Keys.Display(Command.Rename), "Rename the file (one file selected)"),
+            (s.Keys.DisplayPair(Command.Move, Command.MoveToLast), "Move the selected file(s) to a folder / to the last move folder"),
+            (s.Keys.DisplayPair(Command.Copy, Command.CopyToLast), "Copy the selected file(s) to a folder / to the last copy folder"),
+            (s.Keys.Display(Command.SelectAll), "Select all the videos of the folder"),
+            (s.Keys.DisplayPair(Command.MarkIn, Command.MarkOut), "Start / end marker for the extract (one file selected)"),
+            (s.Keys.Display(Command.Extract), FfmpegExtractor.IsAvailable
                 ? "Extract the marked part to a new file in the same folder (no re-encoding: starts at the keyframe before I)"
                 : "Extract: not available, " + FfmpegExtractor.ExeName + " not found in the viBro folder"),
-            ("F10", FfmpegExtractor.IsAvailable
+            (s.Keys.Display(Command.Gallery), FfmpegExtractor.IsAvailable
                 ? $"Gallery of the folder: {s.GalleryPercents.Length} images per video (click a row: load it; click an image: load it at that time; Esc closes)"
                 : "Gallery: not available, " + FfmpegExtractor.ExeName + " not found in the viBro folder"),
-            ("Ctrl + F2", "This window"),
-            ("Ctrl + W", "Close viBro"),
+            (s.Keys.Display(Command.Commands), "This window"),
+            (s.Keys.Display(Command.Close), "Close viBro (also while editing a text)"),
         }),
         ("File list", new[]
         {

@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.11.0] - non ancora rilasciata
+## [1.11.0] - 2026-11-10
 
 ### Aggiunto
 - **F12: galleria dei video selezionati.** Con uno o più video selezionati nell'elenco, F12 apre una finestra come la galleria con una striscia per video, nell'ordine dell'elenco, e 10 immagini prese al 10, 20 … 90 % e al 99 % della durata. Strisce compatte, separate da 1 pixel; senza tempi e senza riga del nome (il nome compare nel tooltip della striscia). Funzioni come nella galleria F10: clic su una striscia = seleziona e carica il video, clic su un'immagine = lo carica a quel tempo, tasto destro = menu Delete / Move / Copy; le strisce dei file eliminati o spostati spariscono. Senza video selezionati, un avviso nella barra di stato. F12 di nuovo crea una nuova galleria; può restare aperta insieme a quella di F10.

@@ -382,3 +382,6 @@ Richiesta: con F12 una finestra come la galleria con 10 fotogrammi di ogni file 
 - **Due gallerie insieme:** F10 (cartella) e F12 (selezione) sono finestre separate; entrambe ricevono la rimozione dei file eliminati o spostati e si chiudono con viBro. F12 di nuovo sostituisce la propria.
 - Tasto in `[Keys]`: `SelectionGallery=F12`, dopo `Gallery` (ordine dei conflitti).
 - Versione 1.11.0 (nuova funzione compatibile = MINOR).
+
+## D-077 — Chiusura della 1.11.0 (2026-11-10)
+L'utente ha confermato tutte le prove di `TEST-PLAN-1.11.0.md` con l'EXE compilato da `c59c458` (codice invariato fino al tag). La 1.11.0 viene rilasciata (tag `v1.11.0`): al push del tag il job `release` crea `viBro 1.11.0`. Nessuna prova aperta passa alla versione successiva.

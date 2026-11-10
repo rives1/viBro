@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.10.0 released** (keyboard shortcuts configurable in `viBro.ini`). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.11.0 in testing** (F12: gallery of the selected videos). Last release: 1.10.0 (keyboard shortcuts configurable in `viBro.ini`). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -22,6 +22,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 - Delete, rename, move and copy files, with confirmations, progress and cancellation.
 - **Extract a part of a video** (1.5.0): I and O mark start and end, F9 writes the part to a new file in the same folder. It uses an `ffmpeg.exe` that you put next to `viBro.exe` (not included; without it the function is disabled). No re-encoding (fast, original quality): the extract starts at the keyframe at or before the start marker, which can be several seconds earlier; the end is close to the end marker. The markers appear on the timeline (green I, red O, yellow band between them) and a message confirms the extract when it is done.
 - **Gallery** (1.6.0; right-click menu 1.8.0): F10 opens a separate window with one row per video of the folder and 5 images taken at the same percentages of each video's duration (10, 30, 50, 70, 90 % by default). Clicking a row selects and loads that video in the main window; clicking an image loads it at the image's time. It uses the same `ffmpeg.exe` as the extract. The images are the keyframes nearest to those positions (fast, also on a NAS), made in the background starting from the rows on screen, kept in memory only (nothing written to disk) and reused while viBro stays open. The gallery keeps the folder it was opened on; F10 again makes a new one. Right click on a row or an image (1.8.0) selects and loads that video and opens the same menu as on the video (Delete, Move, Copy); rows of deleted or moved files leave the gallery.
+- **Selection gallery** (1.11.0): F12 opens a gallery of the videos selected in the list only, with 10 images per video (10 %, 20 % … 90 % and 99 % of the duration, `[SelectionGallery] PositionsPercent`) in compact strips: no times, no name line (the name is in the tooltip). Clicks and right-click menu as in the gallery. It can stay open together with the F10 gallery.
 - **Multiple selection** (1.7.0): Ctrl + click adds or removes a file, Shift + click selects a range, Ctrl+A selects all the videos. Delete, move and copy act on all the selected videos: one confirmation, one destination, one progress window; name conflicts are asked file by file, with "do the same for the next conflicts" and *Skip*. The video area loads the file just clicked. Rename (F2), Shift+Enter and the extract (I / O / F9) need a single selected video. The arrow keys keep seeking, so the selection is made with the mouse.
 - Light/Dark themes (*Theme* button), control bar (timeline, volume) below the video and above the file list, a timeline band below the video in fullscreen.
 - Folder icon in front of the path bar; icon buttons for Play/Pause, Mute (shows the state), Browse and Theme.
@@ -47,6 +48,7 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | `[Cache] MaxMB` | `0` | 0 = mpv cache disabled; >0 = cache enabled with this limit |
 | `[Gallery] PositionsPercent` | `10,30,50,70,90` | Positions of the gallery images, in % of each video's duration (1 to 10 values) |
 | `[Gallery] Jobs` | `2` | ffmpeg runs at a time for the gallery (1–8; more is faster on an SSD, can be slower on a NAS) |
+| `[SelectionGallery] PositionsPercent` | `10,20,30,40,50,60,70,80,90,99` | Positions of the F12 gallery images, in % of each video's duration (1 to 20 values); ffmpeg runs at a time from `[Gallery] Jobs` |
 | `[Diagnostics] MetricsLog` | `true` | Measurement log `viBro-metrics.csv`; `false` = the file is not created or written |
 | `[Delete] ConfirmFromVideoMenu` | `false` | `false` = *Delete* in the video's right-click menu deletes one file without confirmation (also on the network, where it is permanent); several files are always confirmed. `true` = always confirm |
 | `[Appearance] Theme` | `System` | `Light`, `Dark`, or `System` (follows Windows until a theme is chosen with the *Theme* button) |
@@ -79,6 +81,7 @@ The keys below are the defaults. Since 1.10.0 every keyboard shortcut of the mai
 | `MarkIn / MarkOut` | `I / O` |  |
 | `Extract` | `F9` |  |
 | `Gallery` | `F10` |  |
+| `SelectionGallery` | `F12` |  |
 | `Commands` | `Ctrl+F2` |  |
 | `Close` | `Ctrl+W` | also while editing a text |
 
@@ -107,6 +110,7 @@ The keys below are the defaults. Since 1.10.0 every keyboard shortcut of the mai
 | I / O | Set the start / end marker of an extract at the current position (status bar; also over the video in fullscreen) | 1.5.0 |
 | F9 | Save the part between I and O as a new file in the same folder, `name-extract-yyMMdd-HHmm.ext` (e.g. `clip.mp4` → `clip-extract-261104-1445.mp4`; `-2`, `-3` … if it exists). Needs `ffmpeg.exe` next to `viBro.exe` | 1.5.0 |
 | F10 | Gallery of the folder's videos in a separate window (Esc closes it). Needs `ffmpeg.exe` next to `viBro.exe` | 1.6.0 |
+| F12 | Gallery of the selected videos (compact strips, 10 images each). Needs `ffmpeg.exe` | 1.11.0 |
 | Ctrl + F2 | Show the commands window (keyboard and mouse) | 1.2.0 |
 | Ctrl + W | Close viBro | 0.6.0 |
 

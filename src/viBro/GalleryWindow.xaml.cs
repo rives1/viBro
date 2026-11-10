@@ -39,7 +39,8 @@ public partial class GalleryWindow : Window
     private ScrollViewer? _scroller;
     private VirtualizingStackPanel? _panel;
 
-    internal GalleryWindow(MainWindow main, string folder, IReadOnlyList<VideoItem> videos, double[] percents, int jobs)
+    /// <param name="compact">F12 (1.11.0): one compact strip per selected video, name only in the tooltip, no times.</param>
+    internal GalleryWindow(MainWindow main, string title, IReadOnlyList<VideoItem> videos, double[] percents, int jobs, bool compact = false)
     {
         InitializeComponent();
         ThemeManager.AttachWindow(this);
@@ -48,7 +49,17 @@ public partial class GalleryWindow : Window
         _jobs = Math.Max(1, jobs);
         _rows = videos.Select((v, i) => new GalleryRow(v, i, percents.Length)).ToList();
         _view = new ObservableCollection<GalleryRow>(_rows);
-        Title = "Gallery - " + folder;
+        Title = title;
+        Rows.ItemTemplate = (DataTemplate)FindResource(compact ? "CompactRow" : "NormalRow");
+        if (compact)
+        {
+            // Strips as close as possible: no padding or margin around the rows (based on the theme's style if any).
+            var style = new Style(typeof(ListBoxItem), TryFindResource(typeof(ListBoxItem)) as Style);
+            style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
+            style.Setters.Add(new Setter(FrameworkElement.MarginProperty, new Thickness(0, 0, 0, 1)));
+            style.Setters.Add(new Setter(FrameworkElement.MinHeightProperty, 0.0));
+            Rows.ItemContainerStyle = style;
+        }
         Rows.ItemsSource = _view;
         UpdateStatus();
         Loaded += (_, _) => Start();

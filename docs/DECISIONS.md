@@ -373,3 +373,12 @@ Richiesta: mettere nel file .ini le mappature di tutti i tasti.
 
 ## D-075 — Chiusura della 1.10.0 (2026-11-09)
 L'utente ha confermato tutte le prove di `TEST-PLAN-1.10.0.md` con l'EXE compilato da `f73ab7b` (codice invariato fino al tag). La 1.10.0 viene rilasciata (tag `v1.10.0`): al push del tag il job `release` crea `viBro 1.10.0`, che diventa *Latest* (ordinamento per versione: 1.10.0 > 1.9.0). Nessuna prova aperta passa alla versione successiva.
+
+## D-076 — Contenuto della 1.11.0 (2026-11-10, richieste dell'utente)
+Richiesta: con F12 una finestra come la galleria con 10 fotogrammi di ogni file selezionato (uno ogni 10 % e l'ultimo al 99 %, parametro nel file .ini), strisce con spazi minimi, senza tempi, stesse funzioni sui file della galleria.
+- **Stessa finestra della galleria** (`GalleryWindow`) in modalità compatta: lavoro in background, cache in memoria, clic, menu del tasto destro e rimozione delle righe sono gli stessi. Modello di riga diverso (`CompactRow`): solo le immagini, riquadri 16:9 separati da 1 pixel, nessuna riga del nome e nessun tempo; nome nel tooltip della striscia (scelta dell'utente). Stile delle righe basato su quello del tema, con imbottitura e margini a 0 (1 pixel tra le strisce).
+- **Video:** solo quelli selezionati, in ordine di elenco; nessuno selezionato = avviso. Il clic su un'immagine porta comunque al tempo dell'immagine (fotogramma chiave), anche se il tempo non è scritto.
+- **Parametro** (scelta dell'utente: l'elenco completo): `[SelectionGallery] PositionsPercent`, predefinito `10,20,…,90,99`, da 1 a 20 valori (la galleria F10 resta a 10). Esecuzioni contemporanee da `[Gallery] Jobs`.
+- **Due gallerie insieme:** F10 (cartella) e F12 (selezione) sono finestre separate; entrambe ricevono la rimozione dei file eliminati o spostati e si chiudono con viBro. F12 di nuovo sostituisce la propria.
+- Tasto in `[Keys]`: `SelectionGallery=F12`, dopo `Gallery` (ordine dei conflitti).
+- Versione 1.11.0 (nuova funzione compatibile = MINOR).

@@ -93,6 +93,7 @@ Shift + Invio	Apre il video selezionato con l’applicazione predefinita di Wind
 I / O	Marker di inizio / fine dell’estratto nella posizione corrente (1.5.0)
 F9	Salva la parte tra I e O in un nuovo file nella stessa cartella, senza ricodifica; richiede ffmpeg.exe accanto a viBro.exe (1.5.0)
 F10	Galleria dei video della cartella in una finestra separata: per ogni video una riga con 5 immagini alle stesse percentuali della durata (predefinite 10/30/50/70/90 %, [Gallery] in viBro.ini); clic su una riga = seleziona e carica il video, clic su un’immagine = lo carica a quel tempo; richiede ffmpeg.exe (1.6.0)
+F12	Galleria dei video selezionati: per ogni video una striscia compatta con 10 immagini (10 % … 90 % e 99 % della durata, [SelectionGallery] in viBro.ini), senza tempi, nome nel tooltip; stesse funzioni della galleria (1.11.0)
 
 Le durate dei salti indicate sopra sono quelle predefinite: dalla 1.4.0 si cambiano nella sezione [Seek] di viBro.ini.
 
@@ -198,6 +199,7 @@ Versione	Obiettivo
 1.8.0	F5 aggiorna albero ed elenco; file AVI; elimina dal menu del video senza conferma; menu del tasto destro nella galleria (rilasciata il 2026-11-06)
 1.9.0	Rotella anche con viBro non in primo piano; rotella sulla barra invertita; tasto destro + rotella cambia video; file M4V (rilasciata il 2026-11-07)
 1.10.0	Scorciatoie da tastiera configurabili in viBro.ini ([Keys]) (rilasciata il 2026-11-09)
+1.11.0	Galleria dei video selezionati con F12
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

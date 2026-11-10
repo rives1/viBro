@@ -13,7 +13,7 @@ internal enum Command
     PlayPause, PreviousVideo, NextVideo, Mute, Fullscreen, ExitFullscreen,
     FocusPath, SelectAll, Refresh, OpenFolder, OpenWithDefaultApp,
     Delete, Rename, Move, MoveToLast, Copy, CopyToLast,
-    MarkIn, MarkOut, Extract, Gallery, Commands, Close,
+    MarkIn, MarkOut, Extract, Gallery, SelectionGallery, Commands, Close,
 }
 
 /// <summary>A key with its exact modifiers (Ctrl, Alt, Shift; the Windows key is not used).</summary>
@@ -68,6 +68,7 @@ internal sealed class KeyBindings
         new(Command.MarkOut, "O", false),
         new(Command.Extract, "F9", false),
         new(Command.Gallery, "F10", false),
+        new(Command.SelectionGallery, "F12", false), // 1.11.0
         new(Command.Commands, "Ctrl+F2", false),
         new(Command.Close, "Ctrl+W", false),
     };

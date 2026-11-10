@@ -11,6 +11,54 @@
          load it at the image's time. -->
     <Window.Resources>
         <local:AspectHeightConverter x:Key="AspectHeight" />
+        <DataTemplate x:Key="NormalRow">
+            <StackPanel Margin="0,2,0,6">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Right" Text="{Binding Info}" Opacity="0.7" Margin="12,0,0,0" />
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                </DockPanel>
+                <ItemsControl ItemsSource="{Binding Cells}" Margin="0,4,0,0" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="1" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="2,0">
+                                <!-- 16:9 box whatever the window width: rows keep their height while images arrive. -->
+                                <Border Background="#30808080" Cursor="Hand"
+                                        Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}, Converter={StaticResource AspectHeight}}"
+                                        ToolTip="Click: load the video at this time. Right click: delete, move, copy"
+                                        MouseLeftButtonDown="Cell_MouseLeftButtonDown">
+                                    <Image Source="{Binding Image}" Stretch="Uniform" />
+                                </Border>
+                                <TextBlock Text="{Binding Label}" HorizontalAlignment="Center" Opacity="0.75" FontSize="11" Margin="0,1,0,0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
+        <!-- F12 (1.11.0): selected videos, no name line (name in the tooltip), no times, minimal spacing. -->
+        <DataTemplate x:Key="CompactRow">
+            <ItemsControl ItemsSource="{Binding Cells}" Focusable="False" ToolTip="{Binding Name}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#30808080" Cursor="Hand" Margin="0,0,1,0"
+                                Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}, Converter={StaticResource AspectHeight}}"
+                                MouseLeftButtonDown="Cell_MouseLeftButtonDown">
+                            <Image Source="{Binding Image}" Stretch="Uniform" />
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DataTemplate>
     </Window.Resources>
     <DockPanel>
         <TextBlock x:Name="StatusText" DockPanel.Dock="Bottom" Margin="10,4,10,6" TextTrimming="CharacterEllipsis" />
@@ -25,37 +73,6 @@
                  PreviewMouseLeftButtonUp="Rows_PreviewMouseLeftButtonUp"
                  PreviewMouseRightButtonUp="Rows_PreviewMouseRightButtonUp"
                  ScrollViewer.ScrollChanged="Rows_ScrollChanged">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Margin="0,2,0,6">
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Right" Text="{Binding Info}" Opacity="0.7" Margin="12,0,0,0" />
-                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                        </DockPanel>
-                        <ItemsControl ItemsSource="{Binding Cells}" Margin="0,4,0,0" Focusable="False">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Rows="1" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Margin="2,0">
-                                        <!-- 16:9 box whatever the window width: rows keep their height while images arrive. -->
-                                        <Border Background="#30808080" Cursor="Hand"
-                                                Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}, Converter={StaticResource AspectHeight}}"
-                                                ToolTip="Click: load the video at this time. Right click: delete, move, copy"
-                                                MouseLeftButtonDown="Cell_MouseLeftButtonDown">
-                                            <Image Source="{Binding Image}" Stretch="Uniform" />
-                                        </Border>
-                                        <TextBlock Text="{Binding Label}" HorizontalAlignment="Center" Opacity="0.75" FontSize="11" Margin="0,1,0,0" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
         </ListBox>
     </DockPanel>
 </Window>

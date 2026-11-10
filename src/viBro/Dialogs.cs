@@ -308,6 +308,9 @@ internal sealed class CommandsDialog : Window
             (s.Keys.Display(Command.Gallery), FfmpegExtractor.IsAvailable
                 ? $"Gallery of the folder: {s.GalleryPercents.Length} images per video (click a row: load it; click an image: load it at that time; Esc closes)"
                 : "Gallery: not available, " + FfmpegExtractor.ExeName + " not found in the viBro folder"),
+            (s.Keys.Display(Command.SelectionGallery), FfmpegExtractor.IsAvailable
+                ? $"Gallery of the selected videos: {s.SelectionGalleryPercents.Length} images per video in compact strips (name in the tooltip; same clicks and menu as the gallery)"
+                : "Selection gallery: not available, " + FfmpegExtractor.ExeName + " not found in the viBro folder"),
             (s.Keys.Display(Command.Commands), "This window"),
             (s.Keys.Display(Command.Close), "Close viBro (also while editing a text)"),
         }),

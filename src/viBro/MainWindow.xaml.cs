@@ -174,7 +174,7 @@ public partial class MainWindow : Window
     private void Window_Closing(object? sender, CancelEventArgs e)
     {
         if (_isFullscreen) ExitFullscreen();
-        _gallery?.Close(); // stops its ffmpeg runs
+        foreach (var g in OpenGalleries.ToList()) g.Close(); // stops their ffmpeg runs
         _uiTimer.Stop();
         ComponentDispatcher.ThreadPreprocessMessage -= OnThreadPreprocessMessage;
         _folderCts?.Cancel();
@@ -878,6 +878,7 @@ public partial class MainWindow : Window
 
             // F10 by default, a system key: handled here so Windows does not enter menu mode.
             case Command.Gallery: Dispatcher.BeginInvoke(new Action(OpenGallery)); break; // after this key message
+            case Command.SelectionGallery: Dispatcher.BeginInvoke(new Action(OpenSelectionGallery)); break;
             case Command.Commands: Dispatcher.BeginInvoke(new Action(() => CommandsDialog.Open(this, _settings))); break;
             case Command.Close: Dispatcher.BeginInvoke(new Action(Close)); break;
         }

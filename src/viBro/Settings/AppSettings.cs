@@ -81,6 +81,10 @@ internal sealed class AppSettings
     public double[] GalleryPercents { get; set; } = (double[])DefaultGalleryPercents.Clone();
     public int GalleryJobs { get; set; } = 2;
 
+    // [SelectionGallery] (F12, 1.11.0): image positions for the gallery of the selected videos
+    public static readonly double[] DefaultSelectionGalleryPercents = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 99 };
+    public double[] SelectionGalleryPercents { get; set; } = (double[])DefaultSelectionGalleryPercents.Clone();
+
     // [Cache]
     public int CacheMaxMB { get; set; } // 0 = mpv cache disabled (only the minimal demuxer read-ahead)
 
@@ -160,6 +164,7 @@ internal sealed class AppSettings
 
         GalleryPercents = ReadPercentList("Gallery", "PositionsPercent", GalleryPercents);
         GalleryJobs = ReadInt("Gallery", "Jobs", GalleryJobs, 1, 8);
+        SelectionGalleryPercents = ReadPercentList("SelectionGallery", "PositionsPercent", SelectionGalleryPercents, 20);
 
         CacheMaxMB = ReadInt("Cache", "MaxMB", CacheMaxMB, 0, 4096);
 
@@ -258,6 +263,7 @@ internal sealed class AppSettings
 
         _ini.Set("Gallery", "PositionsPercent", string.Join(",", Array.ConvertAll(GalleryPercents, D)));
         _ini.Set("Gallery", "Jobs", GalleryJobs.ToString(c));
+        _ini.Set("SelectionGallery", "PositionsPercent", string.Join(",", Array.ConvertAll(SelectionGalleryPercents, D)));
 
         _ini.Set("Cache", "MaxMB", CacheMaxMB.ToString(c));
 
@@ -293,8 +299,8 @@ internal sealed class AppSettings
         return null;
     }
 
-    /// <summary>"10,30,50,70,90": 1 to 10 values from 0 to 100, kept in the given order.</summary>
-    private double[] ReadPercentList(string section, string key, double[] def)
+    /// <summary>"10,30,50,70,90": 1 to <paramref name="max"/> values from 0 to 100, kept in the given order.</summary>
+    private double[] ReadPercentList(string section, string key, double[] def, int max = 10)
     {
         string? v = _ini.Get(section, key);
         if (string.IsNullOrWhiteSpace(v)) return def;
@@ -309,7 +315,7 @@ internal sealed class AppSettings
             }
             list.Add(d);
         }
-        if (list.Count is >= 1 and <= 10) return list.ToArray();
+        if (list.Count >= 1 && list.Count <= max) return list.ToArray();
         Invalid(section, key, v);
         return def;
     }

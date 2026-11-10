@@ -11,7 +11,41 @@ namespace ViBro;
 // click on an image loads it at the image's time.
 public partial class MainWindow
 {
-    private GalleryWindow? _gallery;
+    private GalleryWindow? _gallery;          // F10: the folder
+    private GalleryWindow? _selectionGallery; // F12 (1.11.0): the selected videos
+
+    /// <summary>Both galleries, for updates (rows of deleted or moved files) and for closing.</summary>
+    private System.Collections.Generic.IEnumerable<GalleryWindow> OpenGalleries
+        => new[] { _gallery, _selectionGallery }.OfType<GalleryWindow>();
+
+    /// <summary>
+    /// F12 (1.11.0): a gallery of the selected videos only, in list order, with the images of
+    /// [SelectionGallery] PositionsPercent (10 % … 90 % and 99 % by default) in compact strips. Same
+    /// clicks and right-click menu as the folder gallery; F12 again makes a new one.
+    /// </summary>
+    private void OpenSelectionGallery()
+    {
+        if (!FfmpegExtractor.IsAvailable)
+        {
+            SetStatus($"Gallery not available: put {FfmpegExtractor.ExeName} in the viBro folder ({AppInfo.ExeDirectory}).");
+            return;
+        }
+        var videos = SelectedVideos;
+        if (videos.Count == 0)
+        {
+            SetStatus("Select one or more videos in the list, then open the selection gallery.");
+            return;
+        }
+        _selectionGallery?.Close();
+        string title = $"Selection gallery - {(videos.Count == 1 ? "1 video" : videos.Count + " videos")} - {_currentFolder}";
+        var g = new GalleryWindow(this, title, videos, _settings.SelectionGalleryPercents, _settings.GalleryJobs, compact: true);
+        g.Closed += (_, _) =>
+        {
+            if (ReferenceEquals(_selectionGallery, g)) _selectionGallery = null;
+        };
+        _selectionGallery = g;
+        g.Show();
+    }
 
     private void OpenGallery()
     {
@@ -33,7 +67,7 @@ public partial class MainWindow
         }
 
         _gallery?.Close(); // F10 again: a new gallery of the current folder
-        var g = new GalleryWindow(this, _currentFolder, videos, _settings.GalleryPercents, _settings.GalleryJobs);
+        var g = new GalleryWindow(this, "Gallery - " + _currentFolder, videos, _settings.GalleryPercents, _settings.GalleryJobs);
         g.Closed += (_, _) =>
         {
             if (ReferenceEquals(_gallery, g)) _gallery = null;

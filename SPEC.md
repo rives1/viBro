@@ -203,7 +203,7 @@ Versione	Obiettivo
 1.10.0	Scorciatoie da tastiera configurabili in viBro.ini ([Keys]) (rilasciata il 2026-11-09)
 1.11.0	Galleria dei video selezionati con F12 (rilasciata il 2026-11-10)
 1.12.0	Solidità: gallerie con un solo ffmpeg per video, tastiera nelle gallerie, file coinvolti non caricabili durante le operazioni, misure disattivate per impostazione predefinita, regressione unica (rilasciata il 2026-11-11)
-1.13.0	Interfaccia: barra di stato in tre zone con storico, briciole, volume da tastiera, puntatore nascosto a schermo intero, guida nel riquadro vuoto, gallerie con video caricato evidenziato, tempi nelle immagini e posizione ricordata, un solo formato dei tempi
+1.13.0	Interfaccia: barra di stato in tre zone con storico, briciole, volume da tastiera, puntatore nascosto a schermo intero, guida nel riquadro vuoto, gallerie con video caricato evidenziato, tempi nelle immagini e posizione ricordata, un solo formato dei tempi (rilasciata il 2026-11-11)
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

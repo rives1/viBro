@@ -1,9 +1,9 @@
 # CONTEXT — viBro: stato per riprendere il lavoro
 
-_Aggiornato: 2026-11-11 · branch `main` · ultima versione rilasciata **1.12.0** (tag `v1.12.0`) · **in prova: 1.13.0** (codice pronto, piano da eseguire)_
+_Aggiornato: 2026-11-11 · branch `main` · ultima versione rilasciata **1.13.0** (tag `v1.13.0`) · **prossima versione: da definire**_
 
 ## 1. Il progetto in breve
-**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-080 in [docs/DECISIONS.md](docs/DECISIONS.md).
+**viBro** è un'applicazione desktop per Windows 11 x64 per sfogliare cartelle di video, vederli all'istante (caricamento **in pausa**, salti rapidi) e organizzarli (elimina, rinomina, sposta). È distribuita come un unico `viBro.exe` portabile, senza installazione né privilegi di amministratore. Tecnologie: C#/WPF su .NET 10 e libmpv. Licenza GPL-3.0-or-later. Specifica approvata in [SPEC.md](SPEC.md); decisioni D-001…D-081 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 - Cartella sul PC dell'utente: il percorso è nel documento privato del progetto claude.ai, non nel repository pubblico (D-053). Il remote GitHub è `https://github.com/rives1/viBro`; il ramo locale ha commit e i tag `v0.3.0`, `v0.5.0` e `v0.6.0` forse non ancora pubblicati (`git push --follow-tags`), e il push lo fa l'utente.
 - Compilazione: `build.cmd`, che installa per l'utente il .NET SDK 10 in `.dotnet\`, scarica e verifica libmpv, pubblica `artifacts\publish\viBro.exe` e crea lo zip in `dist\`. `build\build.ps1 -Compress` produce la variante compressa in `artifacts\publish-compressed`. **Variante predefinita: EXE normale** (D-047: avvio 410 ms contro 575, ~70 MB di memoria in meno).
@@ -31,7 +31,7 @@ _Aggiornato: 2026-11-11 · branch `main` · ultima versione rilasciata **1.12.0*
 | 1.10.0 | Scorciatoie da tastiera configurabili in `[Keys]` di `viBro.ini` (31 comandi, modificatori esatti, conflitti: vince il primo), Ctrl+F2 con i tasti in uso (D-074) | ✔ tag `v1.10.0` (2026-11-09): tutte le prove superate (D-075) |
 | 1.11.0 | F12: galleria dei video selezionati, strisce compatte con 10 immagini (10 … 90 % e 99 %, `[SelectionGallery] PositionsPercent`), nome nel tooltip, stesse funzioni della galleria (D-076) | ✔ tag `v1.11.0` (2026-11-10): tutte le prove superate (D-077) |
 | 1.12.0 | Solidità (revisione del 2026-11-11): gallerie con un solo ffmpeg per video (`[Gallery] Method`, ripiego automatico), immagine mancante ripresa più indietro, tastiera nelle gallerie, file coinvolti in elimina/sposta non caricabili, `MetricsLog` predefinito `false` con limite 10 MB, `.gitignore`, regressione unica `docs/TEST-REGRESSION.md` (D-078) | ✔ tag `v1.12.0` (2026-11-11): tutte le prove superate, regressione compresa (D-079) |
-| 1.13.0 | Interfaccia: barra di stato in tre zone (messaggi colorati fermi 6 s, storico degli ultimi 20 al clic, formato a destra, misure solo con MetricsLog), briciole + Backspace, volume `+`/`-`, puntatore nascosto a schermo intero, guida nel riquadro vuoto, gallerie con video caricato evidenziato, tempi nelle immagini e posizione ricordata, un solo formato dei tempi (D-080) | in prova: [docs/TEST-PLAN-1.13.0.md](docs/TEST-PLAN-1.13.0.md) |
+| 1.13.0 | Interfaccia: barra di stato in tre zone (messaggi colorati fermi 6 s, storico degli ultimi 20 al clic, formato a destra, misure solo con MetricsLog), briciole + Backspace, volume `+`/`-`, puntatore nascosto a schermo intero, guida nel riquadro vuoto, gallerie con video caricato evidenziato, tempi nelle immagini e posizione ricordata, un solo formato dei tempi (D-080) | ✔ tag `v1.13.0` (2026-11-11): tutte le prove superate, regressione compresa (D-081) |
 
 ## 3. Misure chiave (0.1.0, NAS con unità mappata, d3d11va)
 - Cambio video: mediana 140–500 ms sul NAS (MP4 più lenti per la lettura dell'indice; MKV 66–120 ms), ~38 ms in locale. viBro aggiunge pochi ms rispetto a mpv (verificato con il log di mpv).
@@ -41,8 +41,8 @@ _Aggiornato: 2026-11-11 · branch `main` · ultima versione rilasciata **1.12.0*
 - Memoria: 260–470 MB, stabile. I salti sui fotogrammi chiave per ±1/±5 s **non spostavano l'immagine** (GOP di 5–24 s): da qui la modalità mista (D-007).
 
 ## 4. Stato attuale e prossimo passo
-1. **1.12.0 rilasciata il 2026-11-11** (tag `v1.12.0`, D-079). Tutte le prove di [docs/TEST-PLAN-1.12.0.md](docs/TEST-PLAN-1.12.0.md) e di [docs/TEST-REGRESSION.md](docs/TEST-REGRESSION.md) superate.
-2. **1.13.0 in prova** (D-080): l'utente esegue `build.cmd`, [docs/TEST-PLAN-1.13.0.md](docs/TEST-PLAN-1.13.0.md) e [docs/TEST-REGRESSION.md](docs/TEST-REGRESSION.md); punto da confermare: puntatore nascosto anche sopra il video a schermo intero. Dopo la conferma: data nel CHANGELOG, D-081 di chiusura, fotografia `docs/handover/CONTEXT-v1.13.0.md`, tag `v1.13.0`. Dalla 1.12.0 manca facoltativamente il dato dei tempi Combined / Separate sul NAS (D-079). Nella cartella c'è un file dell'utente non versionato, `vibro Version features request.md`: non va aggiunto ai commit (usare `git add -u` più i file nuovi esplicitamente).
+1. **1.13.0 rilasciata il 2026-11-11** (tag `v1.13.0`, D-081). Tutte le prove di [docs/TEST-PLAN-1.13.0.md](docs/TEST-PLAN-1.13.0.md) e di [docs/TEST-REGRESSION.md](docs/TEST-REGRESSION.md) superate.
+2. Nessuna prova aperta. Da fare dall'utente: `git push --follow-tags` per pubblicare la 1.13.0 (il job `release` crea la release). Facoltativo: i tempi Combined / Separate sul NAS da aggiungere a D-079. Prossimo passo: l'utente definisce eventuali versioni successive. Nella cartella c'è un file dell'utente non versionato, `vibro Version features request.md`: non va aggiunto ai commit (usare `git add -u` più i file nuovi esplicitamente).
 3. Distribuzione solo come sorgente (D-052); EXE predefinito normale (D-047); autore `rives1` (D-054). `ffmpeg.exe` non è incluso né distribuito.
 4. Proposte non scelte finora: annullare l'ultima operazione con Ctrl+Z (proposta del 2026-11-11), test automatici delle parti senza interfaccia eseguiti dal workflow (punto 1 della revisione del 2026-11-11), coda di copia/spostamento con pannello di avanzamento in basso (ritirata dall'utente il 2026-11-05; analisi in D-070).
 5. Da fare dall'utente su GitHub, se non già fatto: cancellare gli artifact delle esecuzioni precedenti e le release in bozza dei tag (D-052); `git push --follow-tags`.
@@ -72,4 +72,4 @@ _Aggiornato: 2026-11-11 · branch `main` · ultima versione rilasciata **1.12.0*
 - **Flusso per ogni versione:** domande, codice, compilazione e test su Linux, copia sul PC, documentazione (CHANGELOG, DECISIONS, CONTEXT, TEST-PLAN), commit; poi l'utente esegue `build.cmd` e il piano di prova; infine chiusura con data, fotografia `docs/handover/CONTEXT-vX.Y.Z.md` e tag.
 
 ## 8. Messaggio per riprendere in una nuova chat
-> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 1.12.0 è rilasciata (tag `v1.12.0`); la 1.13.0 è in prova (`docs/TEST-PLAN-1.13.0.md`).
+> Progetto viBro nella cartella del progetto sul mio PC. Leggi `CONTEXT.md`, `SPEC.md` e `docs/DECISIONS.md`. La 1.13.0 è rilasciata (tag `v1.13.0`); ti descrivo cosa voglio nella prossima versione.

@@ -22,13 +22,26 @@
             <!-- Decorative folder icon, the same as in the tree. -->
             <Image x:Name="PathIcon" DockPanel.Dock="Left" Width="16" Height="16" Margin="2,0,6,0"
                    VerticalAlignment="Center" Focusable="False" />
-            <TextBox x:Name="PathBox" VerticalContentAlignment="Center" Padding="2"
-                     ToolTip="Folder path (local, mapped drive or \\server\share). Ctrl+L to edit, Enter to open, Esc to cancel."
-                     PreviewKeyDown="PathBox_PreviewKeyDown" />
+            <!-- 1.13.0: clickable "breadcrumbs"; a click on the empty part (or Ctrl+L) turns the bar into
+                 an editable path, as in File Explorer. -->
+            <Grid>
+                <Border x:Name="CrumbBar" BorderThickness="1" CornerRadius="4" BorderBrush="#40808080" Background="Transparent"
+                        MinHeight="30" Padding="2,0" Cursor="IBeam" PreviewMouseLeftButtonUp="CrumbBar_PreviewMouseLeftButtonUp"
+                        ToolTip="Click a folder to open it; click the empty part (or Ctrl+L) to type a path. Backspace: parent folder.">
+                    <ScrollViewer x:Name="CrumbScroll" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled"
+                                  Focusable="False" VerticalAlignment="Center">
+                        <StackPanel x:Name="CrumbPanel" Orientation="Horizontal" />
+                    </ScrollViewer>
+                </Border>
+                <TextBox x:Name="PathBox" VerticalContentAlignment="Center" Padding="2" Visibility="Collapsed"
+                         ToolTip="Folder path (local, mapped drive or \\server\share). Enter opens, Esc cancels."
+                         PreviewKeyDown="PathBox_PreviewKeyDown" LostKeyboardFocus="PathBox_LostKeyboardFocus" />
+            </Grid>
         </DockPanel>
 
-        <!-- Compact status bar: Fluent pads it by 12 px and each item by 4 px; here it is just taller
-             than its text. Left: videos in the folder and their total size. -->
+        <!-- Compact status bar in three zones (1.13.0): left the folder summary, right the format of the
+             loaded video (and the measurements, only with [Diagnostics] MetricsLog=true), centre the
+             messages: errors orange and results green stay 6 s; a click shows the last 20 messages. -->
         <StatusBar x:Name="StatusPanel" DockPanel.Dock="Bottom" Padding="4,0">
             <StatusBarItem Padding="4,1">
                 <TextBlock x:Name="WarningText" Foreground="DarkOrange" FontWeight="SemiBold" Visibility="Collapsed" />
@@ -37,12 +50,25 @@
                 <TextBlock x:Name="FolderSummaryText" />
             </StatusBarItem>
             <Separator />
-            <StatusBarItem Padding="4,1">
-                <TextBlock x:Name="StatusText" Text="Ready" />
-            </StatusBarItem>
-            <Separator />
-            <StatusBarItem Padding="4,1">
+            <StatusBarItem x:Name="MetricsItem" DockPanel.Dock="Right" Padding="4,1" Visibility="Collapsed">
                 <TextBlock x:Name="MetricsText" />
+            </StatusBarItem>
+            <Separator x:Name="MetricsSeparator" DockPanel.Dock="Right" Visibility="Collapsed" />
+            <StatusBarItem DockPanel.Dock="Right" Padding="4,1">
+                <TextBlock x:Name="MediaText" />
+            </StatusBarItem>
+            <Separator DockPanel.Dock="Right" />
+            <StatusBarItem Padding="4,1" Cursor="Hand" MouseLeftButtonUp="StatusText_MouseLeftButtonUp"
+                           ToolTip="Click: the last 20 messages">
+                <Grid>
+                    <TextBlock x:Name="StatusText" Text="Ready" TextTrimming="CharacterEllipsis" />
+                    <Popup x:Name="StatusHistoryPopup" PlacementTarget="{Binding ElementName=StatusText}" Placement="Top"
+                           StaysOpen="False" AllowsTransparency="True">
+                        <Border x:Name="StatusHistoryBorder" BorderThickness="1" BorderBrush="#60808080" CornerRadius="4" Padding="8,6">
+                            <StackPanel x:Name="StatusHistoryList" MinWidth="320" MaxWidth="900" />
+                        </Border>
+                    </Popup>
+                </Grid>
             </StatusBarItem>
         </StatusBar>
 
@@ -113,7 +139,7 @@
                                     </Border>
                                 </Popup>
                                 <TextBlock x:Name="TimeText" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="10,0,0,0"
-                                           FontFamily="Consolas" Text="00:00:00 / 00:00:00" />
+                                           FontFamily="Consolas" Text="0:00 / 0:00" />
                                 <Grid Margin="10,0,0,0" VerticalAlignment="Center">
                                     <Slider x:Name="TimeSlider" Minimum="0" Maximum="1" Focusable="False" IsMoveToPointEnabled="True"
                                             ValueChanged="TimeSlider_ValueChanged" SizeChanged="TimeSlider_SizeChanged"
@@ -129,7 +155,13 @@
                         </DockPanel>
                     </Border>
                     <Border Background="Black">
-                        <mpv:MpvHost x:Name="VideoHost" />
+                        <Grid>
+                            <!-- 1.13.0: shown while no video is loaded (the native video window is hidden then,
+                                 because nothing can be drawn over it). -->
+                            <TextBlock x:Name="VideoPlaceholder" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Foreground="#909090" FontSize="15" TextAlignment="Center" TextWrapping="Wrap" Margin="20" />
+                            <mpv:MpvHost x:Name="VideoHost" />
+                        </Grid>
                     </Border>
                 </DockPanel>
 

@@ -24,8 +24,13 @@ public partial class MainWindow
     private void SetCurrentItem(VideoItem? item)
     {
         if (!ReferenceEquals(_currentItem, item)) _currentItem?.SetCurrent(false, true);
+        bool changed = !ReferenceEquals(_currentItem, item);
         _currentItem = item;
         item?.SetCurrent(true, _player?.IsPaused ?? true);
+        if (!changed) return;
+        if (item == null) MediaText.Text = "";
+        foreach (var g in OpenGalleries) g.SetCurrent(item?.FullPath); // 1.13.0: the loaded row is marked
+        UpdateVideoPlaceholder();
     }
 
     /// <summary>Glyphs and tooltips follow the player state; updated only when it changes.</summary>

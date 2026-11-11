@@ -85,7 +85,9 @@ Ctrl + F2	Finestra dei comandi di tastiera e mouse (1.2.0)
 M	Mute on/off
 F11	Schermo intero
 Esc	Esce dallo schermo intero
-Ctrl + L	Attiva la barra del percorso
+Ctrl + L	Attiva la barra del percorso (dalla 1.13.0 la barra mostra il percorso a briciole cliccabili; Ctrl+L o un clic sulla parte vuota la rende modificabile)
+Backspace	Cartella superiore (1.13.0)
++ / -	Volume su / giù del 5 %, valore mostrato sopra il video (1.13.0)
 Ctrl + A	Seleziona tutti i video della cartella (1.7.0)
 F5	Aggiorna l’albero delle cartelle e l’elenco dei file dal disco, conservando cartelle aperte, selezione e video caricato (1.8.0)
 Invio	Apre la cartella selezionata nell’elenco (1.3.0)
@@ -201,6 +203,7 @@ Versione	Obiettivo
 1.10.0	Scorciatoie da tastiera configurabili in viBro.ini ([Keys]) (rilasciata il 2026-11-09)
 1.11.0	Galleria dei video selezionati con F12 (rilasciata il 2026-11-10)
 1.12.0	Solidità: gallerie con un solo ffmpeg per video, tastiera nelle gallerie, file coinvolti non caricabili durante le operazioni, misure disattivate per impostazione predefinita, regressione unica (rilasciata il 2026-11-11)
+1.13.0	Interfaccia: barra di stato in tre zone con storico, briciole, volume da tastiera, puntatore nascosto a schermo intero, guida nel riquadro vuoto, gallerie con video caricato evidenziato, tempi nelle immagini e posizione ricordata, un solo formato dei tempi
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

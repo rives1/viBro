@@ -291,8 +291,10 @@ internal sealed class CommandsDialog : Window
             (s.Keys.Display(Command.PlayPause), "Play / Pause"),
             (s.Keys.DisplayPair(Command.PreviousVideo, Command.NextVideo), "Previous / next video (play state kept)"),
             (s.Keys.Display(Command.Mute), "Mute on / off"),
+            (s.Keys.DisplayPair(Command.VolumeUp, Command.VolumeDown), "Volume up / down by 5 % (value shown over the video)"),
             (s.Keys.DisplayPair(Command.Fullscreen, Command.ExitFullscreen), "Enter / leave fullscreen"),
-            (s.Keys.Display(Command.FocusPath), "Edit the path (Enter opens, Esc cancels)"),
+            (s.Keys.Display(Command.FocusPath), "Edit the path (Enter opens, Esc cancels); a click on a folder of the path opens it"),
+            (s.Keys.Display(Command.ParentFolder), "Parent folder (the folder just left is selected)"),
             (s.Keys.Display(Command.OpenFolder), "Open the selected folder (\"..\" = parent folder)"),
             (s.Keys.Display(Command.OpenWithDefaultApp), "Open the video with the Windows default application (one file selected)"),
             (s.Keys.Display(Command.Delete), "Delete the selected file(s) (confirmation)"),
@@ -338,7 +340,8 @@ internal sealed class CommandsDialog : Window
             (s.Keys.Display(Command.Delete) + ", " + s.Keys.Display(Command.Rename) + ", " +
              s.Keys.DisplayPair(Command.Move, Command.MoveToLast) + ", " + s.Keys.DisplayPair(Command.Copy, Command.CopyToLast),
                 "Delete (confirmation), rename, move, copy the selected row's video"),
-            (s.Keys.Display(Command.PlayPause) + ", " + s.Keys.Display(Command.Mute), "Play / Pause, mute"),
+            (s.Keys.Display(Command.PlayPause) + ", " + s.Keys.Display(Command.Mute) + ", " +
+             s.Keys.DisplayPair(Command.VolumeUp, Command.VolumeDown), "Play / Pause, mute, volume"),
             ("↑ / ↓, Esc", "Previous / next row, close the gallery"),
         }),
         ("Timeline", new[]

@@ -27,6 +27,7 @@ public partial class MainWindow
     private VideoItem? _pendingStartItem;
     private double _pendingStartPosition;
     private string? _lastOpMessage;
+    private StatusKind _lastOpKind = StatusKind.Success; // colour of _lastOpMessage (1.13.0)
     private bool? _playAfterRelease; // playback state before a file operation released the player
 
     /// <summary>Selected videos in list order (folders and ".." are never touched by file operations).</summary>
@@ -54,7 +55,7 @@ public partial class MainWindow
     {
         int n = SelectedVideos.Count;
         if (n <= 1) return false;
-        SetStatus($"{command} works on one file: {n} videos are selected, select only one.");
+        SetStatus($"{command} works on one file: {n} videos are selected, select only one.", StatusKind.Error);
         return true;
     }
 
@@ -142,12 +143,13 @@ public partial class MainWindow
             string how = network ? " (permanently)" : " (Recycle Bin)";
             if (n == 1)
             {
-                if (deleted.Count == 1) _lastOpMessage = $"Deleted {items[0].Name}{how}";
-                else _lastOpMessage = $"{items[0].Name} was not deleted: {errors[0].Error}";
+                if (deleted.Count == 1) (_lastOpMessage, _lastOpKind) = ($"Deleted {items[0].Name}{how}", StatusKind.Success);
+                else (_lastOpMessage, _lastOpKind) = ($"{items[0].Name} was not deleted: {errors[0].Error}", StatusKind.Error);
             }
             else
             {
                 _lastOpMessage = $"Deleted {deleted.Count} of {n} files{how}";
+                _lastOpKind = errors.Count == 0 ? StatusKind.Success : StatusKind.Error;
                 ShowErrors("Delete files", $"{FilesText(errors.Count)} not deleted:", errors);
             }
             _busyPaths.Clear(); // the files not deleted can be loaded again
@@ -183,7 +185,7 @@ public partial class MainWindow
                 string newPath = await Task.Run(() => FileOps.Rename(item.FullPath, newName));
                 var renamed = new VideoItem(Path.GetFileName(newPath), newPath, item.Size, item.Modified, item.Storage);
                 ReplaceItem(item, renamed);
-                _lastOpMessage = $"Renamed to {renamed.Name}";
+                (_lastOpMessage, _lastOpKind) = ($"Renamed to {renamed.Name}", StatusKind.Success);
                 ReloadItem(renamed, position);
                 return;
             }
@@ -429,12 +431,13 @@ public partial class MainWindow
             ShowErrors(op + " files", $"{FilesText(errors.Count)} not {(copy ? "copied" : "moved")}:", errors);
         }
 
+        StatusKind kind = errors.Count > 0 ? StatusKind.Error : cancelled || done.Count == 0 ? StatusKind.Normal : StatusKind.Success;
         if (copy)
         {
-            SetStatus(message);
+            SetStatus(message, kind);
             return;
         }
-        _lastOpMessage = message;
+        (_lastOpMessage, _lastOpKind) = (message, kind);
         AfterRemoval(removed, released, position);
     }
 
@@ -472,7 +475,7 @@ public partial class MainWindow
         }
         catch (Exception ex)
         {
-            SetStatus("Settings not saved: " + ex.Message);
+            SetStatus("Settings not saved: " + ex.Message, StatusKind.Error);
         }
     }
 
@@ -586,7 +589,7 @@ public partial class MainWindow
         if (released == null && _currentItem != null && _items.Contains(_currentItem))
         {
             SelectOnly(_currentItem); // the loaded file was not involved: it keeps playing
-            if (_lastOpMessage != null) SetStatus(_lastOpMessage);
+            if (_lastOpMessage != null) SetStatus(_lastOpMessage, _lastOpKind);
             _lastOpMessage = null;
             return;
         }
@@ -602,20 +605,25 @@ public partial class MainWindow
         {
             _playAfterRelease = null; // nothing is loaded next: do not carry the state further
             // The player has already released the file: the video area stays empty.
-            SetStatus((_lastOpMessage ?? "") + (_items.Any(i => i.IsVideo) ? "" : "  |  No more videos in this folder."));
+            SetStatus((_lastOpMessage ?? "") + (_items.Any(i => i.IsVideo) ? "" : "  |  No more videos in this folder."),
+                _lastOpMessage != null ? _lastOpKind : StatusKind.Normal);
             _lastOpMessage = null;
             return;
         }
         SelectAndLoad(next);
         if (ReferenceEquals(next, _currentItem) && _lastOpMessage != null)
         {
-            SetStatus(_lastOpMessage); // already loaded: no load will show the message
+            SetStatus(_lastOpMessage, _lastOpKind); // already loaded: no load will show the message
             _lastOpMessage = null;
         }
     }
 
-    /// <summary>Called when a load completes: restores the position after a reload, shows the last operation.</summary>
-    private string ApplyPostLoadActions(VideoItem item, string status)
+    /// <summary>
+    /// Called when a load completes: restores the position after a reload and shows the result of the
+    /// last file operation (in its colour), or clears "Loading ..." (1.13.0: the file name and format
+    /// are no longer repeated in the message area).
+    /// </summary>
+    private void ApplyPostLoadActions(VideoItem item)
     {
         if (ReferenceEquals(item, _pendingStartItem))
         {
@@ -624,9 +632,9 @@ public partial class MainWindow
         }
         if (_lastOpMessage != null)
         {
-            status = _lastOpMessage + "  |  " + status;
+            SetStatus(_lastOpMessage, _lastOpKind);
             _lastOpMessage = null;
         }
-        return status;
+        else SetStatus("");
     }
 }

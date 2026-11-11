@@ -34,7 +34,7 @@ public partial class MainWindow
         }
         if (_player == null || _currentItem == null || _player.Duration <= 0)
         {
-            SetStatus("No video loaded: nothing to mark.");
+            SetStatus("No video loaded: nothing to mark.", StatusKind.Error);
             return;
         }
         if (!MarkersValid)
@@ -120,7 +120,7 @@ public partial class MainWindow
         FormatTime(seconds) + "." + ((int)(Math.Max(seconds, 0) * 10 % 10)).ToString(CultureInfo.InvariantCulture);
 
     private void ReportExtractUnavailable() =>
-        SetStatus($"Extract not available: put {FfmpegExtractor.ExeName} in the viBro folder ({AppInfo.ExeDirectory}).");
+        SetStatus($"Extract not available: put {FfmpegExtractor.ExeName} in the viBro folder ({AppInfo.ExeDirectory}).", StatusKind.Error);
 
     private async void ExtractMarked()
     {
@@ -132,12 +132,12 @@ public partial class MainWindow
         }
         if (!MarkersValid || _markIn is not double start || _markOut is not double end || _currentItem is not VideoItem item)
         {
-            SetStatus("Set the start (I) and end (O) markers first.");
+            SetStatus("Set the start (I) and end (O) markers first.", StatusKind.Error);
             return;
         }
         if (end - start < 0.1)
         {
-            SetStatus($"The end marker must be after the start marker ({MarkersText()}).");
+            SetStatus($"The end marker must be after the start marker ({MarkersText()}).", StatusKind.Error);
             return;
         }
 
@@ -161,7 +161,7 @@ public partial class MainWindow
             string finalPath = await extract;
             AddExtractToList(finalPath, folder, item.Storage);
             SetStatus($"Extracted {FormatMark(start)} – {FormatMark(end)} to {Path.GetFileName(finalPath)} " +
-                      "(starts at the keyframe at or before the start marker)");
+                      "(starts at the keyframe at or before the start marker)", StatusKind.Success);
             progressDialog = CloseProgress(progressDialog);
             long size = await Task.Run(() => new FileInfo(finalPath).Length);
             MessageBox.Show(this,
@@ -179,7 +179,7 @@ public partial class MainWindow
             ErrorLog.Write("extract", "Extract of " + item.Name + " failed", ex);
             progressDialog = CloseProgress(progressDialog);
             MessageBox.Show(this, "The extract was not created.\n\n" + ex.Message, "Extract", MessageBoxButton.OK, MessageBoxImage.Warning);
-            SetStatus("Extract failed: " + ex.Message.Split('\n')[0].Trim());
+            SetStatus("Extract failed: " + ex.Message.Split('\n')[0].Trim(), StatusKind.Error);
         }
         finally
         {

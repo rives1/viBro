@@ -2,6 +2,22 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.13.0] - non ancora rilasciata
+
+Interfaccia, dalla revisione grafica del 2026-11-11 (con screenshot dell'utente).
+
+### Aggiunto
+- **Barra di stato in tre zone:** a sinistra il riepilogo della cartella, al centro i messaggi, a destra il formato del video caricato (`HEVC 1280×720`, con nome, hwdec e tempo di caricamento nel tooltip). Errori e avvisi in **arancio**, esiti delle operazioni in **verde**: restano almeno 6 s, e i messaggi normali arrivati nel frattempo (es. `Loading …`) aspettano. **Un clic sul messaggio mostra gli ultimi 20** con l'ora. Tempi di caricamento e dei salti, hwdec e memoria solo con `[Diagnostics] MetricsLog=true`.
+- **Barra del percorso a briciole:** un pulsante per ogni cartella del percorso, un clic la apre. Un clic sulla parte vuota della barra, o Ctrl+L, la trasforma nel percorso modificabile (Invio apre, Esc o uscire dal campo torna alle briciole). **Backspace** apre la cartella superiore lasciando selezionata quella appena lasciata (`[Keys] ParentFolder=Back`).
+- **Volume da tastiera:** `+` / `-` (anche del tastierino numerico) di 5 %, valore mostrato sopra il video per 1 s, anche a finestra normale; anche nelle gallerie (`[Keys] VolumeUp`, `VolumeDown`).
+- **Schermo intero:** il puntatore sparisce insieme alla fascia dopo 2 s senza movimento e torna al primo movimento.
+- **Riquadro video senza video caricato:** al centro `Select a video · F10 gallery · Ctrl+F2 commands` (con i tasti configurati).
+- **Gallerie:** la riga del video caricato ha un bordo nel colore di accento di Windows e la galleria la porta in vista quando cambia (anche con D / E); la riga selezionata ha uno sfondo leggero. Nella galleria F10 il tempo sta dentro l'immagine, in basso a destra, e le righe sono più vicine. Ogni galleria (F10 e F12 separatamente) si riapre nella posizione e dimensione in cui è stata chiusa (`[Gallery]` / `[SelectionGallery]` `Window…`).
+
+### Modificato
+- **Un solo formato dei tempi** ovunque (barra, tempo sotto il puntatore, sopra il video, marker, gallerie): `0:05`, `1:20`, `15:02`, `1:02:15`, senza zeri iniziali inutili (prima `00:01:20` sulla barra).
+- Il nome del file caricato non è più ripetuto nella barra di stato (è in grassetto nell'elenco).
+
 ## [1.12.0] - 2026-11-11
 
 Versione di solidità, dalla revisione del progetto del 2026-11-11.

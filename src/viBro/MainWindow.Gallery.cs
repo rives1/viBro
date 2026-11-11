@@ -30,55 +30,57 @@ public partial class MainWindow
     {
         if (!FfmpegExtractor.IsAvailable)
         {
-            SetStatus($"Gallery not available: put {FfmpegExtractor.ExeName} in the viBro folder ({AppInfo.ExeDirectory}).");
+            SetStatus($"Gallery not available: put {FfmpegExtractor.ExeName} in the viBro folder ({AppInfo.ExeDirectory}).", StatusKind.Error);
             return;
         }
         var videos = SelectedVideos;
         if (videos.Count == 0)
         {
-            SetStatus("Select one or more videos in the list, then open the selection gallery.");
+            SetStatus("Select one or more videos in the list, then open the selection gallery.", StatusKind.Error);
             return;
         }
         _selectionGallery?.Close();
         string title = $"Selection gallery - {(videos.Count == 1 ? "1 video" : videos.Count + " videos")} - {_currentFolder}";
         var g = new GalleryWindow(this, title, videos, _settings.SelectionGalleryPercents, _settings.GalleryJobs,
-            _settings.GalleryCombined, compact: true);
+            _settings.GalleryCombined, _settings.SelectionGalleryWindow, compact: true);
         g.Closed += (_, _) =>
         {
             if (ReferenceEquals(_selectionGallery, g)) _selectionGallery = null;
         };
         _selectionGallery = g;
         g.Show();
+        g.SetCurrent(_currentItem?.FullPath);
     }
 
     private void OpenGallery()
     {
         if (!FfmpegExtractor.IsAvailable)
         {
-            SetStatus($"Gallery not available: put {FfmpegExtractor.ExeName} in the viBro folder ({AppInfo.ExeDirectory}).");
+            SetStatus($"Gallery not available: put {FfmpegExtractor.ExeName} in the viBro folder ({AppInfo.ExeDirectory}).", StatusKind.Error);
             return;
         }
         if (_currentFolder == null)
         {
-            SetStatus("No folder open: nothing to show in the gallery.");
+            SetStatus("No folder open: nothing to show in the gallery.", StatusKind.Error);
             return;
         }
         var videos = _items.Where(i => i.IsVideo).ToList(); // in the list's order
         if (videos.Count == 0)
         {
-            SetStatus("No videos in this folder: nothing to show in the gallery.");
+            SetStatus("No videos in this folder: nothing to show in the gallery.", StatusKind.Error);
             return;
         }
 
         _gallery?.Close(); // F10 again: a new gallery of the current folder
         var g = new GalleryWindow(this, "Gallery - " + _currentFolder, videos, _settings.GalleryPercents, _settings.GalleryJobs,
-            _settings.GalleryCombined);
+            _settings.GalleryCombined, _settings.GalleryWindow);
         g.Closed += (_, _) =>
         {
             if (ReferenceEquals(_gallery, g)) _gallery = null;
         };
         _gallery = g;
         g.Show();
+        g.SetCurrent(_currentItem?.FullPath);
     }
 
     /// <summary>
@@ -130,10 +132,13 @@ public partial class MainWindow
             Command.CopyToLast => () => RunOnGalleryFile(path, () => CopySelected(useLastDestination: true)),
             Command.PlayPause => () => _player?.TogglePause(),
             Command.Mute => () => _player?.ToggleMute(),
+            Command.VolumeUp => () => ChangeVolume(+VolumeStep),
+            Command.VolumeDown => () => ChangeVolume(-VolumeStep),
             _ => null,
         };
         if (action == null) return false;
-        if (!repeat) Dispatcher.BeginInvoke(action); // after this key message (dialogs open on a clean state)
+        if (!repeat || command is Command.VolumeUp or Command.VolumeDown)
+            Dispatcher.BeginInvoke(action); // after this key message (dialogs open on a clean state)
         return true;
     }
 
@@ -146,7 +151,7 @@ public partial class MainWindow
             var item = _items.Find(i => i.IsVideo && string.Equals(i.FullPath, path, StringComparison.OrdinalIgnoreCase));
             if (item == null)
             {
-                SetStatus(Path.GetFileName(path) + " is no longer in the folder.");
+                SetStatus(Path.GetFileName(path) + " is no longer in the folder.", StatusKind.Error);
                 return;
             }
             SelectOnly(item);
@@ -164,7 +169,7 @@ public partial class MainWindow
         var item = _items.Find(i => i.IsVideo && string.Equals(i.FullPath, path, StringComparison.OrdinalIgnoreCase));
         if (item == null)
         {
-            SetStatus(Path.GetFileName(path) + " is no longer in the folder.");
+            SetStatus(Path.GetFileName(path) + " is no longer in the folder.", StatusKind.Error);
             return;
         }
         FileList.ScrollIntoView(item);

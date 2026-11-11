@@ -45,6 +45,10 @@ internal static class NativeMethods
     [DllImport("user32.dll")]
     public static extern IntPtr SetCapture(IntPtr hwnd);
 
+    /// <summary>Hides (false) or shows (true) the pointer; calls must be balanced (1.13.0, fullscreen).</summary>
+    [DllImport("user32.dll")]
+    public static extern int ShowCursor([MarshalAs(UnmanagedType.Bool)] bool show);
+
     /// <summary>False while a Win32 modal (MessageBox, folder picker) has disabled the window.</summary>
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]

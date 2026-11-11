@@ -11,13 +11,77 @@
          load it at the image's time. -->
     <Window.Resources>
         <local:AspectHeightConverter x:Key="AspectHeight" />
+        <!-- 1.13.0: the time is inside the image (bottom right), so rows are closer together. -->
         <DataTemplate x:Key="NormalRow">
-            <StackPanel Margin="0,2,0,6">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Right" Text="{Binding Info}" Opacity="0.7" Margin="12,0,0,0" />
-                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                </DockPanel>
-                <ItemsControl ItemsSource="{Binding Cells}" Margin="0,4,0,0" Focusable="False">
+            <Border BorderThickness="2" CornerRadius="4" Padding="2,1,2,2" Margin="0,0,0,2">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                        <Style.Triggers>
+                            <!-- Selected row: a light background (the theme's own highlight is hidden by the images). -->
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                <Setter Property="Background" Value="#26808080" />
+                            </DataTrigger>
+                            <!-- 1.13.0: the video loaded in the main window, in the accent colour (as the sliders). -->
+                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel>
+                    <DockPanel Margin="2,0,2,2">
+                        <TextBlock DockPanel.Dock="Right" Text="{Binding Info}" Opacity="0.7" Margin="12,0,0,0"
+                                   Typography.NumeralAlignment="Tabular" />
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    </DockPanel>
+                    <ItemsControl ItemsSource="{Binding Cells}" Focusable="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <!-- 16:9 box whatever the window width: rows keep their height while images arrive. -->
+                                <Border Background="#30808080" Cursor="Hand" Margin="1,0"
+                                        Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}, Converter={StaticResource AspectHeight}}"
+                                        ToolTip="Click: load the video at this time. Right click: delete, move, copy"
+                                        MouseLeftButtonDown="Cell_MouseLeftButtonDown">
+                                    <Grid>
+                                        <Image Source="{Binding Image}" Stretch="Uniform" />
+                                        <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="3"
+                                                Background="#B0000000" CornerRadius="3" Padding="4,0,4,1" IsHitTestVisible="False">
+                                            <TextBlock Text="{Binding Label}" Foreground="White" FontSize="11"
+                                                       Typography.NumeralAlignment="Tabular" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+        <!-- F12 (1.11.0): selected videos, no name line (name in the tooltip), no times, minimal spacing. -->
+        <DataTemplate x:Key="CompactRow">
+            <Border BorderThickness="2" CornerRadius="3" ToolTip="{Binding Name}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                        <Style.Triggers>
+                            <!-- Selected row: a light background (the theme's own highlight is hidden by the images). -->
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                <Setter Property="Background" Value="#26808080" />
+                            </DataTrigger>
+                            <!-- 1.13.0: the video loaded in the main window, in the accent colour (as the sliders). -->
+                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <ItemsControl ItemsSource="{Binding Cells}" Focusable="False">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Rows="1" />
@@ -25,39 +89,15 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="2,0">
-                                <!-- 16:9 box whatever the window width: rows keep their height while images arrive. -->
-                                <Border Background="#30808080" Cursor="Hand"
-                                        Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}, Converter={StaticResource AspectHeight}}"
-                                        ToolTip="Click: load the video at this time. Right click: delete, move, copy"
-                                        MouseLeftButtonDown="Cell_MouseLeftButtonDown">
-                                    <Image Source="{Binding Image}" Stretch="Uniform" />
-                                </Border>
-                                <TextBlock Text="{Binding Label}" HorizontalAlignment="Center" Opacity="0.75" FontSize="11" Margin="0,1,0,0" />
-                            </StackPanel>
+                            <Border Background="#30808080" Cursor="Hand" Margin="0,0,1,0"
+                                    Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}, Converter={StaticResource AspectHeight}}"
+                                    MouseLeftButtonDown="Cell_MouseLeftButtonDown">
+                                <Image Source="{Binding Image}" Stretch="Uniform" />
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </StackPanel>
-        </DataTemplate>
-        <!-- F12 (1.11.0): selected videos, no name line (name in the tooltip), no times, minimal spacing. -->
-        <DataTemplate x:Key="CompactRow">
-            <ItemsControl ItemsSource="{Binding Cells}" Focusable="False" ToolTip="{Binding Name}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Rows="1" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="#30808080" Cursor="Hand" Margin="0,0,1,0"
-                                Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}, Converter={StaticResource AspectHeight}}"
-                                MouseLeftButtonDown="Cell_MouseLeftButtonDown">
-                            <Image Source="{Binding Image}" Stretch="Uniform" />
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            </Border>
         </DataTemplate>
     </Window.Resources>
     <DockPanel>

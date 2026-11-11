@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.12.0 rilasciata** (gallerie più rapide, tastiera nelle gallerie, misure disattivate per impostazione predefinita). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.13.0 in prova** (interfaccia: barra di stato in tre zone con storico dei messaggi, percorso a briciole, volume da tastiera, puntatore nascosto a schermo intero, video caricato evidenziato in galleria). Ultima versione rilasciata: 1.12.0 (gallerie più rapide, tastiera nelle gallerie, misure disattivate per impostazione predefinita). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -26,6 +26,14 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - **Galleria** (1.6.0; menu del tasto destro 1.8.0): F10 apre una finestra separata con una riga per ogni video della cartella e 5 immagini prese alle stesse percentuali della durata di ciascun video (predefinite 10, 30, 50, 70, 90 %). Un clic su una riga seleziona e carica quel video nella finestra principale; un clic su un'immagine lo carica al tempo dell'immagine. Usa lo stesso `ffmpeg.exe` dell'estratto. Le immagini sono i fotogrammi chiave più vicini a quelle posizioni (rapide, anche sul NAS), create in background partendo dalle righe visibili, tenute solo in memoria (nulla su disco) e riusate finché viBro resta aperto. La galleria resta sulla cartella in cui è stata aperta; F10 di nuovo ne crea una nuova. Il tasto destro su una riga o un'immagine (1.8.0) seleziona e carica quel video e apre lo stesso menu del video (Delete, Move, Copy); le righe dei file eliminati o spostati escono dalla galleria.
 - **Galleria della selezione** (1.11.0): F12 apre una galleria dei soli video selezionati nell'elenco, con 10 immagini per video (10 %, 20 % … 90 % e 99 % della durata, `[SelectionGallery] PositionsPercent`) in strisce compatte: senza tempi né riga del nome (il nome è nel tooltip). Clic e menu del tasto destro come nella galleria. Può restare aperta insieme alla galleria F10.
 - **Tastiera nelle gallerie** (1.12.0): con una riga selezionata, i tasti di elimina (con conferma), rinomina, sposta, copia, Play/Pause e Mute agiscono su quel video; frecce e PgUp/PgDn si spostano tra le righe.
+- **Interfaccia** (1.13.0):
+  - barra di stato in tre zone: a sinistra il riepilogo della cartella, al centro i messaggi (errori in arancio ed esiti in verde restano 6 s; un clic mostra gli ultimi 20 messaggi), a destra il formato del video caricato (`HEVC 1280×720`; dettagli del motore nel tooltip, misure solo con `MetricsLog=true`);
+  - barra del percorso a briciole cliccabili; un clic sulla parte vuota, o Ctrl+L, la trasforma nel percorso modificabile; Backspace apre la cartella superiore;
+  - volume con `+` / `-` (5 %), valore mostrato sopra il video;
+  - a schermo intero il puntatore sparisce con la fascia dopo 2 s senza movimento;
+  - senza video caricato il riquadro mostra una breve guida (`Select a video · F10 gallery · Ctrl+F2 commands`);
+  - gallerie: la riga del video caricato ha un bordo nel colore di accento e segue D / E; in F10 i tempi sono dentro le immagini; ogni galleria si riapre dove e grande com'era;
+  - un solo formato dei tempi: `1:20`, `15:02`, `1:02:15`.
 - **Selezione multipla** (1.7.0): Ctrl + clic aggiunge o toglie un file, Shift + clic seleziona un intervallo, Ctrl+A seleziona tutti i video. Elimina, sposta e copia agiscono su tutti i video selezionati: una conferma, una destinazione, una finestra di avanzamento; i conflitti di nome si chiedono file per file, con "fai lo stesso per i conflitti successivi" e *Skip*. Il riquadro video carica il file appena cliccato. Rinomina (F2), Shift+Invio e l'estratto (I / O / F9) richiedono un solo video selezionato. Le frecce continuano a spostare il tempo, quindi la selezione si fa col mouse.
 
 - Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.
@@ -53,6 +61,7 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | `[Gallery] PositionsPercent` | `10,30,50,70,90` | Posizioni delle immagini della galleria, in % della durata di ogni video (da 1 a 10 valori) |
 | `[Gallery] Jobs` | `2` | Esecuzioni di ffmpeg contemporanee per la galleria (1–8; di più è più rapido su SSD, può essere più lento sul NAS) |
 | `[Gallery] Method` | `Combined` | `Combined` = una sola esecuzione di ffmpeg per video per tutte le sue immagini (dalla 1.12.0, circa il doppio più rapida; ripiega da sola su un'esecuzione per immagine se un file non lo permette); `Separate` = un'esecuzione per immagine, come prima |
+| `[Gallery]` / `[SelectionGallery]` `WindowLeft`, `WindowTop`, `WindowWidth`, `WindowHeight`, `WindowState` | centrata, 1200 × 800 | Posizione e dimensione delle gallerie F10 e F12, salvate alla chiusura (1.13.0) |
 | `[SelectionGallery] PositionsPercent` | `10,20,30,40,50,60,70,80,90,99` | Posizioni delle immagini della galleria F12, in % della durata di ogni video (da 1 a 20 valori); esecuzioni di ffmpeg contemporanee da `[Gallery] Jobs` |
 | `[Diagnostics] MetricsLog` | `false` (dalla 1.12.0) | Registro delle misure `viBro-metrics.csv`; `false` = il file non viene creato né scritto |
 | `[Delete] ConfirmFromVideoMenu` | `false` | `false` = *Delete* nel menu del tasto destro sul video elimina un file senza conferma (anche in rete, dove è definitiva); più file chiedono sempre conferma. `true` = conferma sempre |
@@ -73,8 +82,10 @@ I tasti qui sotto sono quelli predefiniti. Dalla 1.10.0 ogni scorciatoia da tast
 | `PlayPause` | `Space` |  |
 | `PreviousVideo / NextVideo` | `E / D` |  |
 | `Mute` | `M` |  |
+| `VolumeUp` / `VolumeDown` | `OemPlus,Add` / `OemMinus,Subtract` | `+` / `-` e tastierino numerico; 5 % a pressione (1.13.0) |
 | `Fullscreen / ExitFullscreen` | `F11 / Escape` | ExitFullscreen solo a schermo intero |
 | `FocusPath` | `Ctrl+L` |  |
+| `ParentFolder` | `Back` | Backspace: cartella superiore (1.13.0) |
 | `SelectAll` | `Ctrl+A` |  |
 | `Refresh` | `F5` |  |
 | `OpenFolder` | `Enter` | solo con una cartella selezionata |
@@ -100,6 +111,8 @@ I tasti qui sotto sono quelli predefiniti. Dalla 1.10.0 ogni scorciatoia da tast
 | Spazio | Play/Pause (alla fine del video riparte dall'inizio) | ✔ |
 | E / D | Video precedente / successivo (Play/Pause conservato), senza ricominciare dall'estremità opposta | ✔ |
 | M | Mute on/off | ✔ |
+| + / - | Volume su / giù del 5 % (valore mostrato sopra il video) | 1.13.0 |
+| Backspace | Cartella superiore (resta selezionata la cartella appena lasciata) | 1.13.0 |
 | F11 / Esc | Entra in / esce da schermo intero | ✔ |
 | Ctrl + L | Attiva la barra del percorso (Invio apre, Esc annulla) | ✔ |
 | Ctrl + A | Seleziona tutti i video della cartella (il video caricato non cambia) | 1.7.0 |

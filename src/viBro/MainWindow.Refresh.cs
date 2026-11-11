@@ -21,7 +21,7 @@ public partial class MainWindow
     {
         if (_fileOpBusy)
         {
-            SetStatus("A file operation is running: press F5 when it has finished.");
+            SetStatus("A file operation is running: press F5 when it has finished.", StatusKind.Error);
             return;
         }
         _ = _tree.RefreshAsync(TreeRefreshTimeout); // in the background; a slow share does not delay the list
@@ -53,7 +53,7 @@ public partial class MainWindow
         }
         catch (Exception ex)
         {
-            if (generation == _folderGeneration) SetStatus("Cannot refresh " + path + ": " + ex.Message);
+            if (generation == _folderGeneration) SetStatus("Cannot refresh " + path + ": " + ex.Message, StatusKind.Error);
             return;
         }
         if (generation != _folderGeneration || _fileOpBusy) return; // superseded, or a file operation started
@@ -103,7 +103,7 @@ public partial class MainWindow
         string changes = added == 0 && removed == 0
             ? "no changes"
             : $"{added} new, {removed} removed";
-        SetStatus($"Refreshed {path}: {changes}{extra}");
+        SetStatus($"Refreshed {path}: {changes}{extra}", extra.Length > 0 ? StatusKind.Error : StatusKind.Normal);
     }
 
     private static T? FindDescendant<T>(DependencyObject parent) where T : DependencyObject

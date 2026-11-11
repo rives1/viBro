@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.12.0 released** (faster galleries, keyboard in the galleries, measurements off by default). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.13.0 in testing** (interface: status bar in three zones with message history, breadcrumb path bar, volume keys, hidden pointer in fullscreen, gallery marks the loaded video). Last release: 1.12.0 (faster galleries, keyboard in the galleries, measurements off by default). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -24,6 +24,14 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
 - **Gallery** (1.6.0; right-click menu 1.8.0): F10 opens a separate window with one row per video of the folder and 5 images taken at the same percentages of each video's duration (10, 30, 50, 70, 90 % by default). Clicking a row selects and loads that video in the main window; clicking an image loads it at the image's time. It uses the same `ffmpeg.exe` as the extract. The images are the keyframes nearest to those positions (fast, also on a NAS), made in the background starting from the rows on screen, kept in memory only (nothing written to disk) and reused while viBro stays open. The gallery keeps the folder it was opened on; F10 again makes a new one. Right click on a row or an image (1.8.0) selects and loads that video and opens the same menu as on the video (Delete, Move, Copy); rows of deleted or moved files leave the gallery.
 - **Selection gallery** (1.11.0): F12 opens a gallery of the videos selected in the list only, with 10 images per video (10 %, 20 % … 90 % and 99 % of the duration, `[SelectionGallery] PositionsPercent`) in compact strips: no times, no name line (the name is in the tooltip). Clicks and right-click menu as in the gallery. It can stay open together with the F10 gallery.
 - **Keyboard in the galleries** (1.12.0): with a row selected, the keys of delete (with confirmation), rename, move, copy, play/pause and mute act on that video; arrows and Page Up/Down move between rows.
+- **Interface** (1.13.0):
+  - status bar in three zones: folder summary on the left, messages in the centre (errors orange and results green stay 6 s; a click shows the last 20 messages), format of the loaded video on the right (`HEVC 1280×720`; engine details in its tooltip, measurements only with `MetricsLog=true`);
+  - path bar as clickable breadcrumbs; a click on its empty part, or Ctrl+L, turns it into the editable path; Backspace opens the parent folder;
+  - volume with `+` / `-` (5 %), the value shown over the video;
+  - in fullscreen the pointer disappears with the band after 2 s without movement;
+  - with no video loaded the video area shows a short guide (`Select a video · F10 gallery · Ctrl+F2 commands`);
+  - galleries: the row of the loaded video has a border in the accent colour and follows D / E; F10 times inside the images; each gallery reopens where and as large as it was;
+  - one time format everywhere: `1:20`, `15:02`, `1:02:15`.
 - **Multiple selection** (1.7.0): Ctrl + click adds or removes a file, Shift + click selects a range, Ctrl+A selects all the videos. Delete, move and copy act on all the selected videos: one confirmation, one destination, one progress window; name conflicts are asked file by file, with "do the same for the next conflicts" and *Skip*. The video area loads the file just clicked. Rename (F2), Shift+Enter and the extract (I / O / F9) need a single selected video. The arrow keys keep seeking, so the selection is made with the mouse.
 - Light/Dark themes (*Theme* button), control bar (timeline, volume) below the video and above the file list, a timeline band below the video in fullscreen.
 - Folder icon in front of the path bar; icon buttons for Play/Pause, Mute (shows the state), Browse and Theme.
@@ -50,6 +58,7 @@ It sits next to `viBro.exe` and is written when the program closes. Edit it only
 | `[Gallery] PositionsPercent` | `10,30,50,70,90` | Positions of the gallery images, in % of each video's duration (1 to 10 values) |
 | `[Gallery] Jobs` | `2` | ffmpeg runs at a time for the gallery (1–8; more is faster on an SSD, can be slower on a NAS) |
 | `[Gallery] Method` | `Combined` | `Combined` = one ffmpeg run per video for all its images (since 1.12.0, about twice as fast; falls back by itself to one run per image if a file does not allow it); `Separate` = one run per image, as before |
+| `[Gallery]` / `[SelectionGallery]` `WindowLeft`, `WindowTop`, `WindowWidth`, `WindowHeight`, `WindowState` | centred, 1200 × 800 | Position and size of the F10 and F12 galleries, saved when they close (1.13.0) |
 | `[SelectionGallery] PositionsPercent` | `10,20,30,40,50,60,70,80,90,99` | Positions of the F12 gallery images, in % of each video's duration (1 to 20 values); ffmpeg runs at a time from `[Gallery] Jobs` |
 | `[Diagnostics] MetricsLog` | `false` (since 1.12.0) | Measurement log `viBro-metrics.csv`; `false` = the file is not created or written |
 | `[Delete] ConfirmFromVideoMenu` | `false` | `false` = *Delete* in the video's right-click menu deletes one file without confirmation (also on the network, where it is permanent); several files are always confirmed. `true` = always confirm |
@@ -70,8 +79,10 @@ The keys below are the defaults. Since 1.10.0 every keyboard shortcut of the mai
 | `PlayPause` | `Space` |  |
 | `PreviousVideo / NextVideo` | `E / D` |  |
 | `Mute` | `M` |  |
+| `VolumeUp` / `VolumeDown` | `OemPlus,Add` / `OemMinus,Subtract` | `+` / `-` and the numeric keypad; 5 % per press (1.13.0) |
 | `Fullscreen / ExitFullscreen` | `F11 / Escape` | ExitFullscreen only in fullscreen |
 | `FocusPath` | `Ctrl+L` |  |
+| `ParentFolder` | `Back` | Backspace: parent folder (1.13.0) |
 | `SelectAll` | `Ctrl+A` |  |
 | `Refresh` | `F5` |  |
 | `OpenFolder` | `Enter` | only with a folder selected |
@@ -97,6 +108,8 @@ The keys below are the defaults. Since 1.10.0 every keyboard shortcut of the mai
 | Space | Play/Pause (at the end of the video it restarts from the beginning) | ✔ |
 | E / D | Previous / next video (Play/Pause kept), without wrapping around | ✔ |
 | M | Mute on/off | ✔ |
+| + / - | Volume up / down by 5 % (value shown over the video) | 1.13.0 |
+| Backspace | Parent folder (the folder just left is selected) | 1.13.0 |
 | F11 / Esc | Enter / leave fullscreen | ✔ |
 | Ctrl + L | Focus the path bar (Enter opens, Esc cancels) | ✔ |
 | Ctrl + A | Select all the videos of the folder (the loaded video does not change) | 1.7.0 |

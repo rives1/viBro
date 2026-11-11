@@ -14,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using ViBro.Settings;
 using ViBro.Util;
 
 namespace ViBro;
@@ -43,10 +44,14 @@ public partial class GalleryWindow : Window
     private VirtualizingStackPanel? _panel;
 
     /// <param name="compact">F12 (1.11.0): one compact strip per selected video, name only in the tooltip, no times.</param>
+    private readonly WindowBox _box;
+
     internal GalleryWindow(MainWindow main, string title, IReadOnlyList<VideoItem> videos, double[] percents, int jobs,
-        bool combined, bool compact = false)
+        bool combined, WindowBox box, bool compact = false)
     {
         InitializeComponent();
+        _box = box;
+        ApplyWindowBox();
         ThemeManager.AttachWindow(this);
         _main = main;
         _percents = percents;
@@ -323,6 +328,49 @@ public partial class GalleryWindow : Window
 
     private void Window_Closed(object? sender, EventArgs e) => _cts.Cancel(); // running ffmpeg processes are killed
 
+    // ------------------------------------------------------------------ position and size (1.13.0)
+
+    /// <summary>Last position and size of this kind of gallery, if still on a screen; otherwise centred.</summary>
+    private void ApplyWindowBox()
+    {
+        Width = _box.Width;
+        Height = _box.Height;
+        if (_box.Left is double l && _box.Top is double t && MainWindow.IsOnScreen(l, t, _box.Width, _box.Height))
+        {
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = l;
+            Top = t;
+        }
+        if (_box.Maximized) WindowState = WindowState.Maximized;
+        Closing += (_, _) =>
+        {
+            var r = WindowState == WindowState.Normal ? new Rect(Left, Top, ActualWidth, ActualHeight) : RestoreBounds;
+            if (!r.IsEmpty && r.Width > 0 && r.Height > 0)
+            {
+                _box.Left = r.Left;
+                _box.Top = r.Top;
+                _box.Width = r.Width;
+                _box.Height = r.Height;
+            }
+            _box.Maximized = WindowState == WindowState.Maximized;
+        };
+    }
+
+    // ------------------------------------------------------------------ loaded video (1.13.0)
+
+    /// <summary>Marks the row of the video loaded in the main window and brings it into view.</summary>
+    internal void SetCurrent(string? path)
+    {
+        GalleryRow? current = null;
+        foreach (var row in _view)
+        {
+            bool isCurrent = path != null && string.Equals(row.Item.FullPath, path, StringComparison.OrdinalIgnoreCase);
+            row.IsCurrent = isCurrent;
+            if (isCurrent) current = row;
+        }
+        if (current != null) Rows.ScrollIntoView(current);
+    }
+
     // ------------------------------------------------------------------ helpers
 
     /// <summary>
@@ -350,13 +398,7 @@ public partial class GalleryWindow : Window
         return parts;
     }
 
-    internal static string FormatTime(double seconds)
-    {
-        var t = TimeSpan.FromSeconds(Math.Max(0, Math.Floor(seconds)));
-        return t.TotalHours >= 1
-            ? $"{(int)t.TotalHours}:{t.Minutes:00}:{t.Seconds:00}"
-            : $"{t.Minutes}:{t.Seconds:00}";
-    }
+    internal static string FormatTime(double seconds) => TimeFormat.Format(seconds); // one format everywhere (1.13.0)
 
     private static T? FindChild<T>(DependencyObject parent) where T : DependencyObject
     {
@@ -391,6 +433,19 @@ internal sealed class GalleryRow : INotifyPropertyChanged
     public GalleryCell[] Cells { get; }
     public RowState State { get; set; } // guarded by the window's lock
     public bool Removed { get; set; }   // file deleted or moved: row taken out of the window
+    private bool _isCurrent;
+
+    /// <summary>The video loaded in the main window (1.13.0): the row gets a coloured border.</summary>
+    public bool IsCurrent
+    {
+        get => _isCurrent;
+        set
+        {
+            if (_isCurrent == value) return;
+            _isCurrent = value;
+            PropertyChanged?.Invoke(this, new(nameof(IsCurrent)));
+        }
+    }
     public bool Failed { get; set; }    // duration or an image could not be read
 
     /// <summary>Duration, or the reason the file could not be read.</summary>

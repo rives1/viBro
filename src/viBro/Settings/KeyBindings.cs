@@ -10,8 +10,8 @@ internal enum Command
 {
     SeekBackShort, SeekForwardShort, SeekBackMedium, SeekForwardMedium,
     SeekBackLong, SeekForwardLong, SeekBackVeryLong, SeekForwardVeryLong,
-    PlayPause, PreviousVideo, NextVideo, Mute, Fullscreen, ExitFullscreen,
-    FocusPath, SelectAll, Refresh, OpenFolder, OpenWithDefaultApp,
+    PlayPause, PreviousVideo, NextVideo, Mute, VolumeUp, VolumeDown, Fullscreen, ExitFullscreen,
+    FocusPath, ParentFolder, SelectAll, Refresh, OpenFolder, OpenWithDefaultApp,
     Delete, Rename, Move, MoveToLast, Copy, CopyToLast,
     MarkIn, MarkOut, Extract, Gallery, SelectionGallery, Commands, Close,
 }
@@ -51,9 +51,12 @@ internal sealed class KeyBindings
         new(Command.PreviousVideo, "E", true),
         new(Command.NextVideo, "D", true),
         new(Command.Mute, "M", false),
+        new(Command.VolumeUp, "OemPlus,Add", true),        // 1.13.0: "+" and numeric keypad "+"
+        new(Command.VolumeDown, "OemMinus,Subtract", true), // 1.13.0: "-" and numeric keypad "-"
         new(Command.Fullscreen, "F11", false),
         new(Command.ExitFullscreen, "Escape", true),
         new(Command.FocusPath, "Ctrl+L", true),
+        new(Command.ParentFolder, "Back", false), // 1.13.0: Backspace
         new(Command.SelectAll, "Ctrl+A", true),
         new(Command.Refresh, "F5", false),
         new(Command.OpenFolder, "Enter", false),
@@ -75,7 +78,8 @@ internal sealed class KeyBindings
 
     private static readonly Dictionary<string, Key> Aliases = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Del"] = Key.Delete, ["Esc"] = Key.Escape, ["Return"] = Key.Enter, ["Ins"] = Key.Insert,
+        ["Del"] = Key.Delete, ["Esc"] = Key.Escape, ["Backspace"] = Key.Back,
+        ["Plus"] = Key.OemPlus, ["Minus"] = Key.OemMinus, ["Return"] = Key.Enter, ["Ins"] = Key.Insert,
         ["PgUp"] = Key.PageUp, ["PgDn"] = Key.PageDown, ["PgDown"] = Key.PageDown,
         ["Prior"] = Key.PageUp, ["Next"] = Key.PageDown,
         ["0"] = Key.D0, ["1"] = Key.D1, ["2"] = Key.D2, ["3"] = Key.D3, ["4"] = Key.D4,
@@ -229,6 +233,7 @@ internal sealed class KeyBindings
         {
             Key.Left => "←", Key.Right => "→", Key.Up => "↑", Key.Down => "↓",
             Key.PageUp => "PgUp", Key.PageDown => "PgDown", Key.Delete => "Del", Key.Escape => "Esc",
+            Key.OemPlus => "+", Key.OemMinus => "-", Key.Add => "Num +", Key.Subtract => "Num -", Key.Back => "Backspace",
             _ => KeyName(c.Key),
         };
         return ModifierPrefix(c.Modifiers, " + ") + key;

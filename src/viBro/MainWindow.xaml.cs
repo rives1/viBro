@@ -116,6 +116,7 @@ public partial class MainWindow : Window
         // routed events: intercept them here and route them to the same handler.
         ComponentDispatcher.ThreadPreprocessMessage += OnThreadPreprocessMessage;
         Activated += (_, _) => RecordActivation(); // the activating click must not Play/Pause
+        Deactivated += (_, _) => RestoreCursor(); // never leave the cursor hidden for other windows
 
         // Status bar: number of videos in the list and their total size, whenever the list changes.
         System.ComponentModel.DependencyPropertyDescriptor
@@ -149,6 +150,7 @@ public partial class MainWindow : Window
             _warnings.AddRange(_player.OptionErrors.Select(o => "mpv option: " + o));
             ShowWarnings();
             SetStatus($"Video engine ready (libmpv API {_player.ApiVersion})");
+            UpdateVideoPlaceholder(); // nothing loaded yet: the guide text instead of the empty video window
         }
         catch (Exception ex)
         {
@@ -158,7 +160,9 @@ public partial class MainWindow : Window
                 "The video engine could not be started.\n\n" + ex.Message +
                 "\n\nCheck that viBro.exe was built with libmpv-2.dll (see README).",
                 "viBro", MessageBoxButton.OK, MessageBoxImage.Error);
-            SetStatus("Video engine not available");
+            SetStatus("Video engine not available", StatusKind.Error);
+            VideoPlaceholder.Text = "Video engine not available";
+            VideoHost.Visibility = Visibility.Hidden; // so the text is visible
         }
 
         _uiTimer.Start();
@@ -276,7 +280,7 @@ public partial class MainWindow : Window
     private bool _updatingVolume;
 
     /// <summary>True when at least a usable part of the window would be visible on the desktop.</summary>
-    private static bool IsOnScreen(double left, double top, double width, double height)
+    internal static bool IsOnScreen(double left, double top, double width, double height)
     {
         var desktop = new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
             SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
@@ -322,7 +326,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            SetStatus("Invalid path: " + ex.Message);
+            SetStatus("Invalid path: " + ex.Message, StatusKind.Error);
             return;
         }
 
@@ -332,6 +336,7 @@ public partial class MainWindow : Window
         _folderCts = cts;
 
         PathBox.Text = path;
+        UpdateBreadcrumb(path);
         SetStatus("Opening " + path + " ...");
 
         var scan = Task.Run(() => FolderScanner.Scan(path, cts.Token));
@@ -340,7 +345,7 @@ public partial class MainWindow : Window
         _ = Task.Delay(3000).ContinueWith(_ =>
         {
             if (!scan.IsCompleted && generation == _folderGeneration)
-                SetStatus("Still waiting for " + path + " (network location not responding?)");
+                SetStatus("Still waiting for " + path + " (network location not responding?)", StatusKind.Error);
         }, TaskScheduler.FromCurrentSynchronizationContext());
 
         try
@@ -378,7 +383,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             if (generation == _folderGeneration)
-                SetStatus("Cannot open folder: " + ex.Message);
+                SetStatus("Cannot open folder: " + ex.Message, StatusKind.Error);
         }
     }
 
@@ -386,13 +391,16 @@ public partial class MainWindow : Window
     {
         if (e.Key == Key.Enter)
         {
-            OpenFolder(PathBox.Text, revealInTree: true);
+            string typed = PathBox.Text;
+            LeavePathEdit();
+            OpenFolder(typed, revealInTree: true);
             Keyboard.Focus(FileList);
             e.Handled = true;
         }
         else if (e.Key == Key.Escape)
         {
             PathBox.Text = _currentFolder ?? "";
+            LeavePathEdit();
             Keyboard.Focus(FileList);
             e.Handled = true;
         }
@@ -406,11 +414,7 @@ public partial class MainWindow : Window
             OpenFolder(dialog.FolderName, revealInTree: true);
     }
 
-    private void FocusPathBox()
-    {
-        PathBox.Focus();
-        PathBox.SelectAll();
-    }
+    private void FocusPathBox() => EnterPathEdit(); // Ctrl+L: the breadcrumbs become the editable path
 
     // ================================================================ folder tree
 
@@ -587,7 +591,7 @@ public partial class MainWindow : Window
         if (_player == null) return;
         if (_busyPaths.Contains(item.FullPath))
         {
-            SetStatus($"{item.Name} is being deleted or moved: it can be loaded when the operation ends.");
+            SetStatus($"{item.Name} is being deleted or moved: it can be loaded when the operation ends.", StatusKind.Error);
             return;
         }
         bool play = _playAfterRelease ?? !_player.IsPaused;
@@ -595,6 +599,7 @@ public partial class MainWindow : Window
         _loadingItem = item;
         _currentInfo = null;
         SetStatus("Loading " + item.Name + " ...");
+        UpdateVideoPlaceholder();
         _player.Load(item.FullPath, item, play);
     }
 
@@ -678,7 +683,7 @@ public partial class MainWindow : Window
             catch (Exception ex)
             {
                 ErrorLog.Write("shell", "Cannot open " + item.Name + " with the default application", ex);
-                Dispatcher.BeginInvoke(() => SetStatus("Cannot open " + item.Name + " with the default application: " + ex.Message));
+                Dispatcher.BeginInvoke(() => SetStatus("Cannot open " + item.Name + " with the default application: " + ex.Message, StatusKind.Error));
             }
         });
     }
@@ -689,9 +694,12 @@ public partial class MainWindow : Window
         _currentInfo = r.Info;
         SetCurrentItem(item);
         if (_isFullscreen) _player?.ShowText(item.Name, FileNameOsdMs); // which file, without the list
-        string res = r.Info.Width > 0 ? $"{r.Info.Width}x{r.Info.Height}" : "no video";
-        SetStatus(ApplyPostLoadActions(item, $"{item.Name}  |  {r.Info.Codec} {res}  |  hwdec: {Display(r.Info.Hwdec)}"));
-        _lastLoadText = $"{r.Kind} {r.ElapsedMs:0} ms";
+        // 1.13.0: the format on the right of the status bar; engine details in its tooltip.
+        string codec = string.IsNullOrEmpty(r.Info.Codec) ? "" : r.Info.Codec.ToUpperInvariant();
+        MediaText.Text = r.Info.Width > 0 ? $"{codec} {r.Info.Width}×{r.Info.Height}".Trim() : "no video";
+        MediaText.ToolTip = $"{item.Name}\nhwdec: {Display(r.Info.Hwdec)}\n{r.Kind} {r.ElapsedMs:0} ms";
+        ApplyPostLoadActions(item); // position after a reload, result of the last file operation
+        _lastLoadText = $"{r.Kind} {r.ElapsedMs:0} ms  |  hwdec: {Display(r.Info.Hwdec)}";
         UpdateMetricsText();
 
         RecordMetric(r.Kind, r.ElapsedMs, item, seekMode: "", delta: null, target: null, landed: null, coalesced: 0);
@@ -700,7 +708,7 @@ public partial class MainWindow : Window
     private void OnLoadFailed(string path, string error)
     {
         SetCurrentItem(null);
-        SetStatus($"Cannot play {Path.GetFileName(path)}: {error}");
+        SetStatus($"Cannot play {Path.GetFileName(path)}: {error}", StatusKind.Error);
         ErrorLog.Write("playback", $"Cannot open {Path.GetFileName(path)}: {error}");
     }
 
@@ -861,6 +869,9 @@ public partial class MainWindow : Window
             case Command.PreviousVideo: SelectRelative(-1); break;
             case Command.NextVideo: SelectRelative(+1); break;
             case Command.Mute: _player?.ToggleMute(); break;
+            case Command.VolumeUp: ChangeVolume(+VolumeStep); break;
+            case Command.VolumeDown: ChangeVolume(-VolumeStep); break;
+            case Command.ParentFolder: OpenParentFolder(); break;
             case Command.Fullscreen: ToggleFullscreen(); break;
             case Command.ExitFullscreen: ExitFullscreen(); break;
             case Command.FocusPath: FocusPathBox(); break;
@@ -888,6 +899,52 @@ public partial class MainWindow : Window
             case Command.Close: Dispatcher.BeginInvoke(new Action(Close)); break;
         }
         return true;
+    }
+
+    // ================================================================ volume, cursor, placeholder (1.13.0)
+
+    private const double VolumeStep = 5;
+
+    /// <summary>VolumeUp / VolumeDown (+ / - by default): 5 % per press, the value shown over the video.</summary>
+    internal void ChangeVolume(double delta)
+    {
+        if (_player == null) return;
+        VolumeSlider.Value = Math.Clamp(Math.Round(VolumeSlider.Value + delta), 0, 100); // sets the player's volume
+        _player.ShowText($"Volume {VolumeSlider.Value:0} %" + (_player.IsMuted ? " (muted)" : ""), 1000);
+    }
+
+    private bool _cursorHidden;
+
+    /// <summary>Fullscreen: the pointer disappears with the band and comes back with the first movement.</summary>
+    private void HideCursor()
+    {
+        if (_cursorHidden || !_isFullscreen || !IsActive) return;
+        _cursorHidden = true;
+        NativeMethods.ShowCursor(false); // also over the video window (it shares viBro's input)
+        Mouse.OverrideCursor = Cursors.None;
+    }
+
+    private void RestoreCursor()
+    {
+        if (!_cursorHidden) return;
+        _cursorHidden = false;
+        NativeMethods.ShowCursor(true);
+        Mouse.OverrideCursor = null;
+    }
+
+    /// <summary>
+    /// While nothing is loaded the native video window is hidden and a guide text is shown instead
+    /// (nothing can be drawn over the video window itself).
+    /// </summary>
+    private void UpdateVideoPlaceholder()
+    {
+        if (_player == null) return;
+        bool idle = _currentItem == null && _loadingItem == null;
+        if (idle)
+            VideoPlaceholder.Text = $"Select a video  ·  {_settings.Keys.Display(Command.Gallery)} gallery  ·  " +
+                                    $"{_settings.Keys.Display(Command.Commands)} commands";
+        VideoPlaceholder.Visibility = idle ? Visibility.Visible : Visibility.Collapsed;
+        VideoHost.Visibility = idle ? Visibility.Hidden : Visibility.Visible;
     }
 
     // ================================================================ fullscreen
@@ -925,6 +982,7 @@ public partial class MainWindow : Window
     private void ExitFullscreen()
     {
         _isFullscreen = false;
+        RestoreCursor();
         WindowStyle = _savedStyle;
         ResizeMode = _savedResizeMode;
         WindowState = _savedState == WindowState.Minimized ? WindowState.Normal : _savedState;
@@ -974,6 +1032,7 @@ public partial class MainWindow : Window
     private void ShowFullscreenBar()
     {
         if (!_isFullscreen) return;
+        RestoreCursor();
         SeekPanel.Visibility = Visibility.Visible;
         _fullscreenBarTimer.Stop();
         _fullscreenBarTimer.Start();
@@ -985,6 +1044,7 @@ public partial class MainWindow : Window
         if (TransportBar.IsMouseOver || TimeSlider.IsMouseCaptureWithin) return; // keep while in use
         _fullscreenBarTimer.Stop();
         SeekPanel.Visibility = Visibility.Hidden; // Hidden keeps the band's height
+        HideCursor(); // 1.13.0: with the band, after 2 s without mouse movement
     }
 
     private void TransportBar_MouseMove(object sender, MouseEventArgs e) => ShowFullscreenBar();
@@ -1043,7 +1103,7 @@ public partial class MainWindow : Window
     private void OnPlaybackFailed(string error)
     {
         string name = _loadingItem?.Name ?? (FileList.SelectedItem as VideoItem)?.Name ?? "the video";
-        SetStatus($"Playback of {name} stopped: {error} (network location lost?)");
+        SetStatus($"Playback of {name} stopped: {error} (network location lost?)", StatusKind.Error);
         ErrorLog.Write("playback", $"Playback of {name} stopped: {error}");
     }
 
@@ -1090,11 +1150,16 @@ public partial class MainWindow : Window
             mem.WorkingSetMb, mem.PrivateMb, mem.ManagedMb, AppInfo.SemanticVersion));
 
         if (_metrics.LastError != null)
-            SetStatus("Metrics not saved: " + _metrics.LastError);
+            SetStatus("Metrics not saved: " + _metrics.LastError, StatusKind.Error);
     }
 
+    /// <summary>Load / seek times, hwdec and memory: only with [Diagnostics] MetricsLog=true (1.13.0).</summary>
     private void UpdateMetricsText()
     {
+        var visibility = _settings.MetricsLog ? Visibility.Visible : Visibility.Collapsed;
+        MetricsItem.Visibility = visibility;
+        MetricsSeparator.Visibility = visibility;
+        if (!_settings.MetricsLog) return;
         var mem = MetricsLog.MemorySnapshot();
         MetricsText.Text = string.Join("  |  ",
             new[] { _lastLoadText, _lastSeekText, $"mem {mem.PrivateMb:0} MB" }.Where(s => s.Length > 0));
@@ -1114,14 +1179,9 @@ public partial class MainWindow : Window
         WarningText.Visibility = Visibility.Visible;
     }
 
-    private void SetStatus(string text) => StatusText.Text = text;
 
     private static string Display(string? s) => string.IsNullOrEmpty(s) ? "-" : s;
 
-    private static string FormatTime(double seconds)
-    {
-        if (double.IsNaN(seconds) || seconds < 0) seconds = 0;
-        var t = TimeSpan.FromSeconds(Math.Floor(seconds));
-        return $"{(int)t.TotalHours:00}:{t.Minutes:00}:{t.Seconds:00}";
-    }
+    /// <summary>1.13.0: one format everywhere, without useless leading zeros: "1:20", "15:02", "1:02:15".</summary>
+    private static string FormatTime(double seconds) => TimeFormat.Format(seconds);
 }

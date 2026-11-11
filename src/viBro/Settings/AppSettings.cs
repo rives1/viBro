@@ -16,6 +16,16 @@ internal enum ThemeChoice { System, Light, Dark }
 /// Typed view of viBro.ini (next to the EXE). Missing or invalid values fall back to
 /// defaults (each invalid value is reported once). Unknown keys are preserved on save.
 /// </summary>
+/// <summary>Position and size of a gallery window (1.13.0); Left/Top null = centred on the screen.</summary>
+internal sealed class WindowBox
+{
+    public double? Left { get; set; }
+    public double? Top { get; set; }
+    public double Width { get; set; } = 1200;
+    public double Height { get; set; } = 800;
+    public bool Maximized { get; set; }
+}
+
 internal sealed class AppSettings
 {
     public const int CurrentSchemaVersion = 1;
@@ -86,6 +96,8 @@ internal sealed class AppSettings
     // [SelectionGallery] (F12, 1.11.0): image positions for the gallery of the selected videos
     public static readonly double[] DefaultSelectionGalleryPercents = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 99 };
     public double[] SelectionGalleryPercents { get; set; } = (double[])DefaultSelectionGalleryPercents.Clone();
+    public WindowBox GalleryWindow { get; } = new();          // [Gallery] Window* (1.13.0)
+    public WindowBox SelectionGalleryWindow { get; } = new(); // [SelectionGallery] Window* (1.13.0)
 
     // [Cache]
     public int CacheMaxMB { get; set; } // 0 = mpv cache disabled (only the minimal demuxer read-ahead)
@@ -168,6 +180,8 @@ internal sealed class AppSettings
         GalleryJobs = ReadInt("Gallery", "Jobs", GalleryJobs, 1, 8);
         GalleryCombined = ReadEnumWord("Gallery", "Method", new[] { "Separate", "Combined" }, GalleryCombined ? 1 : 0) == 1;
         SelectionGalleryPercents = ReadPercentList("SelectionGallery", "PositionsPercent", SelectionGalleryPercents, 20);
+        ReadWindowBox("Gallery", GalleryWindow);
+        ReadWindowBox("SelectionGallery", SelectionGalleryWindow);
 
         CacheMaxMB = ReadInt("Cache", "MaxMB", CacheMaxMB, 0, 4096);
 
@@ -268,6 +282,8 @@ internal sealed class AppSettings
         _ini.Set("Gallery", "Jobs", GalleryJobs.ToString(c));
         _ini.Set("Gallery", "Method", GalleryCombined ? "Combined" : "Separate");
         _ini.Set("SelectionGallery", "PositionsPercent", string.Join(",", Array.ConvertAll(SelectionGalleryPercents, D)));
+        WriteWindowBox("Gallery", GalleryWindow, D);
+        WriteWindowBox("SelectionGallery", SelectionGalleryWindow, D);
 
         _ini.Set("Cache", "MaxMB", CacheMaxMB.ToString(c));
 
@@ -322,6 +338,24 @@ internal sealed class AppSettings
         if (list.Count >= 1 && list.Count <= max) return list.ToArray();
         Invalid(section, key, v);
         return def;
+    }
+
+    private void ReadWindowBox(string section, WindowBox box)
+    {
+        box.Left = ReadNullableDouble(section, "WindowLeft", -100000, 100000);
+        box.Top = ReadNullableDouble(section, "WindowTop", -100000, 100000);
+        box.Width = ReadDouble(section, "WindowWidth", box.Width, 300, 100000);
+        box.Height = ReadDouble(section, "WindowHeight", box.Height, 200, 100000);
+        box.Maximized = ReadEnumWord(section, "WindowState", new[] { "Normal", "Maximized" }, box.Maximized ? 1 : 0) == 1;
+    }
+
+    private void WriteWindowBox(string section, WindowBox box, Func<double, string> d)
+    {
+        if (box.Left is double l) _ini.Set(section, "WindowLeft", d(l));
+        if (box.Top is double t) _ini.Set(section, "WindowTop", d(t));
+        _ini.Set(section, "WindowWidth", d(box.Width));
+        _ini.Set(section, "WindowHeight", d(box.Height));
+        _ini.Set(section, "WindowState", box.Maximized ? "Maximized" : "Normal");
     }
 
     private int ReadInt(string section, string key, int def, int min, int max)

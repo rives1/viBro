@@ -331,6 +331,16 @@ internal sealed class CommandsDialog : Window
             ("Wheel", "Back / forward " + AppSettings.FormatSeconds(s.SeekWheelSeconds) + " (also when viBro is not in front)"),
             ("Right button + wheel", "Next (up) / previous (down) video, no menu"),
         }),
+        ("Galleries (F10, F12)", new[]
+        {
+            ("Click / click on an image", "Load the video / load it at that time"),
+            ("Right click", "Menu: Delete, Move, Copy"),
+            (s.Keys.Display(Command.Delete) + ", " + s.Keys.Display(Command.Rename) + ", " +
+             s.Keys.DisplayPair(Command.Move, Command.MoveToLast) + ", " + s.Keys.DisplayPair(Command.Copy, Command.CopyToLast),
+                "Delete (confirmation), rename, move, copy the selected row's video"),
+            (s.Keys.Display(Command.PlayPause) + ", " + s.Keys.Display(Command.Mute), "Play / Pause, mute"),
+            ("↑ / ↓, Esc", "Previous / next row, close the gallery"),
+        }),
         ("Timeline", new[]
         {
             ("Click and drag", "Move in the video"),

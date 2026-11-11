@@ -585,6 +585,11 @@ public partial class MainWindow : Window
     private void LoadItem(VideoItem item)
     {
         if (_player == null) return;
+        if (_busyPaths.Contains(item.FullPath))
+        {
+            SetStatus($"{item.Name} is being deleted or moved: it can be loaded when the operation ends.");
+            return;
+        }
         bool play = _playAfterRelease ?? !_player.IsPaused;
         _playAfterRelease = null;
         _loadingItem = item;

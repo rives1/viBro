@@ -2,6 +2,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using ViBro.Settings;
+using System.Windows.Interop;
+using System.Windows.Input;
 using ViBro.Util;
 
 namespace ViBro;
@@ -38,7 +41,8 @@ public partial class MainWindow
         }
         _selectionGallery?.Close();
         string title = $"Selection gallery - {(videos.Count == 1 ? "1 video" : videos.Count + " videos")} - {_currentFolder}";
-        var g = new GalleryWindow(this, title, videos, _settings.SelectionGalleryPercents, _settings.GalleryJobs, compact: true);
+        var g = new GalleryWindow(this, title, videos, _settings.SelectionGalleryPercents, _settings.GalleryJobs,
+            _settings.GalleryCombined, compact: true);
         g.Closed += (_, _) =>
         {
             if (ReferenceEquals(_selectionGallery, g)) _selectionGallery = null;
@@ -67,7 +71,8 @@ public partial class MainWindow
         }
 
         _gallery?.Close(); // F10 again: a new gallery of the current folder
-        var g = new GalleryWindow(this, "Gallery - " + _currentFolder, videos, _settings.GalleryPercents, _settings.GalleryJobs);
+        var g = new GalleryWindow(this, "Gallery - " + _currentFolder, videos, _settings.GalleryPercents, _settings.GalleryJobs,
+            _settings.GalleryCombined);
         g.Closed += (_, _) =>
         {
             if (ReferenceEquals(_gallery, g)) _gallery = null;
@@ -103,6 +108,33 @@ public partial class MainWindow
         var menu = BuildFileMenu(1, action => RunOnGalleryFile(path, action));
         menu.PlacementTarget = target;
         menu.IsOpen = true;
+    }
+
+    /// <summary>
+    /// Keys pressed in a gallery (1.12.0): the commands of [Keys] that make sense for one video act on
+    /// the gallery's selected row, with the same rules as in the main window (Delete asks for
+    /// confirmation, as Canc / R do). Other keys are left to the gallery (row navigation).
+    /// </summary>
+    internal bool HandleGalleryKey(Key key, ModifierKeys mods, string path)
+    {
+        if (ComponentDispatcher.IsThreadModal || _fileOpBusy) return false;
+        if (!_settings.Keys.TryGet(key, mods, out Command command)) return false;
+        bool repeat = _win32KeyRepeat; // one key press = at most one operation
+        Action? action = command switch
+        {
+            Command.Delete => () => RunOnGalleryFile(path, () => DeleteSelected(fromVideoMenu: false)),
+            Command.Rename => () => RunOnGalleryFile(path, RenameSelected),
+            Command.Move => () => RunOnGalleryFile(path, () => MoveSelected(useLastDestination: false)),
+            Command.MoveToLast => () => RunOnGalleryFile(path, () => MoveSelected(useLastDestination: true)),
+            Command.Copy => () => RunOnGalleryFile(path, () => CopySelected(useLastDestination: false)),
+            Command.CopyToLast => () => RunOnGalleryFile(path, () => CopySelected(useLastDestination: true)),
+            Command.PlayPause => () => _player?.TogglePause(),
+            Command.Mute => () => _player?.ToggleMute(),
+            _ => null,
+        };
+        if (action == null) return false;
+        if (!repeat) Dispatcher.BeginInvoke(action); // after this key message (dialogs open on a clean state)
+        return true;
     }
 
     private void RunOnGalleryFile(string path, Action action)

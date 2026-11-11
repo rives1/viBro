@@ -28,6 +28,9 @@ public partial class GalleryWindow : Window
     private readonly MainWindow _main;
     private readonly double[] _percents;
     private readonly int _jobs;
+    private readonly bool _combined; // 1.12.0: one ffmpeg run per video ([Gallery] Method=Combined)
+    // Extensions where the combined run failed in this window: their next rows go straight to one run per image.
+    private readonly HashSet<string> _combinedFailed = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<GalleryRow> _rows; // work list (guarded by _gate)
     private readonly ObservableCollection<GalleryRow> _view; // what the window shows
     private readonly CancellationTokenSource _cts = new();
@@ -40,13 +43,15 @@ public partial class GalleryWindow : Window
     private VirtualizingStackPanel? _panel;
 
     /// <param name="compact">F12 (1.11.0): one compact strip per selected video, name only in the tooltip, no times.</param>
-    internal GalleryWindow(MainWindow main, string title, IReadOnlyList<VideoItem> videos, double[] percents, int jobs, bool compact = false)
+    internal GalleryWindow(MainWindow main, string title, IReadOnlyList<VideoItem> videos, double[] percents, int jobs,
+        bool combined, bool compact = false)
     {
         InitializeComponent();
         ThemeManager.AttachWindow(this);
         _main = main;
         _percents = percents;
         _jobs = Math.Max(1, jobs);
+        _combined = combined;
         _rows = videos.Select((v, i) => new GalleryRow(v, i, percents.Length)).ToList();
         _view = new ObservableCollection<GalleryRow>(_rows);
         Title = title;
@@ -144,6 +149,33 @@ public partial class GalleryWindow : Window
 
         double[] times = ThumbnailExtractor.Positions(probe.Duration, _percents);
         var images = new Thumbnail?[times.Length];
+
+        // 1.12.0: all the images in one ffmpeg run, split here; on any failure the row is made the old
+        // way, one run per image (also the method of [Gallery] Method=Separate).
+        string ext = Path.GetExtension(row.Item.FullPath);
+        bool tryCombined;
+        lock (_combinedFailed) tryCombined = _combined && times.Length > 1 && !_combinedFailed.Contains(ext);
+        if (tryCombined)
+        {
+            try
+            {
+                var (strip, seconds) = await ThumbnailExtractor.GrabStripAsync(row.Item.FullPath, times, probe.Start, ct);
+                byte[][] parts = await Dispatcher.InvokeAsync(() => SplitStrip(strip, times.Length));
+                for (int i = 0; i < times.Length; i++) images[i] = new Thumbnail(parts[i], seconds[i]);
+                var done = images.Select(t => t!).ToArray();
+                Ui(() => { for (int i = 0; i < done.Length; i++) row.Cells[i].SetImage(done[i]); });
+                GalleryCache.Put(key, new GalleryEntry(probe.Duration, done));
+                return true;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                ErrorLog.Write("gallery", $"Combined images failed for {row.Item.Name} ({ex.Message}); one run per image" +
+                    $" for the {ext} files of this gallery.");
+                lock (_combinedFailed) _combinedFailed.Add(ext);
+                Array.Clear(images);
+            }
+        }
+
         bool all = true;
         for (int i = 0; i < times.Length; i++)
         {
@@ -151,7 +183,7 @@ public partial class GalleryWindow : Window
             int index = i;
             try
             {
-                var t = await ThumbnailExtractor.GrabAsync(row.Item.FullPath, times[i], probe.Start, ct);
+                var t = await ThumbnailExtractor.GrabNearAsync(row.Item.FullPath, times[i], probe.Start, ct);
                 images[i] = t;
                 Ui(() => row.Cells[index].SetImage(t));
             }
@@ -271,18 +303,52 @@ public partial class GalleryWindow : Window
         UpdateStatus();
     }
 
+    /// <summary>
+    /// Esc closes the gallery. 1.12.0: the keys of [Keys] for delete, rename, move, copy, play/pause and
+    /// mute act on the selected row (its video is the one loaded in the main window). Arrows, PgUp/PgDn,
+    /// Home/End keep moving between rows.
+    /// </summary>
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {
             e.Handled = true;
             Close();
+            return;
         }
+        if (Rows.SelectedItem is not GalleryRow row) return;
+        Key key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (_main.HandleGalleryKey(key, Keyboard.Modifiers, row.Item.FullPath)) e.Handled = true;
     }
 
     private void Window_Closed(object? sender, EventArgs e) => _cts.Cancel(); // running ffmpeg processes are killed
 
     // ------------------------------------------------------------------ helpers
+
+    /// <summary>
+    /// Cuts the strip (images side by side, same width each) into one JPEG per image. Runs on the UI
+    /// thread (WPF imaging), about 10–30 ms per row.
+    /// </summary>
+    private static byte[][] SplitStrip(byte[] jpeg, int count)
+    {
+        var decoder = new JpegBitmapDecoder(new MemoryStream(jpeg, writable: false),
+            BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+        BitmapSource strip = decoder.Frames[0];
+        int width = strip.PixelWidth / count;
+        if (width <= 0 || width * count != strip.PixelWidth)
+            throw new InvalidDataException($"unexpected strip width {strip.PixelWidth} for {count} images");
+        var parts = new byte[count][];
+        for (int i = 0; i < count; i++)
+        {
+            var crop = new CroppedBitmap(strip, new Int32Rect(i * width, 0, width, strip.PixelHeight));
+            var encoder = new JpegBitmapEncoder { QualityLevel = 85 };
+            encoder.Frames.Add(BitmapFrame.Create(crop));
+            using var ms = new MemoryStream();
+            encoder.Save(ms);
+            parts[i] = ms.ToArray();
+        }
+        return parts;
+    }
 
     internal static string FormatTime(double seconds)
     {

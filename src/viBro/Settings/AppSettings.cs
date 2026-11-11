@@ -80,6 +80,8 @@ internal sealed class AppSettings
     public static readonly double[] DefaultGalleryPercents = { 10, 30, 50, 70, 90 };
     public double[] GalleryPercents { get; set; } = (double[])DefaultGalleryPercents.Clone();
     public int GalleryJobs { get; set; } = 2;
+    // 1.12.0: Combined = one ffmpeg run per video (default), Separate = one run per image (as before)
+    public bool GalleryCombined { get; set; } = true;
 
     // [SelectionGallery] (F12, 1.11.0): image positions for the gallery of the selected videos
     public static readonly double[] DefaultSelectionGalleryPercents = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 99 };
@@ -95,7 +97,7 @@ internal sealed class AppSettings
     public KeyBindings Keys { get; private set; } = KeyBindings.Defaults();
 
     // [Diagnostics]
-    public bool MetricsLog { get; set; } = true;
+    public bool MetricsLog { get; set; } // 1.12.0: off by default (it was a measuring tool of 0.1.0 – 1.0.0)
 
     public int LoadedSchemaVersion { get; private set; } = CurrentSchemaVersion;
     public List<string> Warnings { get; } = new();
@@ -164,6 +166,7 @@ internal sealed class AppSettings
 
         GalleryPercents = ReadPercentList("Gallery", "PositionsPercent", GalleryPercents);
         GalleryJobs = ReadInt("Gallery", "Jobs", GalleryJobs, 1, 8);
+        GalleryCombined = ReadEnumWord("Gallery", "Method", new[] { "Separate", "Combined" }, GalleryCombined ? 1 : 0) == 1;
         SelectionGalleryPercents = ReadPercentList("SelectionGallery", "PositionsPercent", SelectionGalleryPercents, 20);
 
         CacheMaxMB = ReadInt("Cache", "MaxMB", CacheMaxMB, 0, 4096);
@@ -263,6 +266,7 @@ internal sealed class AppSettings
 
         _ini.Set("Gallery", "PositionsPercent", string.Join(",", Array.ConvertAll(GalleryPercents, D)));
         _ini.Set("Gallery", "Jobs", GalleryJobs.ToString(c));
+        _ini.Set("Gallery", "Method", GalleryCombined ? "Combined" : "Separate");
         _ini.Set("SelectionGallery", "PositionsPercent", string.Join(",", Array.ConvertAll(SelectionGalleryPercents, D)));
 
         _ini.Set("Cache", "MaxMB", CacheMaxMB.ToString(c));

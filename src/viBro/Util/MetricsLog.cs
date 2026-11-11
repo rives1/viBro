@@ -90,17 +90,26 @@ internal sealed class MetricsLog
         return r.ReadLine() == MetricRecord.Header;
     }
 
+    private const long MaxBytes = 10L * 1024 * 1024; // 1.12.0: beyond this the file becomes viBro-metrics-old.csv
+    private bool _headerChecked;
+
     public void Append(MetricRecord record)
     {
         if (_failed) return;
         try
         {
             bool isNew = !File.Exists(_path);
-            if (!isNew && !HeaderMatches())
+            if (!isNew && !_headerChecked && !HeaderMatches())
             {
                 // Column layout changed: keep the old file aside instead of mixing layouts.
                 File.Move(_path, System.IO.Path.ChangeExtension(_path, null) + "-" +
                     DateTime.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture) + ".csv");
+                isNew = true;
+            }
+            _headerChecked = true; // checked once per session, not at every record
+            if (!isNew && new FileInfo(_path).Length >= MaxBytes)
+            {
+                File.Move(_path, System.IO.Path.ChangeExtension(_path, null) + "-old.csv", overwrite: true);
                 isNew = true;
             }
             using var w = new StreamWriter(_path, append: true, new UTF8Encoding(false));

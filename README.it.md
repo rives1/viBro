@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.11.0 rilasciata** (F12: galleria dei video selezionati). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.12.0 in prova** (gallerie più rapide, tastiera nelle gallerie, misure disattivate per impostazione predefinita). Ultima versione rilasciata: 1.11.0 (F12: galleria dei video selezionati). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -16,7 +16,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - Al cambio di file lo stato **Play/Pause si conserva**: se il video era in pausa (o all'avvio) il nuovo si carica in pausa sul primo fotogramma; se era in riproduzione, il nuovo parte.
 - Salti: per impostazione predefinita ±1 s e ±5 s esatti, ±1 min e ±5 min su fotogrammi chiave (rapidi, approssimati) oppure esatti con *Exact long seeks*; ogni durata si cambia in `[Seek]` di `viBro.ini`. Le richieste ripetute vengono accorpate, quindi non si accumula una coda.
 - Play/Pause, barra temporale, volume, mute, schermo intero.
-- **Misure automatiche** in `viBro-metrics.csv`, accanto all'EXE: tempo al primo fotogramma, cambio video, latenza dei salti, memoria.
+- **Misure** in `viBro-metrics.csv`, accanto all'EXE, con `[Diagnostics] MetricsLog=true` (disattivate per impostazione predefinita dalla 1.12.0): tempo al primo fotogramma, cambio video, latenza dei salti, memoria; oltre 10 MB il file diventa `viBro-metrics-old.csv`.
 
 - Albero delle cartelle (cartelle utente, unità locali e di rete, condivisioni UNC aperte), caricato progressivamente e sincronizzato con la cartella aperta.
 - Ordinamento per Name, Size, Date modified; tre riquadri ridimensionabili; impostazioni in `viBro.ini`.
@@ -25,6 +25,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
 - **Estratto di una parte del video** (1.5.0): I e O segnano inizio e fine, F9 scrive la parte in un nuovo file nella stessa cartella. Usa un `ffmpeg.exe` messo dall'utente accanto a `viBro.exe` (non incluso; senza, la funzione è disattivata). Nessuna ricodifica (rapido, qualità originale): l'estratto parte dal fotogramma chiave al marker di inizio o prima, anche diversi secondi prima; la fine è vicina al marker di fine. I marker compaiono sulla barra temporale (I verde, O rosso, fascia gialla tra i due) e un messaggio conferma l'estratto a fine procedura.
 - **Galleria** (1.6.0; menu del tasto destro 1.8.0): F10 apre una finestra separata con una riga per ogni video della cartella e 5 immagini prese alle stesse percentuali della durata di ciascun video (predefinite 10, 30, 50, 70, 90 %). Un clic su una riga seleziona e carica quel video nella finestra principale; un clic su un'immagine lo carica al tempo dell'immagine. Usa lo stesso `ffmpeg.exe` dell'estratto. Le immagini sono i fotogrammi chiave più vicini a quelle posizioni (rapide, anche sul NAS), create in background partendo dalle righe visibili, tenute solo in memoria (nulla su disco) e riusate finché viBro resta aperto. La galleria resta sulla cartella in cui è stata aperta; F10 di nuovo ne crea una nuova. Il tasto destro su una riga o un'immagine (1.8.0) seleziona e carica quel video e apre lo stesso menu del video (Delete, Move, Copy); le righe dei file eliminati o spostati escono dalla galleria.
 - **Galleria della selezione** (1.11.0): F12 apre una galleria dei soli video selezionati nell'elenco, con 10 immagini per video (10 %, 20 % … 90 % e 99 % della durata, `[SelectionGallery] PositionsPercent`) in strisce compatte: senza tempi né riga del nome (il nome è nel tooltip). Clic e menu del tasto destro come nella galleria. Può restare aperta insieme alla galleria F10.
+- **Tastiera nelle gallerie** (1.12.0): con una riga selezionata, i tasti di elimina (con conferma), rinomina, sposta, copia, Play/Pause e Mute agiscono su quel video; frecce e PgUp/PgDn si spostano tra le righe.
 - **Selezione multipla** (1.7.0): Ctrl + clic aggiunge o toglie un file, Shift + clic seleziona un intervallo, Ctrl+A seleziona tutti i video. Elimina, sposta e copia agiscono su tutti i video selezionati: una conferma, una destinazione, una finestra di avanzamento; i conflitti di nome si chiedono file per file, con "fai lo stesso per i conflitti successivi" e *Skip*. Il riquadro video carica il file appena cliccato. Rinomina (F2), Shift+Invio e l'estratto (I / O / F9) richiedono un solo video selezionato. Le frecce continuano a spostare il tempo, quindi la selezione si fa col mouse.
 
 - Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.
@@ -51,8 +52,9 @@ Si trova accanto a `viBro.exe` e viene scritto alla chiusura. Va modificato solo
 | `[Cache] MaxMB` | `0` | 0 = cache di mpv disattivata; >0 = cache attiva con questo limite |
 | `[Gallery] PositionsPercent` | `10,30,50,70,90` | Posizioni delle immagini della galleria, in % della durata di ogni video (da 1 a 10 valori) |
 | `[Gallery] Jobs` | `2` | Esecuzioni di ffmpeg contemporanee per la galleria (1–8; di più è più rapido su SSD, può essere più lento sul NAS) |
+| `[Gallery] Method` | `Combined` | `Combined` = una sola esecuzione di ffmpeg per video per tutte le sue immagini (dalla 1.12.0, circa il doppio più rapida; ripiega da sola su un'esecuzione per immagine se un file non lo permette); `Separate` = un'esecuzione per immagine, come prima |
 | `[SelectionGallery] PositionsPercent` | `10,20,30,40,50,60,70,80,90,99` | Posizioni delle immagini della galleria F12, in % della durata di ogni video (da 1 a 20 valori); esecuzioni di ffmpeg contemporanee da `[Gallery] Jobs` |
-| `[Diagnostics] MetricsLog` | `true` | Registro delle misure `viBro-metrics.csv`; `false` = il file non viene creato né scritto |
+| `[Diagnostics] MetricsLog` | `false` (dalla 1.12.0) | Registro delle misure `viBro-metrics.csv`; `false` = il file non viene creato né scritto |
 | `[Delete] ConfirmFromVideoMenu` | `false` | `false` = *Delete* nel menu del tasto destro sul video elimina un file senza conferma (anche in rete, dove è definitiva); più file chiedono sempre conferma. `true` = conferma sempre |
 | `[Appearance] Theme` | `System` | `Light`, `Dark`, oppure `System` (segue Windows finché non si sceglie con il pulsante *Theme*) |
 
@@ -177,7 +179,7 @@ La versione si trova **solo** in `Directory.Build.props` e viene riportata nel t
 powershell -ExecutionPolicy Bypass -File build\analyze-metrics.ps1 -Path <cartella-exe>\viBro-metrics.csv
 ```
 
-Il protocollo di prova è descritto in [docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md).
+Il protocollo delle misure è descritto in [docs/TEST-PLAN-0.1.0.md](docs/TEST-PLAN-0.1.0.md); le prove da ripetere prima di ogni rilascio sono in [docs/TEST-REGRESSION.md](docs/TEST-REGRESSION.md).
 
 ## Licenza
 

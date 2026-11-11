@@ -2,6 +2,21 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.0] - non ancora rilasciata
+
+Versione di solidità, dalla revisione del progetto del 2026-11-11.
+
+### Aggiunto
+- **Gallerie più rapide:** tutte le immagini di un video in una sola esecuzione di ffmpeg invece di una per immagine (galleria F12: 2 avvii invece di 11). Misurato su un MP4 di 10 minuti in locale: 450 ms contro 1.000 ms per video. Se un file non lo permette, la riga ripiega da sola sul metodo precedente, e per quell'estensione la galleria non lo riprova. `[Gallery] Method=Combined` (predefinito) o `Separate`.
+- **Immagine mancante:** se a una posizione non arriva nessuna immagine (può succedere vicino alla fine, es. al 99 %, nei formati in cui ffmpeg cerca il fotogramma chiave successivo), viene ripresa 10 s e poi 30 s prima.
+- **Tastiera nelle gallerie (F10, F12):** sulla riga selezionata agiscono i tasti di elimina (con conferma, come Canc nell'elenco), rinomina, sposta, copia, Play/Pause e Mute, presi da `[Keys]`. Frecce, PgUp/PgDn e Home/Fine restano per spostarsi tra le righe. Ctrl+F2 ha la sezione *Galleries*.
+- `docs/TEST-REGRESSION.md`: lista unica delle prove da ripetere prima di ogni rilascio; i piani delle versioni contengono solo le novità.
+
+### Modificato
+- **`[Diagnostics] MetricsLog` predefinito `false`:** `viBro-metrics.csv` non viene più scritto se non lo si attiva. Un `viBro.ini` già esistente conserva il valore scritto dalle versioni precedenti (`true`): va cambiato a mano. Oltre 10 MB il file diventa `viBro-metrics-old.csv`; l'intestazione si controlla una volta per sessione e non a ogni riga.
+- **File coinvolti in un'eliminazione o in uno spostamento:** finché l'operazione è in corso non si possono caricare (prima un clic su uno di essi lo apriva nel player e faceva fallire l'operazione su quel file).
+- `.gitignore`: esclusi anche `*.avi`, `*.m4v`, `*.ts` e `viBro-metrics*.csv`.
+
 ## [1.11.0] - 2026-11-10
 
 ### Aggiunto

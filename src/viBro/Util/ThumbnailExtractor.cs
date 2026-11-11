@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +31,8 @@ internal static class ThumbnailExtractor
     private static readonly Regex DurationRx = new(@"Duration:\s*(\d+):(\d{2}):(\d{2}(?:\.\d+)?)", RegexOptions.CultureInvariant);
     private static readonly Regex StartRx = new(@"Duration:[^\r\n]*?start:\s*(-?\d+(?:\.\d+)?)", RegexOptions.CultureInvariant);
     private static readonly Regex PtsRx = new(@"pts_time:\s*(-?\d+(?:\.\d+)?)", RegexOptions.CultureInvariant);
+    // "[Parsed_showinfo_5 @ 0x...] n:   0 pts: ... pts_time:120 ..." (first frame of each chain).
+    private static readonly Regex StripPtsRx = new(@"Parsed_showinfo_(\d+)\s*@[^\]]*\]\s*n:\s*0\s[^\r\n]*?pts_time:\s*(-?\d+(?:\.\d+)?)", RegexOptions.CultureInvariant);
 
     /// <summary>Times (seconds) for the given percentages of the duration, kept inside the video.</summary>
     public static double[] Positions(double duration, IReadOnlyList<double> percents)
@@ -61,6 +64,56 @@ internal static class ThumbnailExtractor
         return m.Success ? double.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) : null;
     }
 
+    /// <summary>
+    /// 1.12.0, one ffmpeg run for all the images of a video: one input per position (each seeks to its
+    /// keyframe), one frame per chain (trim), timestamps reset (setpts=0, otherwise hstack would wait
+    /// until all inputs reach the same time, decoding the whole file), then the images side by side in
+    /// one JPEG strip. showinfo comes before trim, so its pts_time is still the frame's real time.
+    /// </summary>
+    public static List<string> StripArguments(string source, IReadOnlyList<double> seconds)
+    {
+        var c = CultureInfo.InvariantCulture;
+        var a = new List<string> { "-hide_banner", "-nostdin", "-loglevel", "info" };
+        foreach (double t in seconds)
+            a.AddRange(new[] { "-noaccurate_seek", "-ss", t.ToString("0.000", c), "-i", source });
+        var graph = new System.Text.StringBuilder();
+        for (int i = 0; i < seconds.Count; i++)
+            graph.Append($"[{i}:v:0]showinfo,trim=end_frame=1,setpts=0,scale=w={BoxWidth}:h={BoxHeight}:force_original_aspect_ratio=decrease,setsar=1[v{i}];");
+        for (int i = 0; i < seconds.Count; i++) graph.Append($"[v{i}]");
+        graph.Append($"hstack=inputs={seconds.Count}[strip]");
+        a.AddRange(new[]
+        {
+            "-copyts", "-filter_complex", graph.ToString(), "-map", "[strip]", "-frames:v", "1",
+            "-f", "image2pipe", "-c:v", "mjpeg", "-q:v", "4", "pipe:1",
+        });
+        return a;
+    }
+
+    /// <summary>Real times of the strip's images, in input order; null unless there is exactly one per input.</summary>
+    public static double[]? ParseStripTimes(string stderr, int count)
+    {
+        var byFilter = new SortedDictionary<int, double>();
+        foreach (Match m in StripPtsRx.Matches(stderr))
+        {
+            int filter = int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture);
+            byFilter.TryAdd(filter, double.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture));
+        }
+        return byFilter.Count == count ? byFilter.Values.ToArray() : null; // filters are numbered in chain order
+    }
+
+    /// <summary>The strip (JPEG, images side by side, same width each) and the real time of every image.</summary>
+    public static async Task<(byte[] Jpeg, double[] Seconds)> GrabStripAsync(string source, IReadOnlyList<double> seconds,
+        double start, CancellationToken ct)
+    {
+        var (stdout, stderr, code) = await RunAsync(StripArguments(source, seconds), ct);
+        if (code != 0 || stdout.Length == 0)
+            throw new IOException(LastLine(stderr) ?? $"ffmpeg ended with code {code}");
+        double[]? frames = ParseStripTimes(stderr, seconds.Count);
+        return (stdout, frames == null
+            ? seconds.ToArray() // times not readable: the requested positions (already relative to the start)
+            : frames.Select(f => Math.Max(0, f - start)).ToArray());
+    }
+
     public static List<string> ProbeArguments(string source) =>
         new() { "-hide_banner", "-nostdin", "-i", source };
 
@@ -71,15 +124,16 @@ internal static class ThumbnailExtractor
     public static List<string> ThumbnailArguments(string source, double seconds)
     {
         var c = CultureInfo.InvariantCulture;
-        return new()
+        var a = new List<string> { "-hide_banner", "-nostdin", "-loglevel", "info" };
+        a.AddRange(new List<string>
         {
-            "-hide_banner", "-nostdin", "-loglevel", "info",
             "-noaccurate_seek", "-ss", seconds.ToString("0.000", c),
             "-i", source,
             "-copyts", "-map", "0:v:0", "-frames:v", "1", "-an", "-sn", "-dn",
             "-vf", $"showinfo,scale=w={BoxWidth}:h={BoxHeight}:force_original_aspect_ratio=decrease",
             "-f", "image2pipe", "-c:v", "mjpeg", "-q:v", "4", "pipe:1",
-        };
+        });
+        return a;
     }
 
     public static async Task<ProbeResult> ProbeAsync(string source, CancellationToken ct)
@@ -87,6 +141,39 @@ internal static class ThumbnailExtractor
         // Without an output ffmpeg ends with code 1 after printing the input's details: expected.
         var (_, stderr, _) = await RunAsync(ProbeArguments(source), ct);
         return ParseProbe(stderr) ?? throw new IOException(LastLine(stderr) ?? "duration unknown");
+    }
+
+    /// <summary>Earlier positions tried when no image comes (1.12.0): see <see cref="GrabNearAsync"/>.</summary>
+    private static readonly double[] RetryEarlierBy = { 10, 30 };
+
+    /// <summary>
+    /// The image at <paramref name="seconds"/>; if none comes, the same 10 s and then 30 s earlier. In
+    /// MPEG-TS (and some other formats) ffmpeg seeks to the keyframe after the position, so near the
+    /// end (e.g. 99 %) there may be none: an earlier position finds the last keyframe. The time of the
+    /// image is always the real one.
+    /// </summary>
+    public static async Task<Thumbnail> GrabNearAsync(string source, double seconds, double start, CancellationToken ct)
+    {
+        try
+        {
+            return await GrabAsync(source, seconds, start, ct);
+        }
+        catch (Exception first) when (first is not OperationCanceledException)
+        {
+            foreach (double back in RetryEarlierBy)
+            {
+                if (seconds - back < 0) break;
+                try
+                {
+                    return await GrabAsync(source, seconds - back, start, ct);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    // try further back
+                }
+            }
+            throw;
+        }
     }
 
     public static async Task<Thumbnail> GrabAsync(string source, double seconds, double start, CancellationToken ct)

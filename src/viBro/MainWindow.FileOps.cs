@@ -21,6 +21,9 @@ public partial class MainWindow
     private const int MaxNamesShown = 8;
 
     private bool _fileOpBusy;
+    // 1.12.0: files being deleted or moved; they are not loaded until the operation ends (a file opened
+    // by the player meanwhile would make its own deletion, or the removal of a moved source, fail).
+    private readonly HashSet<string> _busyPaths = new(StringComparer.OrdinalIgnoreCase);
     private VideoItem? _pendingStartItem;
     private double _pendingStartPosition;
     private string? _lastOpMessage;
@@ -106,6 +109,7 @@ public partial class MainWindow
         if (confirm && !DeleteConfirmDialog.Ask(this, title, text, warning: network)) return;
 
         _fileOpBusy = true;
+        _busyPaths.UnionWith(items.Select(i => i.FullPath));
         try
         {
             var (released, position) = await ReleaseIfLoadedAsync(items);
@@ -146,10 +150,12 @@ public partial class MainWindow
                 _lastOpMessage = $"Deleted {deleted.Count} of {n} files{how}";
                 ShowErrors("Delete files", $"{FilesText(errors.Count)} not deleted:", errors);
             }
+            _busyPaths.Clear(); // the files not deleted can be loaded again
             AfterRemoval(deleted, released, position);
         }
         finally
         {
+            _busyPaths.Clear();
             _fileOpBusy = false;
         }
     }
@@ -323,6 +329,7 @@ public partial class MainWindow
             return;
         }
 
+        if (!copy) _busyPaths.UnionWith(plan.Select(p => p.Item.FullPath)); // a copy only reads: its files stay loadable
         var (released, position) = copy ? ((VideoItem?)null, 0.0) : await ReleaseIfLoadedAsync(plan.Select(p => p.Item).ToList());
         var done = new List<(VideoItem Item, string FinalPath)>();
         var removed = new List<VideoItem>(); // moves whose source is gone (moved, or copied with the source deleted)
@@ -389,6 +396,7 @@ public partial class MainWindow
         finally
         {
             finished = true;
+            _busyPaths.Clear();
             progressDialog = CloseProgress(progressDialog);
         }
 

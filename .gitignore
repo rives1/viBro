@@ -20,6 +20,10 @@ samples/
 *.mkv
 *.mov
 *.wmv
+*.avi
+*.m4v
+*.ts
+viBro-metrics*.csv
 
 # Local Claude Code settings
 .claude/settings.local.json

@@ -396,3 +396,6 @@ L'utente ha chiesto una revisione del progetto; dei 7 punti proposti dall'assist
 - **Punto 5:** `.gitignore` con `*.avi`, `*.m4v`, `*.ts`, `viBro-metrics*.csv`.
 - **Punto 7, piani di prova:** `docs/TEST-REGRESSION.md` è la lista unica di regressione (da aggiornare quando una funzione cambia); `TEST-PLAN-x.y.z.md` contiene solo le novità e rimanda alla regressione. I piani fino alla 1.11.0 restano come storia.
 - Versione 1.12.0 (comportamenti compatibili, nuova opzione = MINOR).
+
+## D-079 — Chiusura della 1.12.0 (2026-11-11)
+L'utente ha confermato tutte le prove di `TEST-PLAN-1.12.0.md` e di `TEST-REGRESSION.md` con l'EXE compilato da `934cd09` (codice invariato fino al tag). I tempi della misura Combined / Separate sul NAS non sono stati riportati: `[Gallery] Method=Combined` resta il predefinito sulla base della misura locale (D-078) e del funzionamento confermato; i tempi si aggiungono qui se l'utente li fornisce. La 1.12.0 viene rilasciata (tag `v1.12.0`). Nessuna prova aperta passa alla versione successiva.

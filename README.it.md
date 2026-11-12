@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.14.0 rilasciata** (dissolvenze nelle gallerie e nell'elenco, secondo gli effetti di animazione di Windows). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.15.0 in prova** (filtro dell'elenco dei file); **1.14.0 rilasciata** (dissolvenze nelle gallerie e nell'elenco). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -35,6 +35,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
   - gallerie: la riga del video caricato ha un bordo nel colore di accento e segue D / E; in F10 i tempi sono dentro le immagini; ogni galleria si riapre dove e grande com'era;
   - un solo formato dei tempi: `1:20`, `15:02`, `1:02:15`.
 - **Dissolvenze** (1.14.0): le gallerie compaiono e spariscono in dissolvenza (200 ms; la cornice della finestra resta quella di Windows); il bordo del video caricato passa tra le righe della galleria con una breve dissolvenza; le righe dei file eliminati, spostati o scomparsi sfumano fuori dall'elenco, quelle nuove (F5, estratto) entrano sfumando. Il caricamento dei video non le aspetta mai, e con gli *Effetti di animazione* di Windows spenti (Impostazioni › Accessibilità › Effetti visivi) non c'è nessuna animazione.
+- **Filtro** (1.15.0): una casella sopra l'elenco dei file (Ctrl+F). Parole separate da spazi, tutte richieste: `4K` (il nome la contiene, maiuscole indifferenti), `.mp4` (estensione; più estensioni sono alternative), `>1000`, `>1G`, `<500M` (dimensione; un numero senza unità è in MB, unità K, M, G, T in multipli di 1024 come la colonna Size). L'elenco segue 200 ms dopo l'ultimo tasto, in memoria; le parti trovate sono evidenziate. Invio o ↓ passano all'elenco, Esc svuota. Cartelle e `..` restano sempre. Con un filtro D / E, la rotella, il video caricato dopo elimina / sposta, Ctrl+A e la galleria F10 usano i soli video visibili, e le righe nascoste escono dalla selezione: elimina, sposta e copia non toccano mai un file che non si vede. Un'altra cartella si apre senza filtro; F5 lo conserva.
 - **Selezione multipla** (1.7.0): Ctrl + clic aggiunge o toglie un file, Shift + clic seleziona un intervallo, Ctrl+A seleziona tutti i video. Elimina, sposta e copia agiscono su tutti i video selezionati: una conferma, una destinazione, una finestra di avanzamento; i conflitti di nome si chiedono file per file, con "fai lo stesso per i conflitti successivi" e *Skip*. Il riquadro video carica il file appena cliccato. Rinomina (F2), Shift+Invio e l'estratto (I / O / F9) richiedono un solo video selezionato. Le frecce continuano a spostare il tempo, quindi la selezione si fa col mouse.
 
 - Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.
@@ -86,6 +87,7 @@ I tasti qui sotto sono quelli predefiniti. Dalla 1.10.0 ogni scorciatoia da tast
 | `VolumeUp` / `VolumeDown` | `OemPlus,Add` / `OemMinus,Subtract` | `+` / `-` e tastierino numerico; 5 % a pressione (1.13.0) |
 | `Fullscreen / ExitFullscreen` | `F11 / Escape` | ExitFullscreen solo a schermo intero |
 | `FocusPath` | `Ctrl+L` |  |
+| `Filter` | `Ctrl+F` | Casella del filtro dell'elenco (1.15.0) |
 | `ParentFolder` | `Back` | Backspace: cartella superiore (1.13.0) |
 | `SelectAll` | `Ctrl+A` |  |
 | `Refresh` | `F5` |  |
@@ -114,6 +116,7 @@ I tasti qui sotto sono quelli predefiniti. Dalla 1.10.0 ogni scorciatoia da tast
 | M | Mute on/off | ✔ |
 | + / - | Volume su / giù del 5 % (valore mostrato sopra il video) | 1.13.0 |
 | Backspace | Cartella superiore (resta selezionata la cartella appena lasciata) | 1.13.0 |
+| Ctrl+F | Filtro dell'elenco (Invio / ↓: all'elenco, Esc: svuota) | 1.15.0 |
 | F11 / Esc | Entra in / esce da schermo intero | ✔ |
 | Ctrl + L | Attiva la barra del percorso (Invio apre, Esc annulla) | ✔ |
 | Ctrl + A | Seleziona tutti i video della cartella (il video caricato non cambia) | 1.7.0 |

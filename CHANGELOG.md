@@ -2,6 +2,17 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.0] - non rilasciata
+
+Filtro dell'elenco dei file, richiesto dall'utente il 2026-11-12.
+
+### Aggiunto
+- **Casella del filtro** sempre visibile sopra l'elenco (**Ctrl+F**, `[Keys] Filter`). Parole separate da spazi, tutte richieste: `4K` = il nome contiene 4K (maiuscole e minuscole indifferenti); `.mp4` = estensione (più estensioni sono alternative: `.mp4 .mkv`); `>1000`, `>1G`, `<500M`, `>=1.5G` = dimensione (numero senza unità = MB; K, M, G, T in multipli di 1024 come la colonna Size). Esempio: `4K .mkv >1G`.
+- L'elenco si aggiorna 200 ms dopo l'ultimo tasto, in memoria, senza rileggere la cartella. Le parti del nome trovate sono evidenziate nel colore di accento.
+- **Invio** o **↓** passano all'elenco (se nulla è selezionato, viene selezionato e caricato il primo video trovato); **Esc** svuota il filtro (vuoto: torna all'elenco); il pulsante ✕ lo svuota.
+- Il filtro agisce solo sui video: cartelle e `..` restano sempre. Con un filtro attivo D / E, la rotella, il video caricato dopo elimina / sposta, Ctrl+A e la galleria F10 lavorano sui soli video visibili; le righe nascoste escono dalla selezione, quindi elimina, sposta e copia non toccano mai un file che non si vede. La barra di stato conta i video visibili e aggiunge `filter: 12 of 128`.
+- Aprendo un'altra cartella il filtro si svuota; F5 lo conserva. Se una galleria o una rinomina porta a un video nascosto, il filtro si svuota con un messaggio.
+
 ## [1.14.0] - 2026-11-12
 
 Interfaccia più morbida: dissolvenze, richieste dall'utente il 2026-11-12. La riproduzione resta istantanea: nessun caricamento aspetta un'animazione.

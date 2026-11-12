@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mpv="clr-namespace:ViBro.Mpv"
         xmlns:util="clr-namespace:ViBro.Util"
+        xmlns:local="clr-namespace:ViBro"
         Title="viBro" Icon="viBro.ico" Width="1280" Height="820" MinWidth="640" MinHeight="420"
         PreviewKeyDown="Window_PreviewKeyDown"
         ContentRendered="Window_ContentRendered"
@@ -168,7 +169,20 @@
                 <GridSplitter x:Name="ListSplitter" Grid.Row="1" Height="5" HorizontalAlignment="Stretch"
                               ResizeBehavior="PreviousAndNext" ResizeDirection="Rows" Focusable="False" />
 
-                <ListView x:Name="FileList" Grid.Row="2" SelectionMode="Extended"
+                <DockPanel Grid.Row="2">
+                <!-- 1.15.0: filter of the list, always visible (Ctrl+F). Words in AND, .ext, >N / <N in MB, M or G. -->
+                <Grid DockPanel.Dock="Top" Margin="0,0,0,3">
+                    <TextBox x:Name="FilterBox" Padding="8,3,34,3" VerticalContentAlignment="Center"
+                             TextChanged="FilterBox_TextChanged" PreviewKeyDown="FilterBox_PreviewKeyDown" Loaded="FilterBox_Loaded"
+                             ToolTip="Filter the list: words (all required), .mp4 (extension), &gt;1000 or &gt;1G / &lt;500M (size; a bare number is in MB). Enter or Down: to the list. Esc: clear." />
+                    <TextBlock x:Name="FilterHint" Margin="11,0,40,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                               Opacity="0.55" TextTrimming="CharacterEllipsis" Text="Filter" />
+                    <Button x:Name="FilterClear" HorizontalAlignment="Right" Margin="0,0,3,0" Width="28" Padding="0"
+                            VerticalAlignment="Stretch" Focusable="False" Visibility="Collapsed" Background="Transparent"
+                            BorderThickness="0" Content="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10"
+                            ToolTip="Clear the filter (Esc)" Click="FilterClear_Click" />
+                </Grid>
+                <ListView x:Name="FileList" SelectionMode="Extended"
                           PreviewMouseLeftButtonDown="FileList_PreviewMouseLeftButtonDown"
                           PreviewMouseLeftButtonUp="FileList_PreviewMouseLeftButtonUp"
                           VirtualizingPanel.IsVirtualizing="True"
@@ -190,7 +204,10 @@
                                                 <TextBlock Text="{Binding StateGlyph}" FontSize="11" VerticalAlignment="Center"
                                                            FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" />
                                             </Grid>
-                                            <TextBlock x:Name="NameText" Text="{Binding Name}" VerticalAlignment="Center" />
+                                            <!-- 1.15.0: the parts matched by the filter are highlighted. -->
+                                            <TextBlock x:Name="NameText" VerticalAlignment="Center"
+                                                       local:FilterHighlight.Text="{Binding Name}"
+                                                       local:FilterHighlight.Words="{Binding FilterWords, RelativeSource={RelativeSource AncestorType=Window}}" />
                                         </StackPanel>
                                         <DataTemplate.Triggers>
                                             <DataTrigger Binding="{Binding IsCurrent}" Value="True">
@@ -212,6 +229,7 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
+                </DockPanel>
             </Grid>
         </Grid>
     </DockPanel>

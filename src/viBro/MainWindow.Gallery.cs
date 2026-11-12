@@ -64,15 +64,18 @@ public partial class MainWindow
             SetStatus("No folder open: nothing to show in the gallery.", StatusKind.Error);
             return;
         }
-        var videos = _items.Where(i => i.IsVideo).ToList(); // in the list's order
+        var videos = ShownVideos.ToList(); // in the list's order; 1.15.0: the videos shown by the filter
         if (videos.Count == 0)
         {
-            SetStatus("No videos in this folder: nothing to show in the gallery.", StatusKind.Error);
+            SetStatus(_filter.IsEmpty || !_items.Any(i => i.IsVideo)
+                ? "No videos in this folder: nothing to show in the gallery."
+                : "No videos match the filter: nothing to show in the gallery.", StatusKind.Error);
             return;
         }
 
         _gallery?.CloseNow(); // F10 again: a new gallery of the current folder
-        var g = new GalleryWindow(this, "Gallery - " + _currentFolder, videos, _settings.GalleryPercents, _settings.GalleryJobs,
+        string filterNote = _filter.IsEmpty ? "" : $" (filter: {_filter.Text})";
+        var g = new GalleryWindow(this, "Gallery - " + _currentFolder + filterNote, videos, _settings.GalleryPercents, _settings.GalleryJobs,
             _settings.GalleryCombined, _settings.GalleryWindow);
         g.Closed += (_, _) =>
         {
@@ -154,6 +157,7 @@ public partial class MainWindow
                 SetStatus(Path.GetFileName(path) + " is no longer in the folder.", StatusKind.Error);
                 return;
             }
+            EnsureShown(item); // 1.15.0: a hidden row is never acted on
             SelectOnly(item);
             action();
         }
@@ -172,6 +176,7 @@ public partial class MainWindow
             SetStatus(Path.GetFileName(path) + " is no longer in the folder.", StatusKind.Error);
             return;
         }
+        EnsureShown(item); // 1.15.0
         FileList.ScrollIntoView(item);
 
         bool loadedOrLoading = ReferenceEquals(item, _currentItem) || ReferenceEquals(item, _loadingItem);

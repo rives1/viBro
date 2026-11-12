@@ -294,6 +294,7 @@ internal sealed class CommandsDialog : Window
             (s.Keys.DisplayPair(Command.VolumeUp, Command.VolumeDown), "Volume up / down by 5 % (value shown over the video)"),
             (s.Keys.DisplayPair(Command.Fullscreen, Command.ExitFullscreen), "Enter / leave fullscreen"),
             (s.Keys.Display(Command.FocusPath), "Edit the path (Enter opens, Esc cancels); a click on a folder of the path opens it"),
+            (s.Keys.Display(Command.Filter), "Filter the list: words (all required), .mp4, >1000 / >1G / <500M (size, MB by default); Enter / Down: to the list, Esc: clear"),
             (s.Keys.Display(Command.ParentFolder), "Parent folder (the folder just left is selected)"),
             (s.Keys.Display(Command.OpenFolder), "Open the selected folder (\"..\" = parent folder)"),
             (s.Keys.Display(Command.OpenWithDefaultApp), "Open the video with the Windows default application (one file selected)"),

@@ -353,6 +353,8 @@ public partial class MainWindow : Window
             var items = await scan;
             if (generation != _folderGeneration) return; // superseded by a newer request
 
+            // 1.15.0: another folder opens with an empty filter (the same folder keeps it).
+            if (!string.Equals(_currentFolder, path, StringComparison.OrdinalIgnoreCase)) ClearFilter();
             _currentFolder = path;
             SetItems(items, keepSelection: false);
             int videos = 0, folders = 0;
@@ -473,8 +475,9 @@ public partial class MainWindow : Window
         try
         {
             _items = items;
-            FileList.ItemsSource = _items;
-            foreach (var s in selected) FileList.SelectedItems.Add(s); // the whole selection (1.7.0)
+            BindItems(); // 1.15.0: with the filter
+            foreach (var s in selected)
+                if (s is VideoItem v && IsShown(v)) FileList.SelectedItems.Add(s); // the whole selection (1.7.0), rows shown only
             var visible = _currentItem != null && selected.Contains(_currentItem) ? _currentItem : selected.FirstOrDefault();
             if (visible != null) FileList.ScrollIntoView(visible);
         }
@@ -565,7 +568,7 @@ public partial class MainWindow : Window
         if (!ReferenceEquals(clicked, _currentItem) && !ReferenceEquals(clicked, _loadingItem)) LoadItem(clicked);
     }
 
-    /// <summary>Ctrl+A: every video of the folder (not the folders); the loaded video does not change.</summary>
+    /// <summary>Ctrl+A: every video shown (not the folders; with a filter, only the videos that pass it); the loaded video does not change.</summary>
     private void SelectAllVideos()
     {
         _suppressSelectionLoad = true;
@@ -612,10 +615,13 @@ public partial class MainWindow : Window
         long total = 0, selectedBytes = 0;
         int videos = 0, folders = 0, position = 0, selectedCount = 0;
         var selection = new HashSet<VideoItem>(FileList.SelectedItems.OfType<VideoItem>());
+        int allVideos = 0;
         foreach (var v in _items)
         {
             if (v.Kind == EntryKind.Folder) folders++;
             if (!v.IsVideo) continue;
+            allVideos++;
+            if (!IsShown(v)) continue; // 1.15.0: counts and size of the videos shown
             videos++;
             total += v.Size;
             if (selection.Contains(v))
@@ -629,7 +635,7 @@ public partial class MainWindow : Window
         if (selectedCount == 1) count = $"{position} / {count}";
         else if (selectedCount > 1) count = $"{selectedCount} selected ({VideoItem.FormatSize(selectedBytes)}) · {count}";
         string folderText = folders == 0 ? "" : folders == 1 ? "1 folder · " : $"{folders} folders · ";
-        FolderSummaryText.Text = folderText + count + " · " + VideoItem.FormatSize(total);
+        FolderSummaryText.Text = folderText + count + " · " + VideoItem.FormatSize(total) + FilterSummary(videos, allVideos);
     }
 
     /// <summary>E / D and the wheel: previous / next video in the current order (folders are skipped), keeping play/pause. No wrap-around.</summary>
@@ -639,9 +645,10 @@ public partial class MainWindow : Window
         // From the loaded video (with several rows selected, the selection collapses to the new one).
         var from = _loadingItem ?? _currentItem;
         int index = from != null ? _items.IndexOf(from) : -1;
-        if (index < 0) index = FileList.SelectedIndex;
+        if (index < 0 && FileList.SelectedItem is VideoItem sel) index = _items.IndexOf(sel); // the view's index differs with a filter
         int next = index < 0 ? (direction > 0 ? 0 : _items.Count - 1) : index + direction;
-        while (next >= 0 && next < _items.Count && !_items[next].IsVideo) next += direction;
+        // Folders are skipped, and (1.15.0) the videos hidden by the filter.
+        while (next >= 0 && next < _items.Count && !(_items[next].IsVideo && IsShown(_items[next]))) next += direction;
         if (next < 0 || next >= _items.Count) return;
         SelectAndLoad(_items[next]);
     }
@@ -875,6 +882,7 @@ public partial class MainWindow : Window
             case Command.Fullscreen: ToggleFullscreen(); break;
             case Command.ExitFullscreen: ExitFullscreen(); break;
             case Command.FocusPath: FocusPathBox(); break;
+            case Command.Filter: FocusFilterBox(); break;
             case Command.SelectAll: SelectAllVideos(); break;
             case Command.Refresh: RefreshAll(); break;
             case Command.OpenFolder: OpenListEntry(folderEntry!); break;

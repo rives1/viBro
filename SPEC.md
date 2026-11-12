@@ -85,6 +85,7 @@ Ctrl + F2	Finestra dei comandi di tastiera e mouse (1.2.0)
 M	Mute on/off
 F11	Schermo intero
 Esc	Esce dallo schermo intero
+Ctrl + F	Filtro dell'elenco: parole (tutte richieste), .ext, >N / <N in MB, M o G; Invio / ↓ all'elenco, Esc svuota (1.15.0)
 Ctrl + L	Attiva la barra del percorso (dalla 1.13.0 la barra mostra il percorso a briciole cliccabili; Ctrl+L o un clic sulla parte vuota la rende modificabile)
 Backspace	Cartella superiore (1.13.0)
 + / -	Volume su / giù del 5 %, valore mostrato sopra il video (1.13.0)
@@ -205,6 +206,7 @@ Versione	Obiettivo
 1.12.0	Solidità: gallerie con un solo ffmpeg per video, tastiera nelle gallerie, file coinvolti non caricabili durante le operazioni, misure disattivate per impostazione predefinita, regressione unica (rilasciata il 2026-11-11)
 1.13.0	Interfaccia: barra di stato in tre zone con storico, briciole, volume da tastiera, puntatore nascosto a schermo intero, guida nel riquadro vuoto, gallerie con video caricato evidenziato, tempi nelle immagini e posizione ricordata, un solo formato dei tempi (rilasciata il 2026-11-11)
 1.14.0	Dissolvenze: apertura e chiusura delle gallerie, bordo del video caricato in galleria, righe tolte e nuove nell'elenco; seguono gli effetti di animazione di Windows (rilasciata il 2026-11-12)
+1.15.0	Filtro dell'elenco (Ctrl+F): nome, estensione e dimensione, evidenziazione; D / E, Ctrl+A e F10 sui soli video visibili (in prova)
 1.1.0	(confluita nella 1.2.0) Controlli sotto il video, rotella per spostarsi nel video a finestra normale, icona della barra del percorso, cursore all’inizio nella rinomina
 
 

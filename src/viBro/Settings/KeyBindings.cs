@@ -11,7 +11,7 @@ internal enum Command
     SeekBackShort, SeekForwardShort, SeekBackMedium, SeekForwardMedium,
     SeekBackLong, SeekForwardLong, SeekBackVeryLong, SeekForwardVeryLong,
     PlayPause, PreviousVideo, NextVideo, Mute, VolumeUp, VolumeDown, Fullscreen, ExitFullscreen,
-    FocusPath, ParentFolder, SelectAll, Refresh, OpenFolder, OpenWithDefaultApp,
+    FocusPath, Filter, ParentFolder, SelectAll, Refresh, OpenFolder, OpenWithDefaultApp,
     Delete, Rename, Move, MoveToLast, Copy, CopyToLast,
     MarkIn, MarkOut, Extract, Gallery, SelectionGallery, Commands, Close,
 }
@@ -56,6 +56,7 @@ internal sealed class KeyBindings
         new(Command.Fullscreen, "F11", false),
         new(Command.ExitFullscreen, "Escape", true),
         new(Command.FocusPath, "Ctrl+L", true),
+        new(Command.Filter, "Ctrl+F", false), // 1.15.0: the filter box of the list
         new(Command.ParentFolder, "Back", false), // 1.13.0: Backspace
         new(Command.SelectAll, "Ctrl+A", true),
         new(Command.Refresh, "F5", false),

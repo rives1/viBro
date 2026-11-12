@@ -36,7 +36,8 @@ public partial class MainWindow
         get
         {
             var set = new HashSet<VideoItem>(FileList.SelectedItems.OfType<VideoItem>().Where(v => v.IsVideo));
-            return set.Count == 0 ? new List<VideoItem>() : _items.Where(set.Contains).ToList();
+            // 1.15.0: only rows shown (hidden rows are deselected anyway): never a file the user cannot see.
+            return set.Count == 0 ? new List<VideoItem>() : _items.Where(i => set.Contains(i) && IsShown(i)).ToList();
         }
     }
 
@@ -523,6 +524,7 @@ public partial class MainWindow
         if (i >= 0) list[i] = newItem;
         else list.Add(newItem);
         SetItems(list, keepSelection: false);
+        EnsureShown(newItem); // 1.15.0: a new name that does not match the filter clears it
         SelectOnly(newItem);
     }
 
@@ -574,7 +576,7 @@ public partial class MainWindow
             try
             {
                 _items = old.Where(i => !gone.Contains(i)).ToList();
-                FileList.ItemsSource = _items;
+                BindItems();
             }
             finally
             {
@@ -602,14 +604,17 @@ public partial class MainWindow
         VideoItem? next = null;
         if (last >= 0)
         {
-            for (int i = last + 1; i < old.Count && next == null; i++) if (old[i].IsVideo && !gone.Contains(old[i])) next = old[i];
-            for (int i = last - 1; i >= 0 && next == null; i--) if (old[i].IsVideo && !gone.Contains(old[i])) next = old[i];
+            // 1.15.0: among the videos shown.
+            for (int i = last + 1; i < old.Count && next == null; i++) if (old[i].IsVideo && IsShown(old[i]) && !gone.Contains(old[i])) next = old[i];
+            for (int i = last - 1; i >= 0 && next == null; i--) if (old[i].IsVideo && IsShown(old[i]) && !gone.Contains(old[i])) next = old[i];
         }
         if (next == null)
         {
             _playAfterRelease = null; // nothing is loaded next: do not carry the state further
             // The player has already released the file: the video area stays empty.
-            SetStatus((_lastOpMessage ?? "") + (_items.Any(i => i.IsVideo) ? "" : "  |  No more videos in this folder."),
+            string none = _items.Any(i => i.IsVideo && IsShown(i)) ? ""
+                : _items.Any(i => i.IsVideo) ? "  |  No more videos match the filter." : "  |  No more videos in this folder.";
+            SetStatus((_lastOpMessage ?? "") + none,
                 _lastOpMessage != null ? _lastOpKind : StatusKind.Normal);
             _lastOpMessage = null;
             return;

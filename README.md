@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.14.0 released** (fades in the galleries and the file list, following Windows animation effects). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.15.0 in test** (filter of the file list); **1.14.0 released** (fades in the galleries and the file list). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -33,6 +33,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
   - galleries: the row of the loaded video has a border in the accent colour and follows D / E; F10 times inside the images; each gallery reopens where and as large as it was;
   - one time format everywhere: `1:20`, `15:02`, `1:02:15`.
 - **Fades** (1.14.0): the galleries fade in when they open and out when they close (200 ms; the window frame stays native); the border of the loaded video moves between gallery rows with a short fade; rows of deleted, moved or vanished files fade out of the list, new rows (F5, extract) fade in. Video loading never waits for them, and with Windows *Animation effects* off (Settings › Accessibility › Visual effects) nothing is animated.
+- **Filter** (1.15.0): a box above the file list (Ctrl+F). Words separated by spaces, all required: `4K` (name contains, case-insensitive), `.mp4` (extension; several are alternatives), `>1000`, `>1G`, `<500M` (size; a bare number is in MB, units K, M, G, T in multiples of 1024 like the Size column). The list follows 200 ms after the last key, in memory; the matched parts are highlighted. Enter or Down go to the list, Esc clears. Folders and `..` always stay. With a filter, D / E, the wheel, the video loaded after delete / move, Ctrl+A and the F10 gallery use the visible videos only, and hidden rows leave the selection: delete, move and copy never touch a file you cannot see. Another folder opens with an empty filter; F5 keeps it.
 - **Multiple selection** (1.7.0): Ctrl + click adds or removes a file, Shift + click selects a range, Ctrl+A selects all the videos. Delete, move and copy act on all the selected videos: one confirmation, one destination, one progress window; name conflicts are asked file by file, with "do the same for the next conflicts" and *Skip*. The video area loads the file just clicked. Rename (F2), Shift+Enter and the extract (I / O / F9) need a single selected video. The arrow keys keep seeking, so the selection is made with the mouse.
 - Light/Dark themes (*Theme* button), control bar (timeline, volume) below the video and above the file list, a timeline band below the video in fullscreen.
 - Folder icon in front of the path bar; icon buttons for Play/Pause, Mute (shows the state), Browse and Theme.
@@ -83,6 +84,7 @@ The keys below are the defaults. Since 1.10.0 every keyboard shortcut of the mai
 | `VolumeUp` / `VolumeDown` | `OemPlus,Add` / `OemMinus,Subtract` | `+` / `-` and the numeric keypad; 5 % per press (1.13.0) |
 | `Fullscreen / ExitFullscreen` | `F11 / Escape` | ExitFullscreen only in fullscreen |
 | `FocusPath` | `Ctrl+L` |  |
+| `Filter` | `Ctrl+F` | Filter box of the file list (1.15.0) |
 | `ParentFolder` | `Back` | Backspace: parent folder (1.13.0) |
 | `SelectAll` | `Ctrl+A` |  |
 | `Refresh` | `F5` |  |
@@ -111,6 +113,7 @@ The keys below are the defaults. Since 1.10.0 every keyboard shortcut of the mai
 | M | Mute on/off | ✔ |
 | + / - | Volume up / down by 5 % (value shown over the video) | 1.13.0 |
 | Backspace | Parent folder (the folder just left is selected) | 1.13.0 |
+| Ctrl+F | Filter of the file list (Enter / Down: to the list, Esc: clear) | 1.15.0 |
 | F11 / Esc | Enter / leave fullscreen | ✔ |
 | Ctrl + L | Focus the path bar (Enter opens, Esc cancels) | ✔ |
 | Ctrl + A | Select all the videos of the folder (the loaded video does not change) | 1.7.0 |

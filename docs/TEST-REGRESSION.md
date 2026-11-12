@@ -12,6 +12,7 @@ Lista unica delle funzioni da riprovare prima di ogni rilascio (dalla 1.12.0, D-
 - [ ] Barra del percorso a briciole: clic su una cartella del percorso; clic sulla parte vuota o Ctrl+L per scrivere un percorso (locale, unità di rete, `\\server\share`), Invio / Esc; Backspace = cartella superiore.
 - [ ] Elenco: `..`, cartelle, video (MP4, MKV, MOV, WMV, AVI, M4V); ordinamento per Name / Size / Date in entrambi i versi; Invio o doppio clic aprono una cartella.
 - [ ] Selezione: clic, Ctrl + clic, Shift + clic, Ctrl+A; barra di stato `… selected (… GB)` e `12 / 128 videos`.
+- [ ] Filtro (Ctrl+F): `4K`, `.mp4`, `>1G` restringono l'elenco con le parti trovate evidenziate; con il filtro D / E, Ctrl+A ed F10 lavorano sui soli video visibili; Esc svuota; un'altra cartella si apre senza filtro.
 - [ ] F5 aggiorna albero ed elenco senza perdere selezione, video caricato e posizione di scorrimento; righe nuove e scomparse in dissolvenza (con gli *Effetti di animazione* di Windows attivi).
 
 ## Riproduzione e salti

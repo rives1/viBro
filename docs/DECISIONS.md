@@ -439,3 +439,6 @@ Richiesta: ricerca rapida nell'elenco (nome parziale, estensione, dimensione `>1
 - **Evidenziazione:** proprietà associata `FilterHighlight` sul nome (colonna Name): le parti trovate dalle parole diventano `Run` con sfondo nel colore di accento di Windows al 40 %; senza filtro il testo resta un unico `Run`.
 - **Barra di stato:** conteggio, posizione e dimensione totale dei video visibili, più ` · filter: 12 of 128`.
 - Versione 1.15.0 (nuova funzione compatibile = MINOR).
+
+## D-085 — Chiusura della 1.15.0 (2026-11-12)
+L'utente ha confermato tutte le prove di `TEST-PLAN-1.15.0.md` (che comprende la regressione di `TEST-REGRESSION.md`) con l'EXE compilato da `726605a` (codice invariato fino al tag), compreso il punto da osservare di D-084: il filtro della vista resta applicato dopo ordinamento, F5, elimina / sposta e rinomina. La 1.15.0 viene rilasciata (tag `v1.15.0`). Nessuna prova aperta passa alla versione successiva.

@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.15.0] - non rilasciata
+## [1.15.0] - 2026-11-12
 
 Filtro dell'elenco dei file, richiesto dall'utente il 2026-11-12.
 

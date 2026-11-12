@@ -2,7 +2,7 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.14.0] - non rilasciata
+## [1.14.0] - 2026-11-12
 
 Interfaccia più morbida: dissolvenze, richieste dall'utente il 2026-11-12. La riproduzione resta istantanea: nessun caricamento aspetta un'animazione.
 

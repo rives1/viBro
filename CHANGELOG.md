@@ -2,6 +2,16 @@
 
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.14.0] - non rilasciata
+
+Interfaccia più morbida: dissolvenze, richieste dall'utente il 2026-11-12. La riproduzione resta istantanea: nessun caricamento aspetta un'animazione.
+
+### Aggiunto
+- **Gallerie (F10, F12):** all'apertura il contenuto compare in dissolvenza (200 ms) e alla chiusura (Esc, pulsante di chiusura, Alt+F4) sparisce in dissolvenza (200 ms) prima che la finestra si chiuda. La cornice della finestra resta quella nativa di Windows, quindi si dissolve il contenuto, non la cornice. Un secondo Esc durante la dissolvenza chiude subito; F10 / F12 di nuovo e la chiusura di viBro chiudono senza dissolvenza.
+- **Gallerie:** quando cambia il video caricato (clic, D / E) il bordo colorato sfuma dalla riga vecchia a quella nuova (150 ms).
+- **Elenco dei file:** le righe dei file eliminati, spostati o scomparsi con F5 sfumano (150 ms) prima di lasciare l'elenco; le righe nuove (F5, estratto F9) compaiono in dissolvenza.
+- Tutte le dissolvenze seguono Windows: con *Impostazioni › Accessibilità › Effetti visivi › Effetti di animazione* spento, viBro non anima nulla.
+
 ## [1.13.0] - 2026-11-11
 
 Interfaccia, dalla revisione grafica del 2026-11-11 (con screenshot dell'utente).

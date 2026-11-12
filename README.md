@@ -4,7 +4,7 @@ viBro is a desktop application for Windows 11 x64 to browse folders of videos, v
 
 Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for decoding and playback. The program ships as a single portable `viBro.exe`.
 
-> **Status: 1.13.0 released** (interface: status bar in three zones with message history, breadcrumb path bar, volume keys, hidden pointer in fullscreen, gallery marks the loaded video). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
+> **Status: 1.14.0 in test** (fades in the galleries and the file list); **1.13.0 released** (interface: status bar in three zones with message history, breadcrumb path bar, volume keys, hidden pointer in fullscreen, gallery marks the loaded video). Version 1.0.0 was the first complete and verified version. Version 0.1.0 validated the technology on SSD and NAS. The road to 1.0.0 is described in [SPEC.md](SPEC.md) (in Italian).
 >
 > Italian version of this file: [README.it.md](README.it.md).
 
@@ -32,6 +32,7 @@ Technology: C#/WPF (.NET 10) for the interface, [libmpv](https://mpv.io) for dec
   - with no video loaded the video area shows a short guide (`Select a video · F10 gallery · Ctrl+F2 commands`);
   - galleries: the row of the loaded video has a border in the accent colour and follows D / E; F10 times inside the images; each gallery reopens where and as large as it was;
   - one time format everywhere: `1:20`, `15:02`, `1:02:15`.
+- **Fades** (1.14.0): the galleries fade in when they open and out when they close (200 ms; the window frame stays native); the border of the loaded video moves between gallery rows with a short fade; rows of deleted, moved or vanished files fade out of the list, new rows (F5, extract) fade in. Video loading never waits for them, and with Windows *Animation effects* off (Settings › Accessibility › Visual effects) nothing is animated.
 - **Multiple selection** (1.7.0): Ctrl + click adds or removes a file, Shift + click selects a range, Ctrl+A selects all the videos. Delete, move and copy act on all the selected videos: one confirmation, one destination, one progress window; name conflicts are asked file by file, with "do the same for the next conflicts" and *Skip*. The video area loads the file just clicked. Rename (F2), Shift+Enter and the extract (I / O / F9) need a single selected video. The arrow keys keep seeking, so the selection is made with the mouse.
 - Light/Dark themes (*Theme* button), control bar (timeline, volume) below the video and above the file list, a timeline band below the video in fullscreen.
 - Folder icon in front of the path bar; icon buttons for Play/Pause, Mute (shows the state), Browse and Theme.

@@ -61,6 +61,7 @@ public partial class MainWindow
         var old = new Dictionary<string, VideoItem>(StringComparer.OrdinalIgnoreCase);
         foreach (var i in _items) old.TryAdd(i.Kind + "|" + i.FullPath, i);
         var merged = new List<VideoItem>(scanned.Count);
+        var fresh = new List<VideoItem>(); // 1.14.0: new rows, faded in
         int added = 0;
         foreach (var s in scanned)
         {
@@ -73,17 +74,33 @@ public partial class MainWindow
             {
                 merged.Add(s);
                 if (s.Kind != EntryKind.Parent) added++;
+                fresh.Add(s);
             }
         }
         int removed = old.Values.Count(i => i.Kind != EntryKind.Parent);
+        var gone = new HashSet<VideoItem>(old.Values);
+
+        // 1.14.0: the vanished rows fade out first; meanwhile a folder change or a file operation wins.
+        var faded = gone.Count > 0 ? await FadeOutRowsAsync(gone) : new List<UIElement>();
+        if (generation != _folderGeneration || _fileOpBusy)
+        {
+            ClearFadedRows(faded);
+            return;
+        }
 
         var scroller = FindDescendant<ScrollViewer>(FileList);
         double offset = scroller?.VerticalOffset ?? 0;
         SetItems(merged, keepSelection: true); // sorted with the current column; the selection is kept
+        ClearFadedRows(faded);
         if (scroller != null)
+        {
+            // Back to the same place now, so that the new rows that fade in are the ones on screen;
+            // once more after the layout, as before 1.14.0.
+            FileList.UpdateLayout();
+            scroller.ScrollToVerticalOffset(offset);
             _ = Dispatcher.BeginInvoke(() => scroller.ScrollToVerticalOffset(offset), DispatcherPriority.Loaded);
-
-        var gone = new HashSet<VideoItem>(old.Values);
+        }
+        FadeInRows(fresh);
         foreach (var g in OpenGalleries) g.RemoveVideos(gone.Where(i => i.IsVideo).Select(i => i.FullPath));
         if (_markItem != null && gone.Contains(_markItem))
         {

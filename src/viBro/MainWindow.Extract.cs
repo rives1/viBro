@@ -195,9 +195,11 @@ public partial class MainWindow
         try
         {
             var fi = new FileInfo(path);
-            var list = new List<VideoItem>(_items) { new VideoItem(fi.Name, fi.FullName, fi.Length, fi.LastWriteTime, storage) };
+            var extract = new VideoItem(fi.Name, fi.FullName, fi.Length, fi.LastWriteTime, storage);
+            var list = new List<VideoItem>(_items) { extract };
             SetItems(list, keepSelection: true);
             UpdateFolderSummary();
+            FadeInRows(new[] { extract }); // 1.14.0
         }
         catch
         {

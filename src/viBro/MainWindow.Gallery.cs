@@ -39,7 +39,7 @@ public partial class MainWindow
             SetStatus("Select one or more videos in the list, then open the selection gallery.", StatusKind.Error);
             return;
         }
-        _selectionGallery?.Close();
+        _selectionGallery?.CloseNow();
         string title = $"Selection gallery - {(videos.Count == 1 ? "1 video" : videos.Count + " videos")} - {_currentFolder}";
         var g = new GalleryWindow(this, title, videos, _settings.SelectionGalleryPercents, _settings.GalleryJobs,
             _settings.GalleryCombined, _settings.SelectionGalleryWindow, compact: true);
@@ -71,7 +71,7 @@ public partial class MainWindow
             return;
         }
 
-        _gallery?.Close(); // F10 again: a new gallery of the current folder
+        _gallery?.CloseNow(); // F10 again: a new gallery of the current folder
         var g = new GalleryWindow(this, "Gallery - " + _currentFolder, videos, _settings.GalleryPercents, _settings.GalleryJobs,
             _settings.GalleryCombined, _settings.GalleryWindow);
         g.Closed += (_, _) =>

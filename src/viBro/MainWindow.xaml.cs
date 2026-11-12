@@ -178,7 +178,7 @@ public partial class MainWindow : Window
     private void Window_Closing(object? sender, CancelEventArgs e)
     {
         if (_isFullscreen) ExitFullscreen();
-        foreach (var g in OpenGalleries.ToList()) g.Close(); // stops their ffmpeg runs
+        foreach (var g in OpenGalleries.ToList()) g.CloseNow(); // stops their ffmpeg runs; no fade
         _uiTimer.Stop();
         ComponentDispatcher.ThreadPreprocessMessage -= OnThreadPreprocessMessage;
         _folderCts?.Cancel();

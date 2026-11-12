@@ -153,7 +153,7 @@ public partial class MainWindow
                 ShowErrors("Delete files", $"{FilesText(errors.Count)} not deleted:", errors);
             }
             _busyPaths.Clear(); // the files not deleted can be loaded again
-            AfterRemoval(deleted, released, position);
+            await AfterRemovalAsync(deleted, released, position);
         }
         finally
         {
@@ -438,7 +438,7 @@ public partial class MainWindow
             return;
         }
         (_lastOpMessage, _lastOpKind) = (message, kind);
-        AfterRemoval(removed, released, position);
+        await AfterRemovalAsync(removed, released, position);
     }
 
     private ProgressDialog? CloseProgress(ProgressDialog? dialog)
@@ -556,9 +556,12 @@ public partial class MainWindow
     /// - the loaded file was not involved: it stays loaded and selected;
     /// - otherwise the video after the last removed one is selected and loaded (play/pause kept), or the
     ///   previous one if none follows; with no videos left the video area stays empty.
+    /// 1.14.0: the removed rows fade out first (150 ms, only with Windows animations on); the operation
+    /// is still running meanwhile (no F5, no other file operation).
     /// </summary>
-    private void AfterRemoval(List<VideoItem> removed, VideoItem? released, double position)
+    private async Task AfterRemovalAsync(List<VideoItem> removed, VideoItem? released, double position)
     {
+        var faded = removed.Count > 0 ? await FadeOutRowsAsync(removed) : new List<UIElement>();
         var old = _items;
         var gone = new HashSet<VideoItem>(removed);
         int last = -1;
@@ -577,6 +580,7 @@ public partial class MainWindow
             {
                 _suppressSelectionLoad = false;
             }
+            ClearFadedRows(faded); // after the rebuild, in the same frame: the rows reused for other files are opaque again
             UpdateFolderSummary();
         }
 

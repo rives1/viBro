@@ -12,7 +12,7 @@ Lista unica delle funzioni da riprovare prima di ogni rilascio (dalla 1.12.0, D-
 - [ ] Barra del percorso a briciole: clic su una cartella del percorso; clic sulla parte vuota o Ctrl+L per scrivere un percorso (locale, unità di rete, `\\server\share`), Invio / Esc; Backspace = cartella superiore.
 - [ ] Elenco: `..`, cartelle, video (MP4, MKV, MOV, WMV, AVI, M4V); ordinamento per Name / Size / Date in entrambi i versi; Invio o doppio clic aprono una cartella.
 - [ ] Selezione: clic, Ctrl + clic, Shift + clic, Ctrl+A; barra di stato `… selected (… GB)` e `12 / 128 videos`.
-- [ ] F5 aggiorna albero ed elenco senza perdere selezione e video caricato.
+- [ ] F5 aggiorna albero ed elenco senza perdere selezione, video caricato e posizione di scorrimento; righe nuove e scomparse in dissolvenza (con gli *Effetti di animazione* di Windows attivi).
 
 ## Riproduzione e salti
 - [ ] Clic su un video: carica in pausa sul primo fotogramma (o in riproduzione se il precedente suonava); D / E, rotella sulla barra (su = successivo).
@@ -30,8 +30,8 @@ Lista unica delle funzioni da riprovare prima di ogni rilascio (dalla 1.12.0, D-
 
 ## Estratto e gallerie
 - [ ] I / O / F9: estratto nella stessa cartella con conferma; marker sulla barra.
-- [ ] F10: galleria della cartella (5 immagini con il tempo dentro l'immagine); posizione e dimensione delle gallerie ricordate; F12: galleria della selezione (10 immagini, strisce compatte, nome nel tooltip).
-- [ ] Nelle gallerie: riga del video caricato con bordo colorato (segue D / E); clic = carica, clic su immagine = carica a quel tempo, tasto destro = menu, Canc / F2 / W / C / Spazio / M sulla riga selezionata, frecce tra le righe, Esc chiude; le righe dei file eliminati o spostati spariscono.
+- [ ] F10: galleria della cartella (5 immagini con il tempo dentro l'immagine), apertura e chiusura in dissolvenza (con gli *Effetti di animazione* di Windows attivi); posizione e dimensione delle gallerie ricordate; F12: galleria della selezione (10 immagini, strisce compatte, nome nel tooltip).
+- [ ] Nelle gallerie: riga del video caricato con bordo colorato (segue D / E, in dissolvenza); clic = carica, clic su immagine = carica a quel tempo, tasto destro = menu, Canc / F2 / W / C / Spazio / M sulla riga selezionata, frecce tra le righe, Esc chiude; le righe dei file eliminati o spostati spariscono.
 
 ## Tastiera e comandi
 - [ ] Ctrl+F2 mostra tutti i comandi con i tasti in uso; Ctrl+W chiude viBro (anche nella barra del percorso).

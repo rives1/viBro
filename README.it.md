@@ -4,7 +4,7 @@ viBro è un'applicazione desktop per Windows 11 x64 che serve a esplorare cartel
 
 Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la decodifica e la riproduzione. Il programma si distribuisce come un unico `viBro.exe` portabile.
 
-> **Stato: 1.13.0 rilasciata** (interfaccia: barra di stato in tre zone con storico dei messaggi, percorso a briciole, volume da tastiera, puntatore nascosto a schermo intero, video caricato evidenziato in galleria). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
+> **Stato: 1.14.0 in prova** (dissolvenze nelle gallerie e nell'elenco); **1.13.0 rilasciata** (interfaccia: barra di stato in tre zone con storico dei messaggi, percorso a briciole, volume da tastiera, puntatore nascosto a schermo intero, video caricato evidenziato in galleria). La 1.0.0 è stata la prima versione completa e verificata. La 0.1.0 ha validato la tecnologia su SSD e NAS. Il percorso fino alla 1.0.0 è descritto in [SPEC.md](SPEC.md).
 >
 > English version: [README.md](README.md).
 
@@ -34,6 +34,7 @@ Tecnologie: C#/WPF (.NET 10) per l'interfaccia, [libmpv](https://mpv.io) per la 
   - senza video caricato il riquadro mostra una breve guida (`Select a video · F10 gallery · Ctrl+F2 commands`);
   - gallerie: la riga del video caricato ha un bordo nel colore di accento e segue D / E; in F10 i tempi sono dentro le immagini; ogni galleria si riapre dove e grande com'era;
   - un solo formato dei tempi: `1:20`, `15:02`, `1:02:15`.
+- **Dissolvenze** (1.14.0): le gallerie compaiono e spariscono in dissolvenza (200 ms; la cornice della finestra resta quella di Windows); il bordo del video caricato passa tra le righe della galleria con una breve dissolvenza; le righe dei file eliminati, spostati o scomparsi sfumano fuori dall'elenco, quelle nuove (F5, estratto) entrano sfumando. Il caricamento dei video non le aspetta mai, e con gli *Effetti di animazione* di Windows spenti (Impostazioni › Accessibilità › Effetti visivi) non c'è nessuna animazione.
 - **Selezione multipla** (1.7.0): Ctrl + clic aggiunge o toglie un file, Shift + clic seleziona un intervallo, Ctrl+A seleziona tutti i video. Elimina, sposta e copia agiscono su tutti i video selezionati: una conferma, una destinazione, una finestra di avanzamento; i conflitti di nome si chiedono file per file, con "fai lo stesso per i conflitti successivi" e *Skip*. Il riquadro video carica il file appena cliccato. Rinomina (F2), Shift+Invio e l'estratto (I / O / F9) richiedono un solo video selezionato. Le frecce continuano a spostare il tempo, quindi la selezione si fa col mouse.
 
 - Temi Light/Dark (pulsante *Theme*), barra dei controlli (barra temporale, volume) sotto il video e sopra l'elenco dei file, fascia con la barra temporale sotto il video a schermo intero.

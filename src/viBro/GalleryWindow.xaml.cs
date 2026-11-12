@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using ViBro.Settings;
 using ViBro.Util;
@@ -42,6 +43,8 @@ public partial class GalleryWindow : Window
     private bool _suppressSelection;
     private ScrollViewer? _scroller;
     private VirtualizingStackPanel? _panel;
+    private bool _closed;
+    private bool _fadedOut; // 1.14.0: the closing fade has run (or is skipped): the next Closing closes
 
     /// <param name="compact">F12 (1.11.0): one compact strip per selected video, name only in the tooltip, no times.</param>
     private readonly WindowBox _box;
@@ -73,6 +76,53 @@ public partial class GalleryWindow : Window
         Rows.ItemsSource = _view;
         UpdateStatus();
         Loaded += (_, _) => Start();
+        // 1.14.0: the content starts transparent and fades in once the window is on screen.
+        if (Motion.Enabled) Root.Opacity = 0;
+        Closing += Window_Closing;
+    }
+
+    // ------------------------------------------------------------------ fades (1.14.0)
+
+    /// <summary>
+    /// The frame is on screen (native, drawn by Windows): the content fades in. Only the content,
+    /// because fading a whole WPF window needs AllowsTransparency, which removes the native frame.
+    /// </summary>
+    private void Window_ContentRendered(object? sender, EventArgs e)
+    {
+        if (Root.Opacity >= 1) return; // animations off when the window was made
+        var a = new DoubleAnimation(Root.Opacity, 1, Motion.WindowFade) { FillBehavior = FillBehavior.HoldEnd };
+        a.Completed += (_, _) =>
+        {
+            Root.Opacity = 1;
+            Motion.Clear(Root);
+        };
+        Root.BeginAnimation(OpacityProperty, a);
+    }
+
+    /// <summary>
+    /// Esc, the close button, Alt+F4: the content fades out, then the window closes. Input is ignored
+    /// meanwhile; a second close request (Esc again) closes at once.
+    /// </summary>
+    private void Window_Closing(object? sender, CancelEventArgs e)
+    {
+        if (_fadedOut || e.Cancel || !Motion.Enabled || !IsVisible || WindowState == WindowState.Minimized) return;
+        _fadedOut = true;
+        e.Cancel = true;
+        Root.IsHitTestVisible = false;
+        _cts.Cancel(); // no more images: the window is going away
+        var a = new DoubleAnimation(0, Motion.WindowFade) { FillBehavior = FillBehavior.HoldEnd };
+        a.Completed += (_, _) => Dispatcher.BeginInvoke(() =>
+        {
+            if (!_closed) Close(); // CloseNow may have closed it meanwhile
+        });
+        Root.BeginAnimation(OpacityProperty, a);
+    }
+
+    /// <summary>Closes without the fade: viBro is closing, or F10 / F12 replaces this gallery with a new one.</summary>
+    internal void CloseNow()
+    {
+        _fadedOut = true;
+        Close();
     }
 
     private void Start()
@@ -326,7 +376,11 @@ public partial class GalleryWindow : Window
         if (_main.HandleGalleryKey(key, Keyboard.Modifiers, row.Item.FullPath)) e.Handled = true;
     }
 
-    private void Window_Closed(object? sender, EventArgs e) => _cts.Cancel(); // running ffmpeg processes are killed
+    private void Window_Closed(object? sender, EventArgs e)
+    {
+        _closed = true;
+        _cts.Cancel(); // running ffmpeg processes are killed
+    }
 
     // ------------------------------------------------------------------ position and size (1.13.0)
 
@@ -365,10 +419,34 @@ public partial class GalleryWindow : Window
         foreach (var row in _view)
         {
             bool isCurrent = path != null && string.Equals(row.Item.FullPath, path, StringComparison.OrdinalIgnoreCase);
+            if (row.IsCurrent != isCurrent) FadeRing(row, isCurrent);
             row.IsCurrent = isCurrent;
             if (isCurrent) current = row;
         }
         if (current != null) Rows.ScrollIntoView(current);
+    }
+
+    /// <summary>
+    /// 1.14.0: the ring of a row on screen fades out (old video) or in (new one). The animation is not
+    /// held: at its end the ring shows what IsCurrent says. Rows not on screen just get the new state.
+    /// </summary>
+    private void FadeRing(GalleryRow row, bool toCurrent)
+    {
+        if (!Motion.Enabled || Rows.ItemContainerGenerator.ContainerFromItem(row) is not ListBoxItem container) return;
+        if (FindNamed(container, "CurrentRing") is not UIElement ring) return;
+        ring.BeginAnimation(OpacityProperty,
+            new DoubleAnimation(toCurrent ? 0 : 1, toCurrent ? 1 : 0, Motion.RowFade) { FillBehavior = FillBehavior.Stop });
+    }
+
+    private static FrameworkElement? FindNamed(DependencyObject parent, string name)
+    {
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is FrameworkElement fe && fe.Name == name) return fe;
+            if (FindNamed(child, name) is FrameworkElement deeper) return deeper;
+        }
+        return null;
     }
 
     // ------------------------------------------------------------------ helpers
